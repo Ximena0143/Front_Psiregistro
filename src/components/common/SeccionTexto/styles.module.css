@@ -1,0 +1,66 @@
+.container_descripcion_servi {
+  height: 70%;
+  width: 80%;
+}
+
+.container_titulo_mas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subtitulo_servi {
+  font-size: 25px;
+  font-weight: 400;
+  text-align: left;
+  font-family: 'Playfair Display', serif;
+}
+
+.boton_mas {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.linea_servi {
+  margin-top: 10px;
+  width: 100%;
+  border: 1px solid #219EBC;
+  transition: transform 0.7s ease;
+}
+
+.descripcion2_servi {
+  font-family: 'DM Sans', serif;
+  font-size: 15px;
+  color: #243A76;
+  text-align: left;
+  margin-top: 10px;
+}
+
+.texto_container {
+  overflow: hidden;
+  transition: height 1.0s ease, opacity 1.0s ease;
+  height: 0;
+  opacity: 0;
+}
+
+.texto_visible {
+  height: auto;
+  opacity: 1;
+}
+
+.texto_oculto {
+  height: 0;
+  opacity: 0;
+  transition: height 0.5s ease, opacity 0.5s ease;
+}
+
+.texto_visible + .linea_servi {
+  transform: translateY(5px);
+}
+
+.texto_oculto + .linea_servi {
+  transform: translateY(0);
+}
