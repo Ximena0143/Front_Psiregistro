@@ -1,0 +1,106 @@
+.dashboard {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+.content {
+    padding: 20px;
+    width: 75%;
+}
+
+.newPostButton {
+    background: #219EBC;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-family: 'DM Sans', serif;
+}
+
+.newPostButton:hover {
+    background: #1c8ba8;
+}
+
+.publicacionesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.publicacionCard {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.publicacionCard:hover {
+    transform: translateY(-5px);
+}
+
+.imageContainer {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.imageContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cardContent {
+    padding: 15px;
+}
+
+.cardContent h3 {
+    margin: 0 0 10px 0;
+    color: #219EBC;
+}
+
+.cardContent p {
+    color: #666;
+    margin: 0 0 15px 0;
+    font-size: 0.9em;
+}
+
+.cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid #E6EDF0;
+}
+
+.cardFooter span {
+    color: #888;
+    font-size: 0.8em;
+}
+
+.editButton {
+    background: none;
+    border: 1px solid #219EBC;
+    color: #219EBC;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.editButton:hover {
+    background: #219EBC;
+    color: white;
+}

@@ -1,0 +1,211 @@
+/* Estilos base del header */
+.header {
+  width: 100%;
+  height: 100px;
+  background-color: #ffffff;
+  box-shadow: 0 3px 5px #00000029;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Header versión dashboard */
+.header[data-variant="dashboard"] {
+  height: 77px;
+  background-color: #219EBC;
+}
+
+.container_header {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Container header versión dashboard */
+.header[data-variant="dashboard"] .container_header {
+  max-width: 1400px;
+}
+
+/* Estilos del logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+/* Logo versión dashboard */
+.header[data-variant="dashboard"] .logo {
+  gap: 35px;
+}
+
+.logo img {
+  width: 70px;
+  height: auto;
+}
+
+/* Imagen logo versión dashboard */
+.header[data-variant="dashboard"] .logo img {
+  width: 42px;
+}
+
+.logo p {
+  color: #243A76;
+  font-size: 25px;
+  font-family: 'Libre Baskerville', serif;
+}
+
+/* Texto logo versión dashboard */
+.header[data-variant="dashboard"] .logo p {
+  color: #ffffff;
+  font-size: 23px;
+}
+
+/* Estilos de navegación */
+.nav_header {
+  background-color: #ffffff;
+  padding: 20px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Nav header versión dashboard */
+.header[data-variant="dashboard"] .nav_header {
+  background-color: transparent;
+  gap: 40px;
+  align-items: center;
+}
+
+/* Estilos específicos de landing */
+.nav_links {
+  list-style: none;
+  display: flex;
+  gap: 40px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.nav_links li a {
+  text-decoration: none;
+  padding: 10px 15px;
+}
+
+.boton_header {
+  color: rgb(0, 0, 0);
+  font-size: 19px;
+  font-family: 'Playfair Display', serif;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  background: none;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-duration: 400ms;
+  transition-property: color;
+}
+
+.boton_header:focus,
+.boton_header:hover {
+  color: #000000;
+}
+
+.boton_header:focus:after,
+.boton_header:hover:after {
+  width: 100%;
+  left: 0%;
+}
+
+.boton_header:after {
+  content: "";
+  pointer-events: none;
+  bottom: -2px;
+  left: 50%;
+  position: absolute;
+  width: 0%;
+  height: 1px;
+  background-color: #000000;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-duration: 400ms;
+  transition-property: width, left;
+}
+
+.boton_header_sesion {
+  font-family: 'Playfair Display', serif;
+  position: relative;
+  display: inline-block;
+  padding: 5px 15px;
+  text-align: center;
+  font-size: 19px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  color: #000000;
+  background: transparent;
+  cursor: pointer;
+  transition: ease-out 0.5s;
+  border: 2px solid #000000;
+  box-shadow: inset 0 0 0 0 #000000;
+}
+
+.boton_header_sesion:hover {
+  color: white;
+  box-shadow: inset 0 -100px 0 0 #000000;
+}
+
+.boton_header_sesion:active {
+  transform: scale(0.9);
+}
+
+/* Estilos específicos del dashboard */
+.icon {
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  cursor: pointer;
+}
+
+.name_user {
+  font-family: 'Libre Baskerville', serif;
+  color: #ffffff;
+}
+
+.icon_user {
+  color: #ffffff;
+}
+
+.dropdown {
+  height: auto;
+  width: 130px;
+  text-align: start;
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #E6EDF0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.dropdown p {
+  padding: 8px;
+  margin: 0;
+  cursor: pointer;
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+}
+
+.dropdown p:hover {
+  background-color: #ffffff;
+  border-radius: 4px;
+}

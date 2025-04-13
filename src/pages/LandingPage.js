@@ -1,29 +1,13 @@
-import SeccionTexto from '../components/SeccionTexto';
+import SeccionTexto from '../components/common/SeccionTexto/SeccionTexto';
 import styles from './LandingPage.module.css';
-import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import React from 'react';
+import Header from '../components/layout/Header/Header';
 
 const LandingPage = () => {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <div className={styles.container_header}>
-                    <div className={styles.logo}>
-                        <img src="/Images/Logo.jpeg" alt="Logo" />
-                        <p>Righteous</p>
-                    </div>
-                    <nav className={styles.nav_header}>
-                        <ul className={styles.nav_links}>
-                            <li><a href="#Inicio"><button className={styles.boton_header}>Inicio</button></a></li>
-                            <li><a href="#Nosotros"><button className={styles.boton_header}>Nosotros</button></a></li>
-                            <li><a href="#Servicios"><button className={styles.boton_header}>Servicios</button></a></li>
-                            <li><a href="#Contacto"><button className={styles.boton_header}>Contacto</button></a></li>
-                            <li><Link to="/login"><button className={styles.boton_header_sesion}>Iniciar Sesión</button></Link></li>
-                        </ul>
-                    </nav>
-                </div>
-            </header>
+            <Header variant="landing" />
             <body className={styles.body}>
                 <section id="Inicio">
                     <div className={styles.container_inicio}>
@@ -177,7 +161,7 @@ const LandingPage = () => {
                         </div>
                         <div className={styles.descripcion2_footer}>
                             <p className={styles.compania}>Compañia<br /></p>
-                            <ul className={styles.nav_links}>
+                            <ul className={styles.nav_links_footer}>
                                 <li><a href="#Inicio"><button className={styles.boton_footer}>Inicio</button></a></li>
                                 <li><a href="#Nosotros"><button className={styles.boton_footer}>Nosotros</button></a></li>
                                 <li><a href="#Servicios"><button className={styles.boton_footer}>Servicios</button></a></li>

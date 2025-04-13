@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from '../pages/LandingPage.module.css';
+import styles from './styles.module.css';
 
 const SeccionTexto = ({ titulo, descripcion }) => {
     const [mostrarTexto, setMostrarTexto] = useState(false);
