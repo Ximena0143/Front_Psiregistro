@@ -1,15 +1,27 @@
 import styles from "./Login.module.css";
-import React, { useState } from 'react';
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("Admin1234");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    Swal.fire({
+      title: 'Alerta',
+      text: 'Este inicio de sesión es solo para usuarios autorizados.',
+      icon: 'warning',
+      confirmButtonText: 'Entendido',
+      backdrop: false,
+      allowOutsideClick: false
+    });
+  }, []);
 
   const validateEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
@@ -101,7 +113,6 @@ export default function Login() {
             {passwordError && <p className={styles.error_text}>{passwordError}</p>}
           </div>
           <div className={styles.botones}>
-            <button className={styles.boton_crear} type="button" onClick={handleSignup}>Crear cuenta</button>
             <button className={styles.boton_inicio} type="submit">Iniciar Sesión</button>
           </div>
         </form>
