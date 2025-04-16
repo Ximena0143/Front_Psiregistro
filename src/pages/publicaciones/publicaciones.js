@@ -10,10 +10,12 @@ const Publicaciones = () => {
             <div className={styles.main}>
                 <Sidebar />
                 <div className={styles.content}>
-                    <h2>Publicaciones</h2>
-                    <button className={styles.newPostButton}>
-                        Nueva publicación
-                    </button>
+                    <div className={styles.contentHeader}>
+                        <h3>Publicaciones</h3>
+                        <button className={styles.addButton}>
+                            Nueva publicación
+                        </button>
+                    </div>
                     <div className={styles.publicacionesGrid}>
                         {/* Ejemplo de publicación */}
                         <div className={styles.publicacionCard}>

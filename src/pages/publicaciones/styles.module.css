@@ -12,30 +12,49 @@
 }
 
 .content {
-    padding: 20px;
+    padding: 60px;
     width: 75%;
+    background-color: #F8FAFC;
 }
 
-.newPostButton {
-    background: #219EBC;
+.contentHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.contentHeader h3 {
+    color: #000000;
+    font-family: 'DM Sans';
+    font-size: 27px;
+    margin: 0;
+}
+
+.addButton {
+    background: #FB8500;
     color: white;
     border: none;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
-    margin-bottom: 20px;
     font-family: 'DM Sans', serif;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
 }
 
-.newPostButton:hover {
-    background: #1c8ba8;
+.addButton:hover {
+    background: #e67700;
 }
 
 .publicacionesGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
+    gap: 24px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .publicacionCard {
@@ -68,13 +87,17 @@
 
 .cardContent h3 {
     margin: 0 0 10px 0;
-    color: #219EBC;
+    color: #1E293B;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
 }
 
 .cardContent p {
-    color: #666;
+    color: #4B5563;
     margin: 0 0 15px 0;
-    font-size: 0.9em;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.5;
 }
 
 .cardFooter {
@@ -86,21 +109,24 @@
 }
 
 .cardFooter span {
-    color: #888;
-    font-size: 0.8em;
+    color: #64748B;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
 }
 
 .editButton {
     background: none;
-    border: 1px solid #219EBC;
-    color: #219EBC;
-    padding: 5px 15px;
+    border: 1px solid #FB8500;
+    color: #FB8500;
+    padding: 6px 16px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s ease;
 }
 
 .editButton:hover {
-    background: #219EBC;
+    background: #FB8500;
     color: white;
 }

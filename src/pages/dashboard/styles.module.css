@@ -12,7 +12,7 @@
 }
 
 .content {
-    padding: 20px;
+    padding: 60px;
     width: 75%;
 }
 
@@ -23,9 +23,46 @@
     margin-bottom: 20px;
 }
 
-.contentHeader h2 {
-    color: #219EBC;
+.searchContainer {
+    position: relative;
+    width: 200px;
+    display: flex;
+    align-items: center;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 10px;
+    color: #9CA3AF;
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 8px 8px 8px 35px;
+    border: 1px solid #E6EDF0;
+    border-radius: 4px;
+    font-family: 'DM Sans';
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.searchInput:focus {
+    border-color: #FB8500;
+    box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.1);
+}
+
+.searchInput::placeholder {
+    color: #9CA3AF;
+}
+
+.contentHeader h3 {
+    color: #000000;
     margin: 0;
+    font-family: 'DM Sans';
+    font-size: 27px;
 }
 
 .tableContainer {
@@ -37,43 +74,63 @@
 
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 1px;
 }
 
 th, td {
-    padding: 12px;
+    padding: 16px;
     text-align: left;
     border-bottom: 1px solid #E6EDF0;
+    font-family: 'DM Sans';
+    font-size: 15px;
 }
 
 th {
+    padding: 16px;
+}
+
+th:nth-child(1) { width: 25%; }
+th:nth-child(2) { width: 15%; }
+th:nth-child(3) { width: 20%; }
+th:nth-child(4) { width: 20%; }
+th:nth-child(5) { width: 20%; }
+
+th {
     font-weight: 600;
-    color: #219EBC;
+    color: #000000;
+    font-size: 17px;
+}
+
+tr:nth-child(even) {
+    background-color: #F8F9FA;
 }
 
 .actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 15px;
+    min-width: 200px;
 }
 
 .addButton {
-    background: #219EBC;
+    background: #FB8500;
     color: white;
     border: none;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
     font-family: 'DM Sans', serif;
 }
 
 .addButton:hover {
-    background: #1c8ba8;
+    background: #FB8500;
 }
 
 .viewButton {
     background: #E6EDF0;
-    color: #219EBC;
+    color: #FB8500;
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -84,44 +141,50 @@ th {
 }
 
 .viewButton:hover {
-    background: #219EBC;
+    background: #FB8500;
     color: white;
 }
 
-.optionsContainer {
-    position: relative;
+.actionIcons {
     display: flex;
     align-items: center;
+    gap: 12px;
+    margin-left: 12px;
 }
 
-.moreIcon {
+.iconWrapper {
+    position: relative;
     cursor: pointer;
-    color: #666;
-    transition: color 0.2s ease;
 }
 
-.moreIcon:hover {
-    color: #219EBC;
+.iconWrapper[title] {
+    position: relative;
 }
 
-.options {
+.iconWrapper[title]:hover::after {
+    content: attr(title);
     position: absolute;
-    right: 0;
-    top: 100%;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: #333;
+    color: white;
+    font-size: 12px;
     border-radius: 4px;
-    min-width: 150px;
-    z-index: 10;
+    white-space: nowrap;
+    z-index: 1000;
+    font-family: 'DM Sans';
 }
 
-.options p {
-    margin: 0;
-    padding: 10px 15px;
-    cursor: pointer;
-    transition: background 0.2s ease;
+.actionIcon {
+    width: 20px;
+    height: 20px;
+    color: #4B5563;
+    transition: all 0.2s ease;
 }
 
-.options p:hover {
-    background: #E6EDF0;
+.actionIcon:hover {
+    color: #FB8500;
+    transform: scale(1.1);
 }
