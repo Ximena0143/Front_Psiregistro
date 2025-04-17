@@ -1,4 +1,4 @@
-import styles from "./Login.module.css";
+import styles from "./styles.module.css";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
@@ -18,6 +18,7 @@ export default function Login() {
       text: 'Este inicio de sesión es solo para usuarios autorizados.',
       icon: 'warning',
       confirmButtonText: 'Entendido',
+      confirmButtonColor: '#FB8500',
       backdrop: false,
       allowOutsideClick: false
     });
@@ -63,10 +64,6 @@ export default function Login() {
     } else {
       console.log("Hay errores en el formulario");
     }
-  };
-
-  const handleSignup = () => {
-    navigate("/signup");
   };
 
   return (

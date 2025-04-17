@@ -3,14 +3,21 @@ import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
 import Sidebar from '../../components/layout/Sidebar/Sidebar';
 
-const Test = () => {
+const TestPsi = () => {
     return (
         <div className={styles.dashboard}>
             <Header variant="dashboard" />
             <div className={styles.main}>
                 <Sidebar />
                 <div className={styles.content}>
-                    <h2>Test Psicológicos</h2>
+                    <div className={styles.contentHeader}>
+                        <h3>Test Psicológicos</h3>
+                        <div className={styles.actions}>
+                            <button className={styles.addButton}>
+                                Subir test
+                            </button>
+                        </div>
+                    </div>
                     <div className={styles.testGrid}>
                         <div className={styles.testCard}>
                             <h3>Test de Ansiedad</h3>
@@ -44,4 +51,4 @@ const Test = () => {
     );
 };
 
-export default Test;
+export default TestPsi;

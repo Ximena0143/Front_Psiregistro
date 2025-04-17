@@ -1,14 +1,48 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiUserCircle } from "react-icons/hi2";
 import { FaRegBell } from "react-icons/fa6";
+import { FaRegUser } from "react-icons/fa";
+import { IoLogOutOutline } from "react-icons/io5";
+import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 
 const Header = ({ variant = 'landing' }) => {
     const [showMenu, setShowMenu] = useState(false);
+    const navigate = useNavigate();
 
     const toggleMenu = () => {
         setShowMenu(!showMenu);
+    };
+    
+    const handleLogout = () => {
+        Swal.fire({
+            title: '¿Cerrar sesión?',
+            text: '¿Estás seguro que deseas cerrar la sesión?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#FB8500',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, cerrar sesión',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí iría la lógica para cerrar sesión (eliminar tokens, etc.)
+                Swal.fire({
+                    title: 'Sesión cerrada',
+                    text: 'Has cerrado sesión correctamente',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Redirigir al login
+                    navigate('/login');
+                });
+            }
+        });
+        
+        // Cerrar el menú desplegable después de hacer clic
+        setShowMenu(false);
     };
 
     if (variant === 'dashboard') {
@@ -26,8 +60,16 @@ const Header = ({ variant = 'landing' }) => {
                             <HiUserCircle className={styles.icon_user} size={35}/>
                             {showMenu && (
                                 <div className={styles.dropdown}>
-                                    <p>Ver perfil</p>
-                                    <p>Cerrar sesión</p>
+                                    <Link to="/perfil">
+                                        <p>
+                                            <FaRegUser style={{ marginRight: '8px' }} size={14} />
+                                            Ver perfil
+                                        </p>
+                                    </Link>
+                                    <p onClick={handleLogout}>
+                                        <IoLogOutOutline style={{ marginRight: '8px' }} size={16} />
+                                        Cerrar sesión
+                                    </p>
                                 </div>
                             )}
                         </div>

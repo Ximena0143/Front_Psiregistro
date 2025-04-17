@@ -20,14 +20,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .contentHeader h3 {
     color: #000000;
+    margin: 0;
     font-family: 'DM Sans';
     font-size: 27px;
-    margin: 0;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    min-width: 200px;
 }
 
 .addButton {
@@ -46,7 +54,7 @@
     background: #e67700;
 }
 
-.publicacionesGrid {
+.testGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
@@ -56,79 +64,66 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.publicacionCard {
+.testCard {
     background: white;
+    padding: 20px;
     border-radius: 8px;
-    overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
+    border: 1px solid #E6EDF0;
 }
 
-.publicacionCard:hover {
+.testCard:hover {
     transform: translateY(-5px);
 }
 
-.imageContainer {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-}
-
-.imageContainer img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.cardContent {
-    padding: 15px;
-}
-
-.cardContent h3 {
+.testCard h3 {
     margin: 0 0 10px 0;
-    width: 100%;
-    font-size: 30px;
-    font-weight: 400;
-    font-family: 'Playfair Display', serif;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
+    color: #243A76;
+    font-size: 26px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
 }
 
-.cardContent p {
-    color: #243A76;
-    margin: 0 0 15px 0;
-    font-size: 18px;
+.testCard p {
+    color: #000000;
+    margin: 0 0 20px 0;
+    font-size: 16px;
     font-family: 'DM Sans', serif;
     line-height: 1.5;
 }
 
-.cardFooter {
+.cardActions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 10px;
-    border-top: 1px solid #E6EDF0;
+    gap: 10px;
 }
 
-.cardFooter span {
-    color: #64748B;
-    font-size: 12px;
-    font-family: 'DM Sans', sans-serif;
-}
-
-.editButton {
-    background: none;
-    border: 1px solid #FB8500;
-    color: #FB8500;
-    padding: 6px 16px;
+.viewButton, .assignButton {
+    padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+    font-family: 'DM Sans', serif;
     font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
     transition: all 0.2s ease;
 }
 
-.editButton:hover {
+.viewButton {
+    background: none;
+    border: 1px solid #FB8500;
+    color: #FB8500;
+}
+
+.viewButton:hover {
     background: #FB8500;
     color: white;
+}
+
+.assignButton {
+    background: #FB8500;
+    border: none;
+    color: white;
+}
+
+.assignButton:hover {
+    background: #e67700;
 }
