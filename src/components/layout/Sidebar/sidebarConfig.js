@@ -1,4 +1,4 @@
-import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaCogs } from "react-icons/fa";
+import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaUserMd } from "react-icons/fa";
 
 export const sidebarItems = [
     {
@@ -20,5 +20,10 @@ export const sidebarItems = [
         title: 'Test',
         path: '/test',
         icon: FaClipboard
+    },
+    {
+        title: 'Psicologos',
+        path: '/psicologos',
+        icon: FaUserMd
     }
 ];

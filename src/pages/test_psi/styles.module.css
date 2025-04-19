@@ -20,14 +20,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .contentHeader h3 {
     color: #000000;
+    margin: 0;
     font-family: 'DM Sans';
     font-size: 27px;
-    margin: 0;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    min-width: 200px;
 }
 
 .addButton {
@@ -46,7 +54,7 @@
     background: #e67700;
 }
 
-.publicacionesGrid {
+.testGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
@@ -56,109 +64,109 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.publicacionCard {
+.testCard {
     background: white;
+    padding: 20px;
     border-radius: 8px;
-    overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
+    border: 1px solid #E6EDF0;
 }
 
-.publicacionCard:hover {
+.testCard:hover {
     transform: translateY(-5px);
 }
 
-.imageContainer {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-}
-
-.imageContainer img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.cardContent {
-    padding: 15px;
-}
-
-.cardContent h3 {
+.testCard h3 {
     margin: 0 0 10px 0;
-    width: 100%;
-    font-size: 30px;
-    font-weight: 400;
-    font-family: 'Playfair Display', serif;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
+    color: #243A76;
+    font-size: 26px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
 }
 
-.cardContent p {
-    color: #243A76;
+.testCard p {
+    color: #000000;
     margin: 0 0 15px 0;
-    font-size: 18px;
+    font-size: 16px;
     font-family: 'DM Sans', serif;
     line-height: 1.5;
 }
 
-.cardFooter {
+.testMeta {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 10px;
-    border-top: 1px solid #E6EDF0;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
-.cardFooter span {
-    color: #64748B;
-    font-size: 12px;
+.metaItem {
     font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #4B5563;
 }
 
-.actionButtons {
+.metaLabel {
+    font-weight: 600;
+    color: #243A76;
+}
+
+.cardActions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
-.editButton {
-    background: none;
-    border: 1px solid #FB8500;
-    color: #FB8500;
-    padding: 6px 16px;
+.viewButton, .assignButton, .downloadButton, .assignModalButton {
+    padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+    font-family: 'DM Sans', serif;
     font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
-.editButton:hover {
+.viewButton {
+    background: none;
+    border: 1px solid #FB8500;
+    color: #FB8500;
+}
+
+.viewButton:hover {
     background: #FB8500;
     color: white;
 }
 
-.deleteButton {
-    background: none;
-    border: 1px solid #DC2626;
-    color: #DC2626;
-    padding: 6px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.assignButton {
+    background: #FB8500;
+    border: none;
+    color: white;
 }
 
-.deleteButton:hover {
-    background: #DC2626;
+.assignButton:hover {
+    background: #e67700;
+}
+
+.downloadButton {
+    background: #219EBC;
+    border: none;
     color: white;
+}
+
+.downloadButton:hover {
+    background: #1a7d95;
+}
+
+.assignModalButton {
+    background: #FB8500;
+    border: none;
+    color: white;
+}
+
+.assignModalButton:hover {
+    background: #e67700;
 }
 
 /* Estilos para modales */
@@ -342,29 +350,110 @@
     background: #ff9b58;
 }
 
-.saveButton:disabled {
+.saveButton:disabled,
+.assignModalButton:disabled {
     background: #ccc;
     cursor: not-allowed;
 }
 
-.currentImagePreview {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+/* Estilos para los detalles del test */
+.testDetails {
+    background: white;
+    border-radius: 8px;
 }
 
-.currentImagePreview p {
+.testDetailTitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 24px;
+    color: #243A76;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+}
+
+.testDetailSection {
+    margin-bottom: 20px;
+}
+
+.testDetailSection h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    color: #333;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.testDetailSection p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #4B5563;
+    line-height: 1.6;
     margin: 0;
+}
+
+.testDetailInfo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.infoLabel {
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
+    font-weight: 600;
+    color: #243A76;
+}
+
+.infoItem span:not(.infoLabel) {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
     color: #4B5563;
 }
 
-.previewImage {
-    max-width: 100%;
-    height: auto;
-    max-height: 150px;
-    border-radius: 4px;
-    border: 1px solid #E6EDF0;
+/* Estilos para asignar test */
+.assignHeader {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #E6EDF0;
+    padding-bottom: 15px;
+}
+
+.assignHeader h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    color: #243A76;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.assignHeader p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #4B5563;
+    margin: 0;
+}
+
+.emailInputContainer {
+    position: relative;
+}
+
+.emailIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748B;
+}
+
+.emailInput {
+    padding-left: 40px !important;
 }

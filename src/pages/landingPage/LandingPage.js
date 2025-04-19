@@ -1,7 +1,7 @@
-import SeccionTexto from '../components/common/SeccionTexto/SeccionTexto';
-import styles from './LandingPage.module.css';
+import SeccionTexto from '../../components/common/SeccionTexto/SeccionTexto';
+import styles from './styles.module.css';
 import React from 'react';
-import Header from '../components/layout/Header/Header';
+import Header from '../../components/layout/Header/Header';
 
 const LandingPage = () => {
 
