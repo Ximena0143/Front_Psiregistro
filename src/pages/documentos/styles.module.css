@@ -176,3 +176,222 @@ tr:nth-child(even) {
     color: #FB8500;
     transform: scale(1.1);
 }
+
+/* Estilos para el botón de cerrar */
+.closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #4B5563;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeButton:hover {
+    color: #FB8500;
+}
+
+/* Estilos para el modal de subir documento */
+.uploadModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.uploadContainer {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.uploadHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #E6EDF0;
+}
+
+.uploadHeader h4 {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    color: #333;
+}
+
+.uploadContent {
+    padding: 20px;
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    gap: 8px;
+}
+
+.formField label {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: #333;
+}
+
+.formField input,
+.formField select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    border: 1px solid #E6EDF0;
+    border-radius: 6px;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.formField input:focus,
+.formField select:focus {
+    outline: none;
+    border-color: #FB8500;
+    box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.1);
+}
+
+.fileUploadArea {
+    border: 2px dashed #E6EDF0;
+    border-radius: 6px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 5px;
+}
+
+.fileUploadArea:hover {
+    border-color: #FB8500;
+}
+
+.fileUploadIcon {
+    margin-bottom: 10px;
+}
+
+.fileUploadText {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #4B5563;
+    text-align: center;
+}
+
+.fileInput {
+    display: none;
+}
+
+.selectedFileName {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #219EBC;
+    margin-top: 10px;
+    text-align: center;
+    word-break: break-all;
+}
+
+.uploadActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid #E6EDF0;
+}
+
+/* Estilos para la vista previa de documentos */
+.previewContent {
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.documentPreview {
+    min-height: 300px;
+    border: 1px solid #E6EDF0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.previewPlaceholder {
+    text-align: center;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.previewPlaceholder p {
+    margin: 5px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #4B5563;
+}
+
+.previewText {
+    margin-top: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #333;
+    line-height: 1.6;
+}
+
+.cancelButton {
+    background: #f8f9fa;
+    color: #4B5563;
+    border: 1px solid #E6EDF0;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    background: #E6EDF0;
+}
+
+.uploadButton {
+    background: #FB8500;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.uploadButton:hover {
+    background: #ff9b58;
+}

@@ -116,6 +116,11 @@
     font-family: 'DM Sans', sans-serif;
 }
 
+.actionButtons {
+    display: flex;
+    gap: 8px;
+}
+
 .editButton {
     background: none;
     border: 1px solid #FB8500;
@@ -126,9 +131,240 @@
     font-size: 14px;
     font-family: 'DM Sans', sans-serif;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .editButton:hover {
     background: #FB8500;
     color: white;
+}
+
+.deleteButton {
+    background: none;
+    border: 1px solid #DC2626;
+    color: #DC2626;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.deleteButton:hover {
+    background: #DC2626;
+    color: white;
+}
+
+/* Estilos para modales */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContainer {
+    background: white;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #E6EDF0;
+}
+
+.modalHeader h4 {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    color: #333;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #4B5563;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeButton:hover {
+    color: #FB8500;
+}
+
+.modalContent {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    gap: 8px;
+}
+
+.formField label {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: #333;
+}
+
+.formField input,
+.formField textarea,
+.formField select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    border: 1px solid #E6EDF0;
+    border-radius: 6px;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.formField textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.formField input:focus,
+.formField textarea:focus,
+.formField select:focus {
+    outline: none;
+    border-color: #FB8500;
+    box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.1);
+}
+
+.fileUploadArea {
+    border: 2px dashed #E6EDF0;
+    border-radius: 6px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 5px;
+}
+
+.fileUploadArea:hover {
+    border-color: #FB8500;
+}
+
+.fileUploadIcon {
+    margin-bottom: 10px;
+}
+
+.fileUploadText {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #4B5563;
+    text-align: center;
+}
+
+.fileInput {
+    display: none;
+}
+
+.selectedFileName {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #219EBC;
+    margin-top: 10px;
+    text-align: center;
+    word-break: break-all;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid #E6EDF0;
+}
+
+.cancelButton {
+    background: #f8f9fa;
+    color: #4B5563;
+    border: 1px solid #E6EDF0;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    background: #E6EDF0;
+}
+
+.saveButton {
+    background: #FB8500;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.saveButton:hover {
+    background: #ff9b58;
+}
+
+.saveButton:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.currentImagePreview {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.currentImagePreview p {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #4B5563;
+}
+
+.previewImage {
+    max-width: 100%;
+    height: auto;
+    max-height: 150px;
+    border-radius: 4px;
+    border: 1px solid #E6EDF0;
 }

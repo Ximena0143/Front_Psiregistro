@@ -9,6 +9,10 @@ import Publicaciones from "./pages/publicaciones/Publicaciones";
 import TestPsi from "./pages/test_psi/TestPsi";
 import Dashboard from './pages/dashboard/Dashboard';
 import Perfil from './pages/perfil/Perfil';
+import AgregarPaciente from './pages/pacientes/agregar/AgregarPaciente';
+import EditarPaciente from './pages/pacientes/editar/EditarPaciente';
+import HistorialPaciente from './pages/pacientes/historial/HistorialPaciente';
+import AgregarPsicologo from './pages/psicologos/agregar/AgregarPsicologo';
 
 
 function App() {
@@ -25,6 +29,10 @@ function App() {
           <Route path="/test" element={<TestPsi />} />
           <Route path="/psicologos" element={<Psicologos />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/pacientes/agregar" element={<AgregarPaciente />} />
+          <Route path="/pacientes/editar/:id" element={<EditarPaciente />} />
+          <Route path="/pacientes/historial/:id" element={<HistorialPaciente />} />
+          <Route path="/psicologos/agregar" element={<AgregarPsicologo />} />
         </Routes>
       </Router>
     </div>
