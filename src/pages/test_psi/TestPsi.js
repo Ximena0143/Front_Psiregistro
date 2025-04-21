@@ -10,32 +10,23 @@ const TestPsi = () => {
         {
             id: 1,
             nombre: "Test de Ansiedad",
-            descripcion: "Evaluación del nivel de ansiedad y sus manifestaciones.",
-            instrucciones: "Este test consta de 21 preguntas que evaluúan la intensidad de los síntomas de ansiedad. El paciente debe responder según cómo se ha sentido durante las últimas dos semanas.",
             archivo: "/files/test_ansiedad.pdf",
             fechaCreacion: "10 Abril, 2025",
-            formato: "PDF",
-            numPreguntas: 21
+            formato: "PDF"
         },
         {
             id: 2,
             nombre: "Test de Depresión",
-            descripcion: "Evaluación de síntomas depresivos y su intensidad.",
-            instrucciones: "El inventario consta de 21 categorías de síntomas y actitudes, con 4 o 5 afirmaciones cada una, que evaluúan la gravedad / intensidad del síntoma.",
             archivo: "/files/test_depresion.pdf",
             fechaCreacion: "5 Abril, 2025",
-            formato: "PDF",
-            numPreguntas: 21
+            formato: "PDF"
         },
         {
             id: 3,
             nombre: "Test de Personalidad",
-            descripcion: "Evaluación de rasgos de personalidad y comportamiento.",
-            instrucciones: "El test consta de 240 preguntas que miden cinco grandes dimensiones de la personalidad: Neuroticismo, Extraversión, Apertura, Amabilidad y Responsabilidad.",
             archivo: "/files/test_personalidad.pdf",
             fechaCreacion: "1 Abril, 2025",
-            formato: "PDF",
-            numPreguntas: 240
+            formato: "PDF"
         }
     ]);
     
@@ -46,9 +37,6 @@ const TestPsi = () => {
     
     const [newTest, setNewTest] = useState({
         nombre: '',
-        descripcion: '',
-        instrucciones: '',
-        numPreguntas: '',
         archivo: null
     });
     
@@ -68,9 +56,6 @@ const TestPsi = () => {
         setShowUploadModal(false);
         setNewTest({
             nombre: '',
-            descripcion: '',
-            instrucciones: '',
-            numPreguntas: '',
             archivo: null
         });
         setSelectedFileName('');
@@ -149,9 +134,6 @@ const TestPsi = () => {
         const nuevoTest = {
             id: tests.length + 1,
             nombre: newTest.nombre,
-            descripcion: newTest.descripcion,
-            instrucciones: newTest.instrucciones,
-            numPreguntas: newTest.numPreguntas,
             fechaCreacion: fechaFormateada,
             formato: selectedFileName ? selectedFileName.split('.').pop().toUpperCase() : 'PDF',
             archivo: selectedFileName ? URL.createObjectURL(newTest.archivo) : "/files/test_example.pdf"
@@ -225,13 +207,9 @@ const TestPsi = () => {
                         {tests.map((test) => (
                             <div key={test.id} className={styles.testCard}>
                                 <h3>{test.nombre}</h3>
-                                <p>{test.descripcion}</p>
                                 <div className={styles.testMeta}>
                                     <span className={styles.metaItem}>
                                         <span className={styles.metaLabel}>Formato:</span> {test.formato}
-                                    </span>
-                                    <span className={styles.metaItem}>
-                                        <span className={styles.metaLabel}>Preguntas:</span> {test.numPreguntas}
                                     </span>
                                 </div>
                                 <div className={styles.cardActions}>
@@ -272,40 +250,7 @@ const TestPsi = () => {
                                     required
                                 />
                             </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="descripcion">Descripción breve *</label>
-                                <input
-                                    id="descripcion"
-                                    name="descripcion"
-                                    type="text"
-                                    value={newTest.descripcion}
-                                    onChange={handleTestInputChange}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="instrucciones">Instrucciones *</label>
-                                <textarea
-                                    id="instrucciones"
-                                    name="instrucciones"
-                                    value={newTest.instrucciones}
-                                    onChange={handleTestInputChange}
-                                    rows={4}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="numPreguntas">Número de preguntas *</label>
-                                <input
-                                    id="numPreguntas"
-                                    name="numPreguntas"
-                                    type="number"
-                                    min="1"
-                                    value={newTest.numPreguntas}
-                                    onChange={handleTestInputChange}
-                                    required
-                                />
-                            </div>
+
                             <div className={styles.formField}>
                                 <label>Archivo del test *</label>
                                 <div 
@@ -341,7 +286,7 @@ const TestPsi = () => {
                             <button 
                                 className={styles.saveButton}
                                 onClick={handleSaveTest}
-                                disabled={!newTest.nombre || !newTest.descripcion || !newTest.instrucciones || !newTest.numPreguntas || !selectedFileName}
+                                disabled={!newTest.nombre || !selectedFileName}
                             >
                                 Guardar test
                             </button>
@@ -363,23 +308,13 @@ const TestPsi = () => {
                         <div className={styles.modalContent}>
                             <div className={styles.testDetails}>
                                 <h3 className={styles.testDetailTitle}>{currentTest.nombre}</h3>
-                                <div className={styles.testDetailSection}>
-                                    <h4>Descripción</h4>
-                                    <p>{currentTest.descripcion}</p>
-                                </div>
-                                <div className={styles.testDetailSection}>
-                                    <h4>Instrucciones</h4>
-                                    <p>{currentTest.instrucciones}</p>
-                                </div>
+
                                 <div className={styles.testDetailInfo}>
                                     <div className={styles.infoItem}>
                                         <span className={styles.infoLabel}>Formato:</span>
                                         <span>{currentTest.formato}</span>
                                     </div>
-                                    <div className={styles.infoItem}>
-                                        <span className={styles.infoLabel}>Número de preguntas:</span>
-                                        <span>{currentTest.numPreguntas}</span>
-                                    </div>
+
                                     <div className={styles.infoItem}>
                                         <span className={styles.infoLabel}>Fecha de creación:</span>
                                         <span>{currentTest.fechaCreacion}</span>
@@ -422,7 +357,6 @@ const TestPsi = () => {
                         <div className={styles.modalContent}>
                             <div className={styles.assignHeader}>
                                 <h3>Test: {currentTest.nombre}</h3>
-                                <p>{currentTest.descripcion}</p>
                             </div>
                             <div className={styles.formField}>
                                 <label htmlFor="pacienteEmail">Correo electrónico del paciente *</label>

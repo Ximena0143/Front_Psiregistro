@@ -16,7 +16,8 @@ const Perfil = () => {
         primerApellido: 'Rodríguez',
         segundoApellido: 'Gómez',
         correo: 'miranda.rodriguez@righteous.com',
-        password: 'Hola123'
+        password: 'Hola123',
+        especializacion: 'Psicología Clínica'
     });
 
     const handleGoBack = () => {
@@ -200,6 +201,21 @@ const Perfil = () => {
                                                 </div>
                                             )}
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className={styles.formRow}>
+                                    <div className={styles.formField}>
+                                        <label htmlFor="especializacion">Especialización</label>
+                                        <input
+                                            type="text"
+                                            id="especializacion"
+                                            name="especializacion"
+                                            value={formData.especializacion}
+                                            onChange={handleInputChange}
+                                            disabled={!isEditing}
+                                            placeholder="Especialización"
+                                        />
                                     </div>
                                 </div>
                             </div>

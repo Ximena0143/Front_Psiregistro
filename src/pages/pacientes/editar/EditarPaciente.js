@@ -18,9 +18,7 @@ const EditarPaciente = () => {
         segundoNombre: '',
         primerApellido: '',
         segundoApellido: '',
-        tipoIdentificacion: 'C.C',
         numeroIdentificacion: '',
-        telefono: '',
         correo: ''
     });
 
@@ -37,9 +35,7 @@ const EditarPaciente = () => {
                 segundoNombre: 'Carlos',
                 primerApellido: 'Pérez',
                 segundoApellido: 'Gómez',
-                tipoIdentificacion: 'C.C',
                 numeroIdentificacion: '1023456789',
-                telefono: '3102345678',
                 correo: 'juan.perez@ejemplo.com'
             };
             
@@ -61,9 +57,7 @@ const EditarPaciente = () => {
         return /^\d{6,11}$/.test(numero);
     };
 
-    const validateTelefono = (telefono) => {
-        return /^\d{10}$/.test(telefono);
-    };
+
 
     const validateNombre = (nombre) => {
         return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]{2,30}$/.test(nombre);
@@ -124,10 +118,7 @@ const EditarPaciente = () => {
             isValid = false;
         }
 
-        if (formData.telefono && !validateTelefono(formData.telefono)) {
-            newErrors.telefono = 'Ingrese un número de teléfono válido (10 dígitos)';
-            isValid = false;
-        }
+
 
         if (formData.correo && !validateEmail(formData.correo)) {
             newErrors.correo = 'Ingrese un correo electrónico válido';
@@ -262,20 +253,6 @@ const EditarPaciente = () => {
 
                                 <div className={styles.formRow}>
                                     <div className={styles.formField}>
-                                        <label htmlFor="tipoIdentificacion">Tipo de identificación *</label>
-                                        <select
-                                            id="tipoIdentificacion"
-                                            name="tipoIdentificacion"
-                                            value={formData.tipoIdentificacion}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="C.C">C.C</option>
-                                            <option value="T.I">T.I</option>
-                                            <option value="C.E">C.E</option>
-                                            <option value="Pasaporte">Pasaporte</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.formField}>
                                         <label htmlFor="numeroIdentificacion">Número de identificación *</label>
                                         <input
                                             type="text"
@@ -287,22 +264,6 @@ const EditarPaciente = () => {
                                             className={errors.numeroIdentificacion ? styles.inputError : ''}
                                         />
                                         {errors.numeroIdentificacion && <span className={styles.errorMessage}>{errors.numeroIdentificacion}</span>}
-                                    </div>
-                                </div>
-
-                                <div className={styles.formRow}>
-                                    <div className={styles.formField}>
-                                        <label htmlFor="telefono">Teléfono</label>
-                                        <input
-                                            type="tel"
-                                            id="telefono"
-                                            name="telefono"
-                                            value={formData.telefono}
-                                            onChange={handleInputChange}
-                                            placeholder="Teléfono (10 dígitos)"
-                                            className={errors.telefono ? styles.inputError : ''}
-                                        />
-                                        {errors.telefono && <span className={styles.errorMessage}>{errors.telefono}</span>}
                                     </div>
                                     <div className={styles.formField}>
                                         <label htmlFor="correo">Correo electrónico</label>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../../../components/layout/Header/Header';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
-import { ArrowLeft, Eye, Download, FileText, FileCheck, FileX, Upload, Plus } from 'lucide-react';
+import { ArrowLeft, Eye, Download, FileText, Upload, Plus } from 'lucide-react';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 
@@ -17,8 +17,6 @@ const HistorialPaciente = () => {
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [newDocument, setNewDocument] = useState({
         titulo: '',
-        tipo: 'Evaluación Psicológica',
-        estado: 'Pendiente',
         archivo: null
     });
     const [selectedFileName, setSelectedFileName] = useState('');
@@ -100,18 +98,7 @@ const HistorialPaciente = () => {
         navigate(-1);
     };
 
-    const getStatusColor = (estado) => {
-        switch(estado) {
-            case 'Completado':
-                return '#4caf50'; // verde
-            case 'En revisión':
-                return '#2196f3'; // azul
-            case 'Pendiente':
-                return '#ff9800'; // naranja
-            default:
-                return '#757575'; // gris
-        }
-    };
+
 
     const handleViewDocument = (documento) => {
         setPreviewDocument(documento);
@@ -131,8 +118,6 @@ const HistorialPaciente = () => {
         setShowUploadModal(false);
         setNewDocument({
             titulo: '',
-            tipo: 'Evaluación Psicológica',
-            estado: 'Pendiente',
             archivo: null
         });
         setSelectedFileName('');
@@ -170,12 +155,9 @@ const HistorialPaciente = () => {
         const nuevoDocumento = {
             id: documentos.length + 1,
             titulo: newDocument.titulo,
-            tipo: newDocument.tipo,
             fechaCreacion: fechaActual,
             fechaActualizacion: fechaActual,
-            estado: newDocument.estado,
-            icono: newDocument.estado === 'Completado' ? 'FileCheck' : 
-                  newDocument.estado === 'Pendiente' ? 'FileX' : 'FileText'
+            icono: 'FileText'
         };
         
         setDocumentos([nuevoDocumento, ...documentos]);
@@ -211,16 +193,8 @@ const HistorialPaciente = () => {
         }, 1500);
     };
 
-    const renderDocumentIcon = (iconName) => {
-        switch(iconName) {
-            case 'FileCheck':
-                return <FileCheck size={24} color="#4caf50" />;
-            case 'FileX':
-                return <FileX size={24} color="#ff9800" />;
-            case 'FileText':
-            default:
-                return <FileText size={24} color="#2196f3" />;
-        }
+    const renderDocumentIcon = () => {
+        return <FileText size={24} color="#219EBC" />;
     };
 
     // Renderizado condicional mientras se cargan los datos
@@ -289,15 +263,11 @@ const HistorialPaciente = () => {
                                         </div>
                                         <div className={styles.documentTitle}>
                                             <h5>{documento.titulo}</h5>
-                                            <span className={styles.documentType}>{documento.tipo}</span>
                                         </div>
                                     </div>
                                     <div className={styles.documentInfo}>
                                         <div className={styles.documentDate}>
                                             <span>Fecha actualización: {documento.fechaActualizacion}</span>
-                                        </div>
-                                        <div className={styles.statusBadge} style={{backgroundColor: getStatusColor(documento.estado)}}>
-                                            {documento.estado}
                                         </div>
                                     </div>
                                     <div className={styles.documentActions}>
@@ -387,36 +357,7 @@ const HistorialPaciente = () => {
                                     required
                                 />
                             </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="tipo">Tipo de documento *</label>
-                                <select
-                                    id="tipo"
-                                    name="tipo"
-                                    value={newDocument.tipo}
-                                    onChange={handleDocumentInputChange}
-                                    required
-                                >
-                                    <option value="Evaluación Psicológica">Evaluación Psicológica</option>
-                                    <option value="Evaluación Neuropsicológica">Evaluación Neuropsicológica</option>
-                                    <option value="Documento Clínico">Documento Clínico</option>
-                                    <option value="Informe de Terapia">Informe de Terapia</option>
-                                    <option value="Plan de Intervención">Plan de Intervención</option>
-                                </select>
-                            </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="estado">Estado del documento *</label>
-                                <select
-                                    id="estado"
-                                    name="estado"
-                                    value={newDocument.estado}
-                                    onChange={handleDocumentInputChange}
-                                    required
-                                >
-                                    <option value="Completado">Completado</option>
-                                    <option value="En revisión">En revisión</option>
-                                    <option value="Pendiente">Pendiente</option>
-                                </select>
-                            </div>
+
                             <div className={styles.formField}>
                                 <label>Documento *</label>
                                 <div 
