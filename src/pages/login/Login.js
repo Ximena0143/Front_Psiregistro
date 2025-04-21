@@ -66,6 +66,24 @@ export default function Login() {
     }
   };
 
+  const handleForgotPassword = () => {
+    Swal.fire({
+      title: '¡Éxito!',
+      text: `Se ha enviado un correo de recuperación de contraseña a ${email}`,
+      icon: 'success',
+      confirmButtonColor: '#FB8500',
+      customClass: {
+        confirmButton: 'font-dm-sans',
+        title: 'font-dm-sans',
+        popup: 'font-dm-sans'
+      },
+      timer: 2000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+      backdrop: false
+    });
+  };
+
   return (
     <div className={styles.container_login}>
       <div className={styles.fondo_login}>
@@ -109,6 +127,7 @@ export default function Login() {
             </div>
             {passwordError && <p className={styles.error_text}>{passwordError}</p>}
           </div>
+          <p className={styles.forgot_password} onClick={handleForgotPassword}>¿Olvidó su contraseña?</p>
           <div className={styles.botones}>
             <button className={styles.boton_inicio} type="submit">Iniciar Sesión</button>
           </div>

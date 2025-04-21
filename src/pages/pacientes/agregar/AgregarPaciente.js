@@ -16,9 +16,7 @@ const AgregarPaciente = () => {
         segundoNombre: '',
         primerApellido: '',
         segundoApellido: '',
-        tipoIdentificacion: 'C.C',
         numeroIdentificacion: '',
-        telefono: '',
         correo: ''
     });
 
@@ -33,10 +31,6 @@ const AgregarPaciente = () => {
 
     const validateIdentificacion = (numero) => {
         return /^\d{6,11}$/.test(numero);
-    };
-
-    const validateTelefono = (telefono) => {
-        return /^\d{10}$/.test(telefono);
     };
 
     const validateNombre = (nombre) => {
@@ -65,9 +59,7 @@ const AgregarPaciente = () => {
             segundoNombre: '',
             primerApellido: '',
             segundoApellido: '',
-            tipoIdentificacion: 'C.C',
             numeroIdentificacion: '',
-            telefono: '',
             correo: ''
         });
     };
@@ -108,11 +100,6 @@ const AgregarPaciente = () => {
             isValid = false;
         } else if (!validateIdentificacion(formData.numeroIdentificacion)) {
             newErrors.numeroIdentificacion = 'Ingrese un número de identificación válido (6-11 dígitos)';
-            isValid = false;
-        }
-
-        if (formData.telefono && !validateTelefono(formData.telefono)) {
-            newErrors.telefono = 'Ingrese un número de teléfono válido (10 dígitos)';
             isValid = false;
         }
 
@@ -227,67 +214,37 @@ const AgregarPaciente = () => {
                                             className={errors.segundoApellido ? styles.inputError : ''}
                                         />
                                         {errors.segundoApellido && <span className={styles.errorMessage}>{errors.segundoApellido}</span>}
-                                    </div>
                                 </div>
+                            </div>
 
-                                <div className={styles.formRow}>
-                                    <div className={styles.formField}>
-                                        <label htmlFor="tipoIdentificacion">Tipo de identificación *</label>
-                                        <select
-                                            id="tipoIdentificacion"
-                                            name="tipoIdentificacion"
-                                            value={formData.tipoIdentificacion}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="C.C">C.C</option>
-                                            <option value="T.I">T.I</option>
-                                            <option value="C.E">C.E</option>
-                                            <option value="Pasaporte">Pasaporte</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label htmlFor="numeroIdentificacion">Número de identificación *</label>
-                                        <input
-                                            type="text"
-                                            id="numeroIdentificacion"
-                                            name="numeroIdentificacion"
-                                            value={formData.numeroIdentificacion}
-                                            onChange={handleInputChange}
-                                            placeholder="Número de identificación"
-                                            className={errors.numeroIdentificacion ? styles.inputError : ''}
-                                        />
-                                        {errors.numeroIdentificacion && <span className={styles.errorMessage}>{errors.numeroIdentificacion}</span>}
-                                    </div>
+                            <div className={styles.formRow}>
+                                <div className={styles.formField}>
+                                    <label htmlFor="numeroIdentificacion">Número de identificación *</label>
+                                    <input
+                                        type="text"
+                                        id="numeroIdentificacion"
+                                        name="numeroIdentificacion"
+                                        value={formData.numeroIdentificacion}
+                                        onChange={handleInputChange}
+                                        placeholder="Número de identificación"
+                                        className={errors.numeroIdentificacion ? styles.inputError : ''}
+                                    />
+                                    {errors.numeroIdentificacion && <span className={styles.errorMessage}>{errors.numeroIdentificacion}</span>}
                                 </div>
-
-                                <div className={styles.formRow}>
-                                    <div className={styles.formField}>
-                                        <label htmlFor="telefono">Teléfono</label>
-                                        <input
-                                            type="tel"
-                                            id="telefono"
-                                            name="telefono"
-                                            value={formData.telefono}
-                                            onChange={handleInputChange}
-                                            placeholder="Teléfono (10 dígitos)"
-                                            className={errors.telefono ? styles.inputError : ''}
-                                        />
-                                        {errors.telefono && <span className={styles.errorMessage}>{errors.telefono}</span>}
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label htmlFor="correo">Correo electrónico</label>
-                                        <input
-                                            type="email"
-                                            id="correo"
-                                            name="correo"
-                                            value={formData.correo}
-                                            onChange={handleInputChange}
-                                            placeholder="Correo electrónico"
-                                            className={errors.correo ? styles.inputError : ''}
-                                        />
-                                        {errors.correo && <span className={styles.errorMessage}>{errors.correo}</span>}
-                                    </div>
+                                <div className={styles.formField}>
+                                    <label htmlFor="correo">Correo electrónico</label>
+                                    <input
+                                        type="email"
+                                        id="correo"
+                                        name="correo"
+                                        value={formData.correo}
+                                        onChange={handleInputChange}
+                                        placeholder="Correo electrónico"
+                                        className={errors.correo ? styles.inputError : ''}
+                                    />
+                                    {errors.correo && <span className={styles.errorMessage}>{errors.correo}</span>}
                                 </div>
+                            </div>
 
                                 <div className={styles.buttonContainer}>
                                     <button 

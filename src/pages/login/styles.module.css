@@ -105,13 +105,13 @@ html {
 .form_inicio {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 20px;
 }
 
 /*-----------Input-----------*/
 .container_input {
   position: relative;
-  margin: 20px;
+  margin: 15px;
   display: flex;
   flex-direction: column-reverse;
 }
@@ -172,6 +172,16 @@ html {
   margin-top: 0.3rem;
 }
 
+.forgot_password {
+  font-family: 'DM Sans', serif;
+  font-size: 0.8rem;
+  color: #000000;
+  text-align: right;
+  margin: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 /*-----------Fin Input-----------*/
 
 /*-----------Botones-----------*/
@@ -196,6 +206,14 @@ html {
   background: #FB8500;
   border: none;
   color: white;
+  width: 120px;
+}
+
+.boton_crear {
+  background: transparent;
+  border: 2px solid #FB8500;
+  color: #FB8500;
+  width: 120px;
+  font-family: 'DM Sans', serif;
 }
 /*-----------Fin Botones-----------*/
-  

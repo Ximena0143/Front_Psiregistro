@@ -10,11 +10,11 @@ import Swal from 'sweetalert2';
 const Dashboard = () => {
     const navigate = useNavigate();
     const [listaPacientes, setListaPacientes] = useState([
-        { id: 1, nombre: "Laura Gómez Rodríguez", cedula: "123456789", fechaCreacion: "2023-01-01", correo: "laura.gomez@example.com" },
-        { id: 2, nombre: "Andrés Martínez Ramírez", cedula: "987654321", fechaCreacion: "2023-02-15", correo: "andres.martinez@example.com" },
-        { id: 3, nombre: "Camila Torres Jiménez", cedula: "456789123", fechaCreacion: "2023-03-20", correo: "camila.torres@example.com" },
-        { id: 4, nombre: "Juan Pablo Sánchez", cedula: "789123456", fechaCreacion: "2023-04-10", correo: "juan.sanchez@example.com" },
-        { id: 5, nombre: "Felipe Castro Mendoza", cedula: "123456789", fechaCreacion: "2023-05-25", correo: "felipe.castro@example.com" },
+        { id: 1, nombre: "Laura Gómez Rodríguez", numeroIdentificacion: "123456789", fechaCreacion: "2023-01-01", correo: "laura.gomez@example.com" },
+        { id: 2, nombre: "Andrés Martínez Ramírez", numeroIdentificacion: "987654321", fechaCreacion: "2023-02-15", correo: "andres.martinez@example.com" },
+        { id: 3, nombre: "Camila Torres Jiménez", numeroIdentificacion: "456789123", fechaCreacion: "2023-03-20", correo: "camila.torres@example.com" },
+        { id: 4, nombre: "Juan Pablo Sánchez", numeroIdentificacion: "789123456", fechaCreacion: "2023-04-10", correo: "juan.sanchez@example.com" },
+        { id: 5, nombre: "Felipe Castro Mendoza", numeroIdentificacion: "123456789", fechaCreacion: "2023-05-25", correo: "felipe.castro@example.com" },
     ]);
 
     const handleAgregarPaciente = () => {
@@ -60,7 +60,7 @@ const Dashboard = () => {
 
     const columns = [
         { id: 'nombre', label: 'Nombre', minWidth: 200 },
-        { id: 'cedula', label: 'Cédula', minWidth: 120 },
+        { id: 'numeroIdentificacion', label: 'Número de identificación', minWidth: 120 },
         { id: 'fechaCreacion', label: 'Fecha de Creación', minWidth: 150 },
         { id: 'correo', label: 'Correo', minWidth: 200 },
         {
