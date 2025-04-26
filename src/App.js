@@ -13,6 +13,8 @@ import AgregarPaciente from './pages/pacientes/agregar/AgregarPaciente';
 import EditarPaciente from './pages/pacientes/editar/EditarPaciente';
 import HistorialPaciente from './pages/pacientes/historial/HistorialPaciente';
 import AgregarPsicologo from './pages/psicologos/agregar/AgregarPsicologo';
+import TestConnectionPage from './pages/test-connection/TestConnectionPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 
 function App() {
@@ -20,19 +22,63 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
+          {/* Rutas públicas */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/documentos" element={<Documentos />} />
-          <Route path="/publicaciones" element={<Publicaciones />} />
-          <Route path="/test" element={<TestPsi />} />
-          <Route path="/psicologos" element={<Psicologos />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/pacientes/agregar" element={<AgregarPaciente />} />
-          <Route path="/pacientes/editar/:id" element={<EditarPaciente />} />
-          <Route path="/pacientes/historial/:id" element={<HistorialPaciente />} />
-          <Route path="/psicologos/agregar" element={<AgregarPsicologo />} />
+          <Route path="/test-connection" element={<TestConnectionPage />} />
+          
+          {/* Rutas protegidas (requieren autenticación) */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/perfil" element={
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute>
+          } />
+          <Route path="/documentos" element={
+            <ProtectedRoute>
+              <Documentos />
+            </ProtectedRoute>
+          } />
+          <Route path="/publicaciones" element={
+            <ProtectedRoute>
+              <Publicaciones />
+            </ProtectedRoute>
+          } />
+          <Route path="/test" element={
+            <ProtectedRoute>
+              <TestPsi />
+            </ProtectedRoute>
+          } />
+          <Route path="/psicologos" element={
+            <ProtectedRoute>
+              <Psicologos />
+            </ProtectedRoute>
+          } />
+          <Route path="/psicologos/agregar" element={
+            <ProtectedRoute>
+              <AgregarPsicologo />
+            </ProtectedRoute>
+          } />
+          <Route path="/pacientes/agregar" element={
+            <ProtectedRoute>
+              <AgregarPaciente />
+            </ProtectedRoute>
+          } />
+          <Route path="/pacientes/editar/:id" element={
+            <ProtectedRoute>
+              <EditarPaciente />
+            </ProtectedRoute>
+          } />
+          <Route path="/pacientes/historial/:id" element={
+            <ProtectedRoute>
+              <HistorialPaciente />
+            </ProtectedRoute>
+          } />
         </Routes>
       </Router>
     </div>
