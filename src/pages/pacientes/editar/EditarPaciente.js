@@ -5,6 +5,7 @@ import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import { ArrowLeft } from 'lucide-react';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
+import patientService from '../../../services/patient';
 
 const EditarPaciente = () => {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const EditarPaciente = () => {
     // Estados para validación de campos
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         primerNombre: '',
         segundoNombre: '',
@@ -22,27 +24,89 @@ const EditarPaciente = () => {
         correo: ''
     });
 
-    // Simulación de carga de datos del servidor basado en el ID
+    // Cargar los datos del paciente desde el backend
     useEffect(() => {
-        // En una aplicación real, aquí cargarías los datos del paciente desde la API
-        // usando el ID recibido por parámetro
+        const fetchPatientData = async () => {
+            try {
+                // Validar que el ID sea válido antes de hacer la petición
+                if (!id || id === 'N/A' || id === 'undefined' || id === 'null') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'ID de paciente no válido',
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    }).then(() => {
+                        navigate('/dashboard');
+                    });
+                    return;
+                }
+                
+                setLoading(true);
+                
+                // Obtener los datos del paciente por ID
+                console.log('Obteniendo datos del paciente con ID:', id);
+                const response = await patientService.getPatientById(id);
+                console.log('Respuesta del paciente:', response);
+                
+                // Verificar que la respuesta contenga datos
+                if (!response) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo obtener información del paciente',
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    }).then(() => {
+                        navigate('/dashboard');
+                    });
+                    return;
+                }
+                
+                // Extraer datos del paciente y human de la respuesta
+                const patient = response.patient;
+                const human = response.human;
+                
+                console.log('Datos del paciente:', patient);
+                console.log('Datos de human:', human);
+                
+                if (patient && human) {
+                    // Transformar los datos al formato del formulario
+                    setFormData({
+                        primerNombre: human.first_name || '',
+                        segundoNombre: human.middle_name || '',
+                        primerApellido: human.last_name || '',
+                        segundoApellido: human.second_last_name || '',
+                        numeroIdentificacion: human.document_number || patient.identification_number || '',
+                        correo: patient.email || ''
+                    });
+                } else {
+                    // Si no se encuentra el paciente o los datos de human, mostrar error
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se encontró el paciente solicitado o los datos están incompletos',
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    }).then(() => {
+                        navigate('/dashboard');
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar datos del paciente:', error);
+                
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los datos del paciente',
+                    icon: 'error',
+                    confirmButtonColor: '#FB8500'
+                }).then(() => {
+                    navigate('/dashboard');
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
         
-        // Simulamos la carga de datos (esto sería reemplazado por una llamada a API)
-        setTimeout(() => {
-            // Datos de ejemplo para mostrar en el formulario
-            const pacienteData = {
-                primerNombre: 'Juan',
-                segundoNombre: 'Carlos',
-                primerApellido: 'Pérez',
-                segundoApellido: 'Gómez',
-                numeroIdentificacion: '1023456789',
-                correo: 'juan.perez@ejemplo.com'
-            };
-            
-            setFormData(pacienteData);
-            setLoading(false);
-        }, 800); // Simulamos un pequeño tiempo de carga
-    }, [id]);
+        fetchPatientData();
+    }, [id, navigate]);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -56,8 +120,6 @@ const EditarPaciente = () => {
     const validateIdentificacion = (numero) => {
         return /^\d{6,11}$/.test(numero);
     };
-
-
 
     const validateNombre = (nombre) => {
         return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]{2,30}$/.test(nombre);
@@ -118,8 +180,6 @@ const EditarPaciente = () => {
             isValid = false;
         }
 
-
-
         if (formData.correo && !validateEmail(formData.correo)) {
             newErrors.correo = 'Ingrese un correo electrónico válido';
             isValid = false;
@@ -129,35 +189,76 @@ const EditarPaciente = () => {
         return isValid;
     };
 
-    const handleActualizar = () => {
+    const handleActualizar = async () => {
         if (validateForm()) {
-            // Aquí iría la lógica para enviar los datos a la API/Backend
-            console.log('Actualizando paciente:', formData);
-            
-            // Mostrar alerta de confirmación
-            Swal.fire({
-                title: 'Paciente actualizado',
-                text: 'Los datos del paciente han sido actualizados correctamente',
-                icon: 'success',
-                confirmButtonColor: '#FB8500',
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                // Redirigir de vuelta al listado de pacientes
-                navigate('/dashboard');
-            });
+            try {
+                setSubmitting(true);
+                
+                // Preparar los datos para enviar al backend en el formato esperado
+                // El backend espera los campos de nombre en la raíz, no dentro de un objeto human
+                const patientData = {
+                    // Datos de human en la raíz
+                    first_name: formData.primerNombre,
+                    middle_name: formData.segundoNombre || '',
+                    last_name: formData.primerApellido,
+                    second_last_name: formData.segundoApellido || '',
+                    // Datos de patient
+                    email: formData.correo || null,
+                    identification_number: formData.numeroIdentificacion
+                };
+                
+                console.log('Enviando datos de actualización:', patientData);
+                console.log('ID del paciente a actualizar:', id);
+                
+                // Llamar al servicio para actualizar el paciente
+                const response = await patientService.updatePatient(id, patientData);
+                console.log('Respuesta de actualización:', response);
+                
+                // Mostrar alerta de confirmación
+                Swal.fire({
+                    title: 'Paciente actualizado',
+                    text: 'Los datos del paciente han sido actualizados correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#FB8500',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Redirigir de vuelta al listado de pacientes
+                    navigate('/dashboard');
+                });
+            } catch (error) {
+                console.error('Error al actualizar paciente:', error);
+                
+                // Mostrar mensaje de error específico si viene del backend
+                let errorMessage = 'No se pudieron actualizar los datos del paciente';
+                
+                if (error && error.message) {
+                    errorMessage = error.message;
+                }
+                
+                Swal.fire({
+                    title: 'Error',
+                    text: errorMessage,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    confirmButtonColor: '#FB8500'
+                });
+            } finally {
+                setSubmitting(false);
+            }
         } else {
             // Si hay errores, mostrar alerta
             Swal.fire({
-                title: 'Validación fallida',
-                text: 'Por favor corrige los errores en el formulario',
-                icon: 'warning',
+                title: 'Error',
+                text: 'Por favor, corrija los errores en el formulario',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#FB8500'
             });
         }
     };
 
-    // Renderizado condicional mientras se cargan los datos
+    // Mostrar un indicador de carga mientras se obtienen los datos
     if (loading) {
         return (
             <div className={styles.dashboard}>
@@ -166,8 +267,7 @@ const EditarPaciente = () => {
                     <Sidebar />
                     <div className={styles.content}>
                         <div className={styles.loadingContainer}>
-                            <div className={styles.spinner}></div>
-                            <p>Cargando información del paciente...</p>
+                            <p>Cargando datos del paciente...</p>
                         </div>
                     </div>
                 </div>
@@ -204,6 +304,7 @@ const EditarPaciente = () => {
                                             onChange={handleInputChange}
                                             placeholder="Primer nombre"
                                             className={errors.primerNombre ? styles.inputError : ''}
+                                            disabled={submitting}
                                         />
                                         {errors.primerNombre && <span className={styles.errorMessage}>{errors.primerNombre}</span>}
                                     </div>
@@ -217,6 +318,7 @@ const EditarPaciente = () => {
                                             onChange={handleInputChange}
                                             placeholder="Segundo nombre"
                                             className={errors.segundoNombre ? styles.inputError : ''}
+                                            disabled={submitting}
                                         />
                                         {errors.segundoNombre && <span className={styles.errorMessage}>{errors.segundoNombre}</span>}
                                     </div>
@@ -233,6 +335,7 @@ const EditarPaciente = () => {
                                             onChange={handleInputChange}
                                             placeholder="Primer apellido"
                                             className={errors.primerApellido ? styles.inputError : ''}
+                                            disabled={submitting}
                                         />
                                         {errors.primerApellido && <span className={styles.errorMessage}>{errors.primerApellido}</span>}
                                     </div>
@@ -246,6 +349,7 @@ const EditarPaciente = () => {
                                             onChange={handleInputChange}
                                             placeholder="Segundo apellido"
                                             className={errors.segundoApellido ? styles.inputError : ''}
+                                            disabled={submitting}
                                         />
                                         {errors.segundoApellido && <span className={styles.errorMessage}>{errors.segundoApellido}</span>}
                                     </div>
@@ -262,6 +366,7 @@ const EditarPaciente = () => {
                                             onChange={handleInputChange}
                                             placeholder="Número de identificación"
                                             className={errors.numeroIdentificacion ? styles.inputError : ''}
+                                            disabled={submitting}
                                         />
                                         {errors.numeroIdentificacion && <span className={styles.errorMessage}>{errors.numeroIdentificacion}</span>}
                                     </div>
@@ -275,6 +380,7 @@ const EditarPaciente = () => {
                                             onChange={handleInputChange}
                                             placeholder="Correo electrónico"
                                             className={errors.correo ? styles.inputError : ''}
+                                            disabled={submitting}
                                         />
                                         {errors.correo && <span className={styles.errorMessage}>{errors.correo}</span>}
                                     </div>
@@ -282,18 +388,12 @@ const EditarPaciente = () => {
 
                                 <div className={styles.buttonContainer}>
                                     <button 
-                                        className={styles.cancelButton}
-                                        onClick={handleGoBack}
-                                        type="button"
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button 
                                         className={styles.saveButton}
                                         onClick={handleActualizar}
                                         type="button"
+                                        disabled={submitting}
                                     >
-                                        Actualizar
+                                        {submitting ? 'Actualizando...' : 'Actualizar'}
                                     </button>
                                 </div>
                             </div>

@@ -14,6 +14,9 @@
 .sidebar li {
     cursor: pointer;
     height: 55px;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .sidebar a {
@@ -26,10 +29,12 @@
     transition: background 0.3s ease;
     gap: 15px;
     height: 100%;
+    flex-grow: 1;
 }
 
 .sidebar p {
     font-family: 'DM Sans', serif;
+    flex-grow: 1;
 }
 
 .sidebar .active {
@@ -40,4 +45,35 @@
 
 .icon_menu {
     font-size: 20px;
+}
+
+.expandIcon {
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+}
+
+.expandIcon:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+}
+
+.subMenu {
+    margin-top: 0 !important;
+    padding-left: 20px !important;
+}
+
+.subItem {
+    height: 45px !important;
+}
+
+.subItem a {
+    font-size: 0.9em;
 }

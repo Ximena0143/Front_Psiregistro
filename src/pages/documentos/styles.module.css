@@ -130,7 +130,7 @@ tr:nth-child(even) {
 }
 
 .addButton:hover {
-    background: #FB8500;
+    background-color: #e67a00;
 }
 
 .actionIcons {

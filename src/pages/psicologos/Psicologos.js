@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
@@ -6,17 +6,61 @@ import Sidebar from '../../components/layout/Sidebar/Sidebar';
 import { Eye, Trash2 } from 'lucide-react';
 import DataTable from '../../components/common/DataTable/DataTable';
 import Swal from 'sweetalert2';
+import userService from '../../services/user';
 
 const Psicologos = () => {
     const navigate = useNavigate();
     
-    const [psicologos, setPsicologos] = useState([
-        { nombre: "María Fernanda Ruiz", cedula: "1122334455", especializacion: "Psicología Clínica", fechaCreacion: "2022-11-05", correo: "maria.ruiz@psicologos.com" },
-        { nombre: "Carlos Andrés Pérez", cedula: "2233445566", especializacion: "Neuropsicología", fechaCreacion: "2023-01-17", correo: "carlos.perez@psicologos.com" },
-        { nombre: "Ana Sofía Gómez", cedula: "3344556677", especializacion: "Psicología Infantil", fechaCreacion: "2023-02-21", correo: "ana.gomez@psicologos.com" },
-        { nombre: "Jorge Luis Torres", cedula: "4455667788", especializacion: "Psicología Organizacional", fechaCreacion: "2023-03-12", correo: "jorge.torres@psicologos.com" },
-        { nombre: "Valentina López", cedula: "5566778899", especializacion: "Psicología Familiar", fechaCreacion: "2023-04-03", correo: "valentina.lopez@psicologos.com" },
-    ]);
+    const [psicologos, setPsicologos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Cargar la lista de psicólogos al montar el componente
+    useEffect(() => {
+        fetchPsicologos();
+    }, []);
+
+    // Función para obtener los psicólogos del backend
+    const fetchPsicologos = async () => {
+        try {
+            setLoading(true);
+            const response = await userService.getUsers();
+            
+            if (response && response.data) {
+                // Transformar los datos al formato que espera el componente
+                const formattedData = response.data.map(user => {
+                    const fullName = `${user.human.first_name} ${user.human.second_name || ''} ${user.human.last_name} ${user.human.second_last_name || ''}`.trim();
+                    
+                    return {
+                        id: user.id,
+                        nombre: fullName,
+                        cedula: user.human.document_number || 'N/A',
+                        especializacion: user.specialization || 'No especificada',
+                        fechaCreacion: new Date(user.created_at).toLocaleDateString(),
+                        correo: user.email
+                    };
+                });
+                
+                setPsicologos(formattedData);
+            } else {
+                setPsicologos([]);
+                console.warn('No se recibieron datos de usuarios del servidor');
+            }
+        } catch (err) {
+            console.error('Error al cargar psicólogos:', err);
+            setError('No se pudieron cargar los psicólogos. Por favor, intente de nuevo más tarde.');
+            
+            // Mostrar mensaje de error
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudieron cargar los psicólogos. Por favor, intente de nuevo más tarde.',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleNavigateToAdd = () => {
         navigate('/psicologos/agregar');
@@ -54,20 +98,32 @@ const Psicologos = () => {
             cancelButtonColor: '#d33',
             confirmButtonText: 'Sí, continuar',
             cancelButtonText: 'Cancelar'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                // Filtrar el psicólogo del array local
-                const newPsicologos = psicologos.filter(p => p.correo !== psicologo.correo);
-                setPsicologos(newPsicologos);
-                
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'El psicólogo ha sido eliminado correctamente.',
-                    icon: 'success',
-                    confirmButtonColor: '#FB8500',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                try {
+                    await userService.deleteUser(psicologo.id);
+                    
+                    // Actualizar la lista de psicólogos
+                    setPsicologos(psicologos.filter(p => p.id !== psicologo.id));
+                    
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'El psicólogo ha sido eliminado correctamente.',
+                        icon: 'success',
+                        confirmButtonColor: '#FB8500',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    console.error('Error al eliminar psicólogo:', error);
+                    
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo eliminar el psicólogo. Por favor, intente de nuevo.',
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    });
+                }
             }
         });
     };
@@ -119,11 +175,27 @@ const Psicologos = () => {
                         </div>
                     </div>
                     <div className={styles.tableContainer}>
-                        <DataTable
-                            columns={columns}
-                            data={psicologos}
-                            searchPlaceholder="Buscar psicólogos..."
-                        />
+                        {loading ? (
+                            <div className={styles.loadingContainer}>
+                                <p>Cargando psicólogos...</p>
+                            </div>
+                        ) : error ? (
+                            <div className={styles.errorContainer}>
+                                <p>{error}</p>
+                                <button 
+                                    className={styles.retryButton}
+                                    onClick={fetchPsicologos}
+                                >
+                                    Intentar de nuevo
+                                </button>
+                            </div>
+                        ) : (
+                            <DataTable
+                                columns={columns}
+                                data={psicologos}
+                                searchPlaceholder="Buscar psicólogos..."
+                            />
+                        )}
                     </div>
                 </div>
             </div>

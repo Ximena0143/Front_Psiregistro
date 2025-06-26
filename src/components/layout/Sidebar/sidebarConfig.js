@@ -1,10 +1,17 @@
-import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaUserMd } from "react-icons/fa";
+import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaUserMd, FaTrashRestore } from "react-icons/fa";
 
 export const sidebarItems = [
     {
         title: 'Pacientes',
         path: '/dashboard',
-        icon: FaUserFriends
+        icon: FaUserFriends,
+        subItems: [
+            {
+                title: 'Pacientes Eliminados',
+                path: '/pacientes/eliminados',
+                icon: FaTrashRestore
+            }
+        ]
     },
     {
         title: 'Documentos',

@@ -5,12 +5,14 @@ import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import { ArrowLeft } from 'lucide-react';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
+import userService from '../../../services/user';
 
 const AgregarPsicologo = () => {
     const navigate = useNavigate();
     
     // Estados para validación de campos
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         primerNombre: '',
         segundoNombre: '',
@@ -18,7 +20,9 @@ const AgregarPsicologo = () => {
         segundoApellido: '',
         especializacion: '',
         telefono: '',
-        correo: ''
+        correo: '',
+        password: '',
+        confirmPassword: ''
     });
 
     const handleGoBack = () => {
@@ -36,6 +40,10 @@ const AgregarPsicologo = () => {
 
     const validateNombre = (nombre) => {
         return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]{2,30}$/.test(nombre);
+    };
+
+    const validatePassword = (password) => {
+        return password.length >= 8;
     };
 
     const handleInputChange = (e) => {
@@ -62,7 +70,9 @@ const AgregarPsicologo = () => {
             segundoApellido: '',
             especializacion: '',
             telefono: '',
-            correo: ''
+            correo: '',
+            password: '',
+            confirmPassword: ''
         });
         setErrors({});
     };
@@ -116,23 +126,82 @@ const AgregarPsicologo = () => {
             isValid = false;
         }
 
+        if (!formData.password) {
+            newErrors.password = 'La contraseña es obligatoria';
+            isValid = false;
+        } else if (!validatePassword(formData.password)) {
+            newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+            isValid = false;
+        }
+
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = 'Confirme la contraseña';
+            isValid = false;
+        } else if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = 'Las contraseñas no coinciden';
+            isValid = false;
+        }
+
         setErrors(newErrors);
         return isValid;
     };
 
-    const handleGuardar = () => {
+    const handleGuardar = async () => {
         if (validateForm()) {
-            // Aquí iría la lógica para guardar el psicólogo en la base de datos
-            Swal.fire({
-                title: '¡Éxito!',
-                text: 'Psicólogo guardado correctamente',
-                icon: 'success',
-                confirmButtonColor: '#FB8500',
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                navigate('/psicologos');
-            });
+            try {
+                setLoading(true);
+                
+                // Preparar los datos para el backend según la estructura esperada
+                const userData = {
+                    first_name: formData.primerNombre,
+                    second_name: formData.segundoNombre || null,
+                    last_name: formData.primerApellido,
+                    second_last_name: formData.segundoApellido || null,
+                    phone: formData.telefono || null,
+                    email: formData.correo,
+                    password: formData.password,
+                    password_confirmation: formData.confirmPassword,
+                    specialization: formData.especializacion
+                };
+                
+                // Enviar los datos al backend
+                await userService.registerUser(userData);
+                
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'Psicólogo guardado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#FB8500',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    navigate('/psicologos');
+                });
+            } catch (error) {
+                console.error('Error al registrar psicólogo:', error);
+                
+                // Mostrar mensaje de error
+                let errorMessage = 'Ocurrió un error al guardar el psicólogo';
+                
+                // Si hay errores específicos del backend, mostrarlos
+                if (error.data && error.data.errors) {
+                    const backendErrors = error.data.errors;
+                    const errorMessages = Object.values(backendErrors).flat();
+                    if (errorMessages.length > 0) {
+                        errorMessage = errorMessages.join('\n');
+                    }
+                }
+                
+                Swal.fire({
+                    title: 'Error',
+                    text: errorMessage,
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    confirmButtonColor: '#FB8500'
+                });
+            } finally {
+                setLoading(false);
+            }
         } else {
             Swal.fire({
                 title: 'Error',
@@ -264,11 +333,41 @@ const AgregarPsicologo = () => {
                                     </div>
                                 </div>
 
+                                <div className={styles.formRow}>
+                                    <div className={styles.formField}>
+                                        <label htmlFor="password">Contraseña *</label>
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            name="password"
+                                            value={formData.password}
+                                            onChange={handleInputChange}
+                                            placeholder="Contraseña"
+                                            className={errors.password ? styles.inputError : ''}
+                                        />
+                                        {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
+                                    </div>
+                                    <div className={styles.formField}>
+                                        <label htmlFor="confirmPassword">Confirmar contraseña *</label>
+                                        <input
+                                            type="password"
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            value={formData.confirmPassword}
+                                            onChange={handleInputChange}
+                                            placeholder="Confirmar contraseña"
+                                            className={errors.confirmPassword ? styles.inputError : ''}
+                                        />
+                                        {errors.confirmPassword && <span className={styles.errorMessage}>{errors.confirmPassword}</span>}
+                                    </div>
+                                </div>
+
                                 <div className={styles.buttonContainer}>
                                     <button 
                                         className={styles.clearButton}
                                         onClick={handleLimpiarForm}
                                         type="button"
+                                        disabled={loading}
                                     >
                                         Limpiar
                                     </button>
@@ -276,8 +375,9 @@ const AgregarPsicologo = () => {
                                         className={styles.saveButton}
                                         onClick={handleGuardar}
                                         type="button"
+                                        disabled={loading}
                                     >
-                                        Guardar
+                                        {loading ? 'Guardando...' : 'Guardar'}
                                     </button>
                                 </div>
                             </div>

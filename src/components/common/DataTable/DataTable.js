@@ -108,8 +108,8 @@ const DataTable = ({ columns, data, searchPlaceholder = "Buscar..." }) => {
             </Box>
 
             {/* Tabla */}
-            <TableContainer>
-                <Table stickyHeader>
+            <TableContainer sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+                <Table stickyHeader sx={{ tableLayout: 'fixed', width: '100%' }}>
                     <TableHead>
                         <TableRow>
                             {columns.map((column) => (
@@ -117,13 +117,17 @@ const DataTable = ({ columns, data, searchPlaceholder = "Buscar..." }) => {
                                     key={column.id}
                                     align={column.align || 'left'}
                                     style={{ 
-                                        minWidth: column.minWidth,
+                                        width: column.width || 'auto',
+                                        maxWidth: column.maxWidth || 'none',
                                         fontFamily: 'DM Sans',
                                         fontWeight: 600,
                                         fontSize: '15px',
                                         color: '#000000',
                                         backgroundColor: '#FFFFFF',
-                                        cursor: column.id !== 'acciones' ? 'pointer' : 'default'
+                                        cursor: column.id !== 'acciones' ? 'pointer' : 'default',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
                                     }}
                                     onClick={() => column.id !== 'acciones' && handleSort(column.id)}
                                 >
@@ -161,7 +165,10 @@ const DataTable = ({ columns, data, searchPlaceholder = "Buscar..." }) => {
                                                 style={{
                                                     fontFamily: 'DM Sans',
                                                     fontSize: '14px',
-                                                    color: '#000000'
+                                                    color: '#000000',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis'
                                                 }}
                                             >
                                                 {column.render ? column.render(value, row) : value}
