@@ -5,6 +5,7 @@ import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import { ArrowLeft, Eye, Download, FileText, Upload, Plus } from 'lucide-react';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
+import patientService from '../../../services/patient';
 
 const HistorialPaciente = () => {
     const navigate = useNavigate();
@@ -21,84 +22,171 @@ const HistorialPaciente = () => {
     });
     const [selectedFileName, setSelectedFileName] = useState('');
     const fileInputRef = useRef(null);
+    const [error, setError] = useState(null);
+    const [tiposIdentificacion, setTiposIdentificacion] = useState([]);
 
-    // Simular carga de datos del paciente
+    // Cargar los tipos de identificación
     useEffect(() => {
-        // Simulamos la carga de datos (en una app real, esto sería una llamada a API)
-        setTimeout(() => {
-            // Datos de ejemplo del paciente
-            const pacienteData = {
-                id: id,
-                primerNombre: 'Juan',
-                segundoNombre: 'Carlos',
-                primerApellido: 'Pérez',
-                segundoApellido: 'Gómez',
-                tipoIdentificacion: 'C.C',
-                numeroIdentificacion: '1023456789',
-                telefono: '3102345678',
-                correo: 'juan.perez@ejemplo.com'
-            };
-            
-            // Lista de documentos de ejemplo
-            const documentosData = [
-                {
-                    id: 1,
-                    titulo: 'Test de Ansiedad',
-                    tipo: 'Evaluación Psicológica',
-                    fechaCreacion: '2023-08-15',
-                    fechaActualizacion: '2023-08-15',
-                    estado: 'Completado',
-                    icono: 'FileCheck'
-                },
-                {
-                    id: 2,
-                    titulo: 'Test de Depresión de Beck',
-                    tipo: 'Evaluación Psicológica',
-                    fechaCreacion: '2023-09-23',
-                    fechaActualizacion: '2023-09-25',
-                    estado: 'Completado',
-                    icono: 'FileCheck'
-                },
-                {
-                    id: 3,
-                    titulo: 'Evaluación Cognitiva',
-                    tipo: 'Evaluación Neuropsicológica',
-                    fechaCreacion: '2023-10-10',
-                    fechaActualizacion: '2023-10-15',
-                    estado: 'En revisión',
-                    icono: 'FileText'
-                },
-                {
-                    id: 4,
-                    titulo: 'Plan de Intervención',
-                    tipo: 'Documento Clínico',
-                    fechaCreacion: '2023-11-05',
-                    fechaActualizacion: '2023-11-05',
-                    estado: 'Pendiente',
-                    icono: 'FileX'
-                },
-                {
-                    id: 5,
-                    titulo: 'Evaluación de Personalidad',
-                    tipo: 'Evaluación Psicológica',
-                    fechaCreacion: '2024-01-20',
-                    fechaActualizacion: '2024-01-25',
-                    estado: 'Completado',
-                    icono: 'FileCheck'
+        const fetchIdentificationTypes = async () => {
+            try {
+                const response = await patientService.getIdentificationTypes();
+                if (response && response.data) {
+                    setTiposIdentificacion(response.data);
                 }
-            ];
-            
-            setPaciente(pacienteData);
-            setDocumentos(documentosData);
-            setLoading(false);
-        }, 800);
-    }, [id]);
+            } catch (err) {
+                console.error('Error al cargar tipos de identificación:', err);
+            }
+        };
+        
+        fetchIdentificationTypes();
+    }, []);
+
+    // Cargar datos reales del paciente desde el backend
+    useEffect(() => {
+        const fetchPatientData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                // Validar que el ID sea válido antes de hacer la petición
+                if (!id || id === 'N/A' || id === 'undefined' || id === 'null' || id.startsWith('no-id-')) {
+                    throw new Error('ID de paciente no válido');
+                }
+                
+                // Obtener los datos del paciente por ID
+                console.log('Obteniendo datos del paciente con ID:', id);
+                const response = await patientService.getPatientById(id);
+                console.log('Respuesta del paciente:', response);
+                
+                // Verificar que la respuesta contenga datos
+                if (!response || (!response.patient && !response.human)) {
+                    throw new Error('No se pudo obtener información del paciente');
+                }
+                
+                // Extraer datos del paciente y human de la respuesta
+                const patient = response.patient;
+                const human = response.human || patient; // Si no hay human, usar los datos del paciente
+                
+                // Obtener el nombre del tipo de identificación
+                let tipoIdentificacionNombre = 'No especificado';
+                
+                // Verificar si el tipo de identificación está directamente en el objeto patient
+                if (patient.identification_type) {
+                    tipoIdentificacionNombre = patient.identification_type;
+                    console.log('Tipo de identificación encontrado en patient:', tipoIdentificacionNombre);
+                } else {
+                    // Si no está directamente, intentar con el ID y la lista de tipos
+                    const tipoIdentificacionId = human.document_type_id || patient.document_type_id;
+                    
+                    if (tipoIdentificacionId && tiposIdentificacion.length > 0) {
+                        const tipoEncontrado = tiposIdentificacion.find(tipo => tipo.id === tipoIdentificacionId);
+                        if (tipoEncontrado) {
+                            tipoIdentificacionNombre = tipoEncontrado.name;
+                            console.log('Tipo de identificación encontrado por ID:', tipoIdentificacionNombre);
+                        }
+                    } else if (human.document_type) {
+                        // Si ya tenemos el nombre del tipo directamente en human
+                        tipoIdentificacionNombre = human.document_type;
+                        console.log('Tipo de identificación encontrado en human:', tipoIdentificacionNombre);
+                    }
+                }
+                
+                // Formatear los datos del paciente para mostrarlos
+                const pacienteData = {
+                    id: patient.id,
+                    primerNombre: human.first_name || '',
+                    segundoNombre: human.middle_name || '',
+                    primerApellido: human.last_name || '',
+                    segundoApellido: human.second_last_name || '',
+                    tipoIdentificacion: tipoIdentificacionNombre,
+                    numeroIdentificacion: human.document_number || patient.identification_number || '',
+                    telefono: patient.phone || human.phone || 'No disponible',
+                    correo: patient.email || 'No disponible',
+                    fechaNacimiento: human.birth_date ? new Date(human.birth_date).toLocaleDateString() : 'No disponible',
+                    genero: human.gender || 'No especificado',
+                    direccion: human.address || 'No disponible',
+                    ciudad: human.city || 'No disponible',
+                    fechaCreacion: patient.created_at ? new Date(patient.created_at).toLocaleDateString() : 'No disponible',
+                    fechaActualizacion: patient.updated_at ? new Date(patient.updated_at).toLocaleDateString() : 'No disponible'
+                };
+                
+                setPaciente(pacienteData);
+                
+                // Mantenemos los documentos de ejemplo por ahora
+                // En una implementación futura, estos vendrían del backend
+                const documentosData = [
+                    {
+                        id: 1,
+                        titulo: 'Test de Ansiedad',
+                        tipo: 'Evaluación Psicológica',
+                        fechaCreacion: '2023-08-15',
+                        fechaActualizacion: '2023-08-15',
+                        estado: 'Completado',
+                        icono: 'FileCheck'
+                    },
+                    {
+                        id: 2,
+                        titulo: 'Test de Depresión de Beck',
+                        tipo: 'Evaluación Psicológica',
+                        fechaCreacion: '2023-09-23',
+                        fechaActualizacion: '2023-09-25',
+                        estado: 'Completado',
+                        icono: 'FileCheck'
+                    },
+                    {
+                        id: 3,
+                        titulo: 'Evaluación Cognitiva',
+                        tipo: 'Evaluación Neuropsicológica',
+                        fechaCreacion: '2023-10-10',
+                        fechaActualizacion: '2023-10-15',
+                        estado: 'En revisión',
+                        icono: 'FileText'
+                    },
+                    {
+                        id: 4,
+                        titulo: 'Plan de Intervención',
+                        tipo: 'Documento Clínico',
+                        fechaCreacion: '2023-11-05',
+                        fechaActualizacion: '2023-11-05',
+                        estado: 'Pendiente',
+                        icono: 'FileX'
+                    },
+                    {
+                        id: 5,
+                        titulo: 'Evaluación de Personalidad',
+                        tipo: 'Evaluación Psicológica',
+                        fechaCreacion: '2024-01-20',
+                        fechaActualizacion: '2024-01-25',
+                        estado: 'Completado',
+                        icono: 'FileCheck'
+                    }
+                ];
+                
+                setDocumentos(documentosData);
+            } catch (err) {
+                console.error('Error al cargar datos del paciente:', err);
+                setError(err.message || 'Error al cargar datos del paciente');
+                
+                // Mostrar alerta de error
+                Swal.fire({
+                    title: 'Error',
+                    text: err.message || 'No se pudieron cargar los datos del paciente',
+                    icon: 'error',
+                    confirmButtonColor: '#FB8500'
+                }).then(() => {
+                    navigate('/dashboard');
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchPatientData();
+    }, [id, navigate, tiposIdentificacion]);
 
     const handleGoBack = () => {
         navigate(-1);
     };
-
-
 
     const handleViewDocument = (documento) => {
         setPreviewDocument(documento);
@@ -193,8 +281,17 @@ const HistorialPaciente = () => {
         }, 1500);
     };
 
-    const renderDocumentIcon = () => {
-        return <FileText size={24} color="#219EBC" />;
+    const renderDocumentIcon = (icono, color) => {
+        switch(icono) {
+            case 'FileCheck':
+                return <FileText size={24} color={color} />;
+            case 'FileText':
+                return <FileText size={24} color={color} />;
+            case 'FileX':
+                return <FileText size={24} color={color} />;
+            default:
+                return <FileText size={24} color={color} />;
+        }
     };
 
     // Renderizado condicional mientras se cargan los datos
@@ -215,6 +312,29 @@ const HistorialPaciente = () => {
         );
     }
 
+    // Si hay un error y no hay datos de paciente, no renderizamos el resto
+    if (error && !paciente) {
+        return (
+            <div className={styles.dashboard}>
+                <Header variant="dashboard" />
+                <div className={styles.main}>
+                    <Sidebar />
+                    <div className={styles.content}>
+                        <div className={styles.errorContainer}>
+                            <p>{error}</p>
+                            <button 
+                                className={styles.retryButton}
+                                onClick={() => navigate('/dashboard')}
+                            >
+                                Volver al Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.dashboard}>
             <Header variant="dashboard" />
@@ -224,7 +344,7 @@ const HistorialPaciente = () => {
                     <div className={styles.contentHeader}>
                         <div className={styles.headerLeft}>
                             <button className={styles.backButton} onClick={handleGoBack}>
-                                <ArrowLeft size={20} />
+                                <ArrowLeft size={20} color="#4F46E5" />
                             </button>
                             <h3>Historial de Paciente</h3>
                         </div>
@@ -236,8 +356,8 @@ const HistorialPaciente = () => {
                             {paciente.primerApellido} {paciente.segundoApellido && paciente.segundoApellido}
                         </h4>
                         <div className={styles.pacienteDetails}>
-                            <span><strong>Identificación:</strong> {paciente.tipoIdentificacion} {paciente.numeroIdentificacion}</span>
-                            <span><strong>Teléfono:</strong> {paciente.telefono}</span>
+                            <span><strong>Tipo de Identificación:</strong> {paciente.tipoIdentificacion}</span>
+                            <span><strong>Número de Identificación:</strong> {paciente.numeroIdentificacion}</span>
                             <span><strong>Correo:</strong> {paciente.correo}</span>
                         </div>
                     </div>
@@ -249,7 +369,7 @@ const HistorialPaciente = () => {
                                 className={styles.addDocumentButton}
                                 onClick={handleOpenUploadModal}
                             >
-                                <Plus size={16} />
+                                <Plus size={20} color="#FB8500" />
                                 Subir documento
                             </button>
                         </div>
@@ -259,16 +379,16 @@ const HistorialPaciente = () => {
                                 <div className={styles.documentCard} key={documento.id}>
                                     <div className={styles.documentHeader}>
                                         <div className={styles.documentIcon}>
-                                            {renderDocumentIcon(documento.icono)}
+                                            {renderDocumentIcon(documento.icono, "#219EBC")}
                                         </div>
                                         <div className={styles.documentTitle}>
                                             <h5>{documento.titulo}</h5>
+                                            <span className={styles.documentType}>{documento.tipo}</span>
                                         </div>
                                     </div>
                                     <div className={styles.documentInfo}>
-                                        <div className={styles.documentDate}>
-                                            <span>Fecha actualización: {documento.fechaActualizacion}</span>
-                                        </div>
+                                        <p><strong>Creado:</strong> {documento.fechaCreacion}</p>
+                                        <p><strong>Actualizado:</strong> {documento.fechaActualizacion}</p>
                                     </div>
                                     <div className={styles.documentActions}>
                                         <button 
@@ -276,7 +396,7 @@ const HistorialPaciente = () => {
                                             title="Ver documento"
                                             onClick={() => handleViewDocument(documento)}
                                         >
-                                            <Eye size={18} />
+                                            <Eye size={18} color="#059669" />
                                             <span>Ver</span>
                                         </button>
                                         <button 
@@ -284,7 +404,7 @@ const HistorialPaciente = () => {
                                             title="Descargar documento"
                                             onClick={() => handleDownloadDocument(documento)}
                                         >
-                                            <Download size={18} />
+                                            <Download size={18} color="#7C3AED" />
                                             <span>Descargar</span>
                                         </button>
                                     </div>
@@ -328,7 +448,7 @@ const HistorialPaciente = () => {
                                     handleClosePreview();
                                 }}
                             >
-                                <Download size={16} />
+                                <Download size={16} color="#7C3AED" />
                                 Descargar
                             </button>
                         </div>
@@ -365,7 +485,7 @@ const HistorialPaciente = () => {
                                     onClick={handleUploadAreaClick}
                                 >
                                     <div className={styles.fileUploadIcon}>
-                                        <Upload size={30} color="#219EBC" />
+                                        <Upload size={30} color="#0891B2" />
                                     </div>
                                     <p className={styles.fileUploadText}>
                                         Haz clic aquí para seleccionar un archivo o arrástralo y suéltalo
@@ -395,6 +515,7 @@ const HistorialPaciente = () => {
                                 onClick={handleUploadDocument}
                                 disabled={!newDocument.titulo || !selectedFileName}
                             >
+                                <Upload size={16} color="#0891B2" />
                                 Subir documento
                             </button>
                         </div>

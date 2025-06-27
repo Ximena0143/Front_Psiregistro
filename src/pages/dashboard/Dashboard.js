@@ -19,7 +19,7 @@ const Dashboard = () => {
         fetchPacientes();
     }, []);
 
-    // Función para obtener los pacientes del backend
+    // Función para obtener los pacientes activos del backend
     const fetchPacientes = async () => {
         try {
             setLoading(true);
@@ -48,23 +48,23 @@ const Dashboard = () => {
                         fullName = `${patient.first_name || ''} ${patient.middle_name || ''} ${patient.last_name || ''} ${patient.second_last_name || ''}`.trim();
                     } else if (patient.human) {
                         // Mantener compatibilidad con la estructura anterior
-                        fullName = `${patient.human.first_name || ''} ${patient.human.middle_name || ''} ${patient.human.last_name || ''} ${patient.human.second_last_name || ''}`.trim();
-                    } else {
-                        // Si no hay datos de nombre, usar el correo o un placeholder
-                        fullName = patient.email || `Paciente ${id}`;
+                        const human = patient.human;
+                        fullName = `${human.first_name || ''} ${human.middle_name || ''} ${human.last_name || ''} ${human.second_last_name || ''}`.trim();
                     }
-                    
-                    // Obtener el número de documento
-                    let documentNumber = patient.identification_number || 'N/A';
                     
                     // Formatear la fecha de creación
                     let createdAt = 'N/A';
                     if (patient.created_at) {
-                        try {
-                            createdAt = new Date(patient.created_at).toLocaleDateString();
-                        } catch (e) {
-                            console.error('Error al formatear la fecha:', e);
-                        }
+                        const date = new Date(patient.created_at);
+                        createdAt = date.toLocaleDateString();
+                    }
+                    
+                    // Obtener el número de documento
+                    let documentNumber = 'N/A';
+                    if (patient.identification_number) {
+                        documentNumber = patient.identification_number;
+                    } else if (patient.human && patient.human.document_number) {
+                        documentNumber = patient.human.document_number;
                     }
                     
                     // Crear el objeto formateado
@@ -125,9 +125,20 @@ const Dashboard = () => {
     };
 
     const handleEliminarPaciente = (paciente) => {
+        // Verificar que el ID sea válido antes de intentar eliminar
+        if (!paciente.id || String(paciente.id).startsWith('no-id-')) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se puede eliminar este paciente porque no tiene un ID válido en el sistema',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+            return;
+        }
+
         Swal.fire({
             title: '¿Eliminar paciente?',
-            html: `¿Estás seguro de que deseas eliminar al paciente <strong>${paciente.nombre}</strong>?<br>Esta acción no se puede deshacer.`,
+            html: `¿Estás seguro de que deseas eliminar al paciente <strong>${paciente.nombre}</strong>?<br>Esta acción realizará un <em>soft delete</em> y el paciente podrá ser restaurado posteriormente.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#FB8500',
@@ -137,8 +148,12 @@ const Dashboard = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    // Llamar al servicio para eliminar el paciente
-                    await patientService.deletePatient(paciente.id);
+                    setLoading(true);
+                    
+                    // Llamar al servicio para eliminar el paciente (soft delete)
+                    console.log(`Eliminando paciente con ID: ${paciente.id}`);
+                    const response = await patientService.deletePatient(paciente.id);
+                    console.log('Respuesta de eliminación:', response);
                     
                     // Actualizar la lista de pacientes en el estado
                     setPatients(patients.filter(p => p.id !== paciente.id));
@@ -146,7 +161,7 @@ const Dashboard = () => {
                     // Mostrar mensaje de éxito
                     Swal.fire({
                         title: 'Paciente eliminado',
-                        text: `El paciente ${paciente.nombre} ha sido eliminado correctamente`,
+                        text: `El paciente ${paciente.nombre} ha sido eliminado correctamente (soft delete)`,
                         icon: 'success',
                         confirmButtonColor: '#FB8500',
                         timer: 2000,
@@ -155,13 +170,17 @@ const Dashboard = () => {
                 } catch (error) {
                     console.error('Error al eliminar paciente:', error);
                     
-                    // Mostrar mensaje de error
+                    // Mostrar mensaje de error con detalles si están disponibles
                     Swal.fire({
                         title: 'Error',
-                        text: 'No se pudo eliminar el paciente. Por favor, intente de nuevo más tarde.',
+                        text: error.message || 'No se pudo eliminar el paciente. Por favor, intente de nuevo más tarde.',
                         icon: 'error',
                         confirmButtonColor: '#FB8500'
                     });
+                } finally {
+                    setLoading(false);
+                    // Recargar la lista de pacientes para asegurar que está actualizada
+                    fetchPacientes();
                 }
             }
         });
@@ -181,7 +200,7 @@ const Dashboard = () => {
                 <div className={styles.actionIcons}>
                     <div className={styles.iconWrapper} title={row.editable ? "Editar paciente" : "No se puede editar este paciente"}>
                         <Edit2
-                            className={`${styles.actionIcon} ${!row.editable ? styles.disabledIcon : ''}`}
+                            className={`${styles.actionIcon} ${styles.editIcon} ${!row.editable ? styles.disabledIcon : ''}`}
                             onClick={() => {
                                 console.log("Fila completa:", row);
                                 console.log("ID del paciente al hacer clic:", row.id);
@@ -206,13 +225,13 @@ const Dashboard = () => {
                     </div>
                     <div className={styles.iconWrapper} title="Ver historial">
                         <FileText
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.viewIcon}`}
                             onClick={() => handleVerHistorial(row.id)}
                         />
                     </div>
                     <div className={styles.iconWrapper} title="Eliminar paciente">
                         <Trash2
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.deleteIcon}`}
                             onClick={() => handleEliminarPaciente(row)}
                         />
                     </div>

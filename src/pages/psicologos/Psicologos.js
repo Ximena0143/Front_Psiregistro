@@ -142,13 +142,13 @@ const Psicologos = () => {
                 <div className={styles.actionIcons}>
                     <div className={styles.iconWrapper} title="Ver perfil">
                         <Eye
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.viewIcon}`}
                             onClick={() => handleViewProfile(row)}
                         />
                     </div>
                     <div className={styles.iconWrapper} title="Eliminar psicólogo">
                         <Trash2
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.deleteIcon}`}
                             onClick={() => handleDelete(row)}
                         />
                     </div>

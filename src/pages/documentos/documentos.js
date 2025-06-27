@@ -38,19 +38,19 @@ const Documentos = () => {
                 <div className={styles.actionIcons}>
                     <div className={styles.iconWrapper} title="Descargar documento">
                         <Download
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.downloadIcon}`}
                             onClick={() => handleDownloadDocument(row)}
                         />
                     </div>
                     <div className={styles.iconWrapper} title="Ver documento">
                         <Eye
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.viewIcon}`}
                             onClick={() => handlePreviewDocument(row)}
                         />
                     </div>
                     <div className={styles.iconWrapper} title="Eliminar documento">
                         <Trash2
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.deleteIcon}`}
                             onClick={() => handleDeleteDocument(row)}
                         />
                     </div>

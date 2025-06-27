@@ -81,6 +81,79 @@
     color: #333;
 }
 
+.infoContainer {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #E6EDF0;
+}
+
+.infoContainer h5 {
+    margin: 0 0 15px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    color: #219EBC;
+    font-weight: 600;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.infoLabel {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.infoValue {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.errorContainer {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px 0;
+    border: 1px solid #f5c6cb;
+}
+
+.errorContainer p {
+    margin-bottom: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+}
+
+.retryButton {
+    background-color: #FB8500;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.retryButton:hover {
+    background-color: #ff9b58;
+}
+
 .historialesContainer {
     background: white;
     padding: 30px;
@@ -133,8 +206,13 @@
 
 .documentIcon {
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background-color: rgba(33, 158, 188, 0.1);
+    margin-right: 10px;
 }
 
 .documentTitle {
@@ -185,35 +263,64 @@
 }
 
 .actionButton {
-    flex: 1;
-    padding: 12px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: transparent;
+    gap: 5px;
+    padding: 8px 12px;
     border: none;
+    border-radius: 4px;
+    background-color: #f5f5f5;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: #4B5563;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .actionButton:hover {
-    background-color: rgba(251, 133, 0, 0.1);
-    color: #FB8500;
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
 }
 
-.actionButton:hover svg {
-    color: #FB8500;
+.actionButton span {
+    font-size: 14px;
+    font-weight: 500;
 }
 
-.actionButton:first-child {
-    border-right: 1px solid #E6EDF0;
+.addDocumentButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #FB8500;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
 }
 
-/* Estilos para el estado de carga */
+.addDocumentButton:hover {
+    background-color: #e67a00;
+    transform: translateY(-2px);
+}
+
+.downloadPreviewButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #7C3AED;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.downloadPreviewButton:hover {
+    background-color: #6D28D9;
+}
+
 .loadingContainer {
     display: flex;
     flex-direction: column;
@@ -243,7 +350,6 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Modal de vista previa */
 .previewOverlay {
     position: fixed;
     top: 0;
@@ -359,49 +465,6 @@
     background: #E6EDF0;
 }
 
-.downloadPreviewButton {
-    background: #FB8500;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-
-.downloadPreviewButton:hover {
-    background: #ff9b58;
-}
-
-/* Estilos para el botón de agregar documento */
-.addDocumentButton {
-    background: #FB8500;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.addDocumentButton:hover {
-    background: #ff9b58;
-    transform: translateY(-2px);
-}
-
-/* Estilos para el modal de subir documento */
 .uploadModal {
     position: fixed;
     top: 0;

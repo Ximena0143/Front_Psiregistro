@@ -143,10 +143,10 @@ tr:nth-child(even) {
 
 .iconWrapper {
     display: flex;
-    align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    align-items: center;
+    width: 30px;
+    height: 30px;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -156,10 +156,39 @@ tr:nth-child(even) {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
+/* Estilos base para los iconos de acción */
 .actionIcon {
-    color: #333;
     width: 18px;
     height: 18px;
+}
+
+/* Colores específicos para cada tipo de icono */
+.editIcon {
+    color: #4F46E5; /* Azul índigo para editar */
+}
+
+.viewIcon {
+    color: #059669; /* Verde esmeralda para ver/visualizar */
+}
+
+.deleteIcon {
+    color: #DC2626; /* Rojo para eliminar */
+}
+
+.restoreIcon {
+    color: #2563EB; /* Azul para restaurar */
+}
+
+.addIcon {
+    color: #FB8500; /* Naranja (color principal) para añadir */
+}
+
+.downloadIcon {
+    color: #7C3AED; /* Púrpura para descargar */
+}
+
+.uploadIcon {
+    color: #0891B2; /* Cian para subir */
 }
 
 .viewButton {
@@ -211,4 +240,24 @@ tr:nth-child(even) {
 
 .retryButton:hover {
     background-color: #e67a00;
+}
+
+/* Estilos para mensajes de error */
+.errorMessage {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Estilos para el contenedor de carga */
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-family: 'DM Sans', sans-serif;
+    color: #666;
 }

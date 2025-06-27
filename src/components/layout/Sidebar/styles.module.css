@@ -24,10 +24,10 @@
     color: black;
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 10px 15px 10px 20px;
     border-radius: 5px;
     transition: background 0.3s ease;
-    gap: 15px;
+    gap: 10px;
     height: 100%;
     flex-grow: 1;
 }
@@ -35,6 +35,8 @@
 .sidebar p {
     font-family: 'DM Sans', serif;
     flex-grow: 1;
+    margin: 0;
+    text-align: left;
 }
 
 .sidebar .active {
@@ -43,8 +45,17 @@
     border-radius: 5px;
 }
 
+/* Cuando el elemento padre está activo, cambiar el color de la flecha a blanco */
+li:has(.active) .expandIcon {
+    color: white;
+}
+
 .icon_menu {
     font-size: 20px;
+    min-width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .expandIcon {

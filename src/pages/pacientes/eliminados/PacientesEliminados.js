@@ -48,54 +48,41 @@ const PacientesEliminados = () => {
                 
                 // Transformar los datos al formato que espera el componente
                 const formattedData = deletedPatientsData.map(patient => {
-                    // Asegurarse de que patient.human existe
-                    if (!patient.human) {
-                        console.warn('Paciente eliminado sin datos de human:', patient);
-                        return {
-                            id: patient.id,
-                            nombre: 'Datos incompletos',
-                            numeroIdentificacion: 'N/A',
-                            fechaEliminacion: patient.deleted_at ? new Date(patient.deleted_at).toLocaleDateString() : 'N/A'
-                        };
-                    }
-                    
-                    // Verificar la estructura de document_number y deleted_at
-                    console.log(`Paciente eliminado ID ${patient.id} - document_number:`, patient.human.document_number);
-                    console.log(`Paciente eliminado ID ${patient.id} - deleted_at:`, patient.deleted_at);
-                    
-                    // Acceder a document_number de manera segura
-                    // En algunos casos, document_number podría estar en patient.human.document_number
-                    // En otros casos, podría estar directamente en patient.document_number
-                    let documentNumber = 'N/A';
-                    if (patient.human && patient.human.document_number) {
-                        documentNumber = patient.human.document_number;
-                    } else if (patient.document_number) {
-                        documentNumber = patient.document_number;
-                    } else if (patient.human && patient.human.identification_number) {
-                        documentNumber = patient.human.identification_number;
-                    } else if (patient.identification_number) {
-                        documentNumber = patient.identification_number;
-                    }
+                    // Crear un objeto con valores predeterminados
+                    const formattedPatient = {
+                        id: patient.id || 'unknown-id',
+                        nombre: 'Sin nombre',
+                        numeroIdentificacion: 'N/A',
+                        fechaEliminacion: 'N/A',
+                        email: patient.email || 'N/A',
+                        human: patient.human || null
+                    };
                     
                     // Formatear el nombre completo
-                    const fullName = `${patient.human.first_name || ''} ${patient.human.middle_name || ''} ${patient.human.last_name || ''} ${patient.human.second_last_name || ''}`.trim();
+                    if (patient.first_name || patient.last_name) {
+                        formattedPatient.nombre = `${patient.first_name || ''} ${patient.middle_name || ''} ${patient.last_name || ''} ${patient.second_last_name || ''}`.trim();
+                    } else if (patient.human) {
+                        const human = patient.human;
+                        formattedPatient.nombre = `${human.first_name || ''} ${human.middle_name || ''} ${human.last_name || ''} ${human.second_last_name || ''}`.trim();
+                    }
+                    
+                    // Obtener el número de documento
+                    if (patient.identification_number) {
+                        formattedPatient.numeroIdentificacion = patient.identification_number;
+                    } else if (patient.human && patient.human.document_number) {
+                        formattedPatient.numeroIdentificacion = patient.human.document_number;
+                    }
                     
                     // Formatear la fecha de eliminación
-                    let deletedAt = 'N/A';
                     if (patient.deleted_at) {
                         try {
-                            deletedAt = new Date(patient.deleted_at).toLocaleDateString();
+                            formattedPatient.fechaEliminacion = new Date(patient.deleted_at).toLocaleDateString();
                         } catch (e) {
                             console.error('Error al formatear la fecha de eliminación:', e);
                         }
                     }
                     
-                    return {
-                        id: patient.id,
-                        nombre: fullName || 'Sin nombre',
-                        numeroIdentificacion: documentNumber,
-                        fechaEliminacion: deletedAt
-                    };
+                    return formattedPatient;
                 });
                 
                 console.log('Datos formateados de pacientes eliminados para mostrar:', formattedData);
@@ -238,8 +225,11 @@ const PacientesEliminados = () => {
                 <div className={styles.content}>
                     <div className={styles.contentHeader}>
                         <div className={styles.headerLeft}>
-                            <button className={styles.backButton} onClick={handleGoBack}>
-                                <ArrowLeft size={20} />
+                            <button 
+                                className={styles.backButton}
+                                onClick={handleGoBack}
+                            >
+                                <ArrowLeft size={20} color="#4F46E5" />
                             </button>
                             <h3>Pacientes Eliminados</h3>
                         </div>
@@ -289,7 +279,7 @@ const PacientesEliminados = () => {
                                                     disabled={actionInProgress}
                                                     title="Restaurar paciente"
                                                 >
-                                                    <RefreshCw size={16} />
+                                                    <RefreshCw size={16} color="#34C759" />
                                                 </button>
                                                 <button 
                                                     className={styles.deleteButton}
@@ -297,7 +287,7 @@ const PacientesEliminados = () => {
                                                     disabled={actionInProgress}
                                                     title="Eliminar permanentemente"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={16} color="#FF3737" />
                                                 </button>
                                             </td>
                                         </tr>
