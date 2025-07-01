@@ -24,27 +24,85 @@ const Psicologos = () => {
     const fetchPsicologos = async () => {
         try {
             setLoading(true);
+            setError(null);
             const response = await userService.getUsers();
+            console.log('Respuesta de getUsers:', response);
             
+            // Depuración: Mostrar la estructura completa de la respuesta
+            console.log('Estructura completa de la respuesta:', JSON.stringify(response, null, 2));
+            
+            // Verificar si hay datos y mostrar información de depuración
             if (response && response.data) {
+                console.log('Cantidad de usuarios recibidos:', response.data.length);
+                
+                // Si hay datos, mostrar el primer elemento para depuración
+                if (Array.isArray(response.data) && response.data.length > 0) {
+                    const firstUser = response.data[0];
+                    console.log('Primer usuario (detalle):', firstUser);
+                    console.log('ID del primer usuario:', firstUser.id);
+                    console.log('Email del primer usuario:', firstUser.email);
+                    console.log('Human del primer usuario:', firstUser.human);
+                    console.log('Specialization del primer usuario:', firstUser.specialization);
+                }
+            }
+            
+            if (response && response.data && Array.isArray(response.data)) {
                 // Transformar los datos al formato que espera el componente
                 const formattedData = response.data.map(user => {
-                    const fullName = `${user.human.first_name} ${user.human.second_name || ''} ${user.human.last_name} ${user.human.second_last_name || ''}`.trim();
+                    // Verificar si existe human y sus propiedades
+                    const human = user.human || {};
+                    const firstName = human.first_name || '';
+                    const middleName = human.middle_name || '';
+                    const lastName = human.last_name || '';
+                    const secondLastName = human.second_last_name || '';
                     
-                    return {
-                        id: user.id,
-                        nombre: fullName,
-                        cedula: user.human.document_number || 'N/A',
-                        especializacion: user.specialization || 'No especificada',
-                        fechaCreacion: new Date(user.created_at).toLocaleDateString(),
-                        correo: user.email
+                    // Construir el nombre completo
+                    const fullName = `${firstName} ${middleName} ${lastName} ${secondLastName}`.trim();
+                    
+                    // Formatear la fecha de creación
+                    let createdAt = 'N/A';
+                    if (user.created_at) {
+                        const date = new Date(user.created_at);
+                        createdAt = date.toLocaleDateString();
+                    }
+                    
+                    // Obtener la especialización del objeto specialization
+                    let especializacion = 'No especificada';
+                    if (user.specialization && user.specialization.name) {
+                        especializacion = user.specialization.name;
+                    }
+                    
+                    // Crear objeto con datos formateados
+                    const formattedUser = {
+                        id: user.id || `temp-${Math.random().toString(36).substring(7)}`,
+                        nombre: fullName || user.email || 'Usuario sin nombre',
+                        cedula: human.document_number || 'N/A',
+                        especializacion: especializacion,
+                        fechaCreacion: createdAt,
+                        correo: user.email || 'N/A',
+                        profileDescription: user.profile_description || 'Sin descripción'
                     };
+                    
+                    console.log('Usuario formateado:', formattedUser);
+                    return formattedUser;
                 });
                 
+                console.log('Datos formateados para mostrar:', formattedData);
                 setPsicologos(formattedData);
             } else {
                 setPsicologos([]);
                 console.warn('No se recibieron datos de usuarios del servidor');
+                
+                // Agregar un elemento de depuración si no hay datos
+                setPsicologos([{
+                    id: 'debug-1',
+                    nombre: 'DATOS DE DEPURACIÓN',
+                    cedula: 'Ver consola para detalles',
+                    especializacion: 'Estructura de respuesta',
+                    fechaCreacion: new Date().toLocaleDateString(),
+                    correo: JSON.stringify(response || {}).substring(0, 50) + '...',
+                    profileDescription: 'Esto es para depurar la estructura de datos'
+                }]);
             }
         } catch (err) {
             console.error('Error al cargar psicólogos:', err);
@@ -75,6 +133,7 @@ const Psicologos = () => {
                     <p><strong>Especialización:</strong> ${psicologo.especializacion}</p>
                     <p><strong>Correo:</strong> ${psicologo.correo}</p>
                     <p><strong>Fecha de Creación:</strong> ${psicologo.fechaCreacion}</p>
+                    <p><strong>Descripción del Perfil:</strong> ${psicologo.profileDescription}</p>
                 </div>
             `,
             confirmButtonText: 'Cerrar',
@@ -89,6 +148,17 @@ const Psicologos = () => {
     };
 
     const handleDelete = (psicologo) => {
+        // Verificar si el ID es temporal
+        if (psicologo.id.toString().startsWith('temp-')) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se puede eliminar este psicólogo porque aún no ha sido guardado en la base de datos.',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+            return;
+        }
+        
         Swal.fire({
             title: '¿Estás seguro?',
             text: `¿Deseas eliminar al psicólogo ${psicologo.nombre}?`,
@@ -103,9 +173,7 @@ const Psicologos = () => {
                 try {
                     await userService.deleteUser(psicologo.id);
                     
-                    // Actualizar la lista de psicólogos
-                    setPsicologos(psicologos.filter(p => p.id !== psicologo.id));
-                    
+                    // Mostrar mensaje de éxito
                     Swal.fire({
                         title: '¡Éxito!',
                         text: 'El psicólogo ha sido eliminado correctamente.',
@@ -114,6 +182,9 @@ const Psicologos = () => {
                         timer: 2000,
                         showConfirmButton: false
                     });
+                    
+                    // Actualizar la lista de psicólogos desde el backend
+                    fetchPsicologos();
                 } catch (error) {
                     console.error('Error al eliminar psicólogo:', error);
                     

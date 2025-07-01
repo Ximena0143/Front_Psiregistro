@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layout/Header/Header';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
@@ -13,17 +13,55 @@ const AgregarPsicologo = () => {
     // Estados para validación de campos
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [specializaciones, setEspecializaciones] = useState([]);
     const [formData, setFormData] = useState({
-        primerNombre: '',
-        segundoNombre: '',
-        primerApellido: '',
-        segundoApellido: '',
-        especializacion: '',
-        telefono: '',
-        correo: '',
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        second_last_name: '',
+        specialization_id: '',
+        email: '',
         password: '',
-        confirmPassword: ''
+        password_confirmation: '',
+        profile_description: '',
+        profile_photo_path: '/default-profile.jpg', // Valor por defecto para la foto de perfil
+        roles: [2] // Por defecto, rol de psicólogo (asumiendo que el ID 2 corresponde a psicólogo)
     });
+
+    // Cargar las especializaciones al montar el componente
+    useEffect(() => {
+        fetchEspecializaciones();
+    }, []);
+
+    // Función para obtener las especializaciones del backend
+    const fetchEspecializaciones = async () => {
+        try {
+            // Aquí deberías llamar a un servicio para obtener las especializaciones
+            // Por ahora, usaremos datos de ejemplo
+            const response = await fetch('http://localhost:8000/api/specialization/index');
+            const data = await response.json();
+            
+            if (data && Array.isArray(data.data)) {
+                setEspecializaciones(data.data);
+            } else {
+                console.warn('No se recibieron datos de especializaciones válidos');
+                // Datos de ejemplo en caso de error
+                setEspecializaciones([
+                    { id: 1, name: 'Psicología Clínica' },
+                    { id: 2, name: 'Psicología Educativa' },
+                    { id: 3, name: 'Psicología Organizacional' }
+                ]);
+            }
+        } catch (error) {
+            console.error('Error al cargar especializaciones:', error);
+            // Datos de ejemplo en caso de error
+            setEspecializaciones([
+                { id: 1, name: 'Psicología Clínica' },
+                { id: 2, name: 'Psicología Educativa' },
+                { id: 3, name: 'Psicología Organizacional' }
+            ]);
+        }
+    };
 
     const handleGoBack = () => {
         navigate(-1);
@@ -32,10 +70,6 @@ const AgregarPsicologo = () => {
     // Funciones de validación
     const validateEmail = (email) => {
         return /\S+@\S+\.\S+/.test(email);
-    };
-
-    const validateTelefono = (telefono) => {
-        return /^\d{10}$/.test(telefono);
     };
 
     const validateNombre = (nombre) => {
@@ -64,15 +98,17 @@ const AgregarPsicologo = () => {
 
     const handleLimpiarForm = () => {
         setFormData({
-            primerNombre: '',
-            segundoNombre: '',
-            primerApellido: '',
-            segundoApellido: '',
-            especializacion: '',
-            telefono: '',
-            correo: '',
+            first_name: '',
+            middle_name: '',
+            last_name: '',
+            second_last_name: '',
+            specialization_id: '',
+            email: '',
             password: '',
-            confirmPassword: ''
+            password_confirmation: '',
+            profile_description: '',
+            profile_photo_path: '/default-profile.jpg',
+            roles: [2]
         });
         setErrors({});
     };
@@ -82,47 +118,42 @@ const AgregarPsicologo = () => {
         let isValid = true;
 
         // Validar campos obligatorios
-        if (!formData.primerNombre) {
-            newErrors.primerNombre = 'El primer nombre es obligatorio';
+        if (!formData.first_name) {
+            newErrors.first_name = 'El primer nombre es obligatorio';
             isValid = false;
-        } else if (!validateNombre(formData.primerNombre)) {
-            newErrors.primerNombre = 'Ingrese un nombre válido';
-            isValid = false;
-        }
-
-        if (formData.segundoNombre && !validateNombre(formData.segundoNombre)) {
-            newErrors.segundoNombre = 'Ingrese un nombre válido';
+        } else if (!validateNombre(formData.first_name)) {
+            newErrors.first_name = 'Ingrese un nombre válido';
             isValid = false;
         }
 
-        if (!formData.primerApellido) {
-            newErrors.primerApellido = 'El primer apellido es obligatorio';
-            isValid = false;
-        } else if (!validateNombre(formData.primerApellido)) {
-            newErrors.primerApellido = 'Ingrese un apellido válido';
+        if (formData.middle_name && !validateNombre(formData.middle_name)) {
+            newErrors.middle_name = 'Ingrese un nombre válido';
             isValid = false;
         }
 
-        if (formData.segundoApellido && !validateNombre(formData.segundoApellido)) {
-            newErrors.segundoApellido = 'Ingrese un apellido válido';
+        if (!formData.last_name) {
+            newErrors.last_name = 'El primer apellido es obligatorio';
+            isValid = false;
+        } else if (!validateNombre(formData.last_name)) {
+            newErrors.last_name = 'Ingrese un apellido válido';
             isValid = false;
         }
 
-        if (!formData.especializacion) {
-            newErrors.especializacion = 'La especialización es obligatoria';
+        if (formData.second_last_name && !validateNombre(formData.second_last_name)) {
+            newErrors.second_last_name = 'Ingrese un apellido válido';
             isValid = false;
         }
 
-        if (!formData.correo) {
-            newErrors.correo = 'El correo electrónico es obligatorio';
-            isValid = false;
-        } else if (!validateEmail(formData.correo)) {
-            newErrors.correo = 'Ingrese un correo electrónico válido';
+        if (!formData.specialization_id) {
+            newErrors.specialization_id = 'La especialización es obligatoria';
             isValid = false;
         }
 
-        if (formData.telefono && !validateTelefono(formData.telefono)) {
-            newErrors.telefono = 'Ingrese un número de teléfono válido (10 dígitos)';
+        if (!formData.email) {
+            newErrors.email = 'El correo electrónico es obligatorio';
+            isValid = false;
+        } else if (!validateEmail(formData.email)) {
+            newErrors.email = 'Ingrese un correo electrónico válido';
             isValid = false;
         }
 
@@ -134,11 +165,11 @@ const AgregarPsicologo = () => {
             isValid = false;
         }
 
-        if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Confirme la contraseña';
+        if (!formData.password_confirmation) {
+            newErrors.password_confirmation = 'Confirme la contraseña';
             isValid = false;
-        } else if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Las contraseñas no coinciden';
+        } else if (formData.password !== formData.password_confirmation) {
+            newErrors.password_confirmation = 'Las contraseñas no coinciden';
             isValid = false;
         }
 
@@ -151,21 +182,8 @@ const AgregarPsicologo = () => {
             try {
                 setLoading(true);
                 
-                // Preparar los datos para el backend según la estructura esperada
-                const userData = {
-                    first_name: formData.primerNombre,
-                    second_name: formData.segundoNombre || null,
-                    last_name: formData.primerApellido,
-                    second_last_name: formData.segundoApellido || null,
-                    phone: formData.telefono || null,
-                    email: formData.correo,
-                    password: formData.password,
-                    password_confirmation: formData.confirmPassword,
-                    specialization: formData.especializacion
-                };
-                
-                // Enviar los datos al backend
-                await userService.registerUser(userData);
+                // Los datos ya están en el formato que espera el backend
+                await userService.registerUser(formData);
                 
                 Swal.fire({
                     title: '¡Éxito!',
@@ -233,103 +251,109 @@ const AgregarPsicologo = () => {
                                 {/* Datos personales */}
                                 <div className={styles.formRow}>
                                     <div className={styles.formField}>
-                                        <label htmlFor="primerNombre">Primer nombre *</label>
+                                        <label htmlFor="first_name">Primer nombre *</label>
                                         <input
                                             type="text"
-                                            id="primerNombre"
-                                            name="primerNombre"
-                                            value={formData.primerNombre}
+                                            id="first_name"
+                                            name="first_name"
+                                            value={formData.first_name}
                                             onChange={handleInputChange}
                                             placeholder="Primer nombre"
-                                            className={errors.primerNombre ? styles.inputError : ''}
+                                            className={errors.first_name ? styles.inputError : ''}
                                         />
-                                        {errors.primerNombre && <span className={styles.errorMessage}>{errors.primerNombre}</span>}
+                                        {errors.first_name && <span className={styles.errorMessage}>{errors.first_name}</span>}
                                     </div>
                                     <div className={styles.formField}>
-                                        <label htmlFor="segundoNombre">Segundo nombre</label>
+                                        <label htmlFor="middle_name">Segundo nombre</label>
                                         <input
                                             type="text"
-                                            id="segundoNombre"
-                                            name="segundoNombre"
-                                            value={formData.segundoNombre}
+                                            id="middle_name"
+                                            name="middle_name"
+                                            value={formData.middle_name}
                                             onChange={handleInputChange}
                                             placeholder="Segundo nombre"
-                                            className={errors.segundoNombre ? styles.inputError : ''}
+                                            className={errors.middle_name ? styles.inputError : ''}
                                         />
-                                        {errors.segundoNombre && <span className={styles.errorMessage}>{errors.segundoNombre}</span>}
+                                        {errors.middle_name && <span className={styles.errorMessage}>{errors.middle_name}</span>}
                                     </div>
                                 </div>
 
                                 <div className={styles.formRow}>
                                     <div className={styles.formField}>
-                                        <label htmlFor="primerApellido">Primer apellido *</label>
+                                        <label htmlFor="last_name">Primer apellido *</label>
                                         <input
                                             type="text"
-                                            id="primerApellido"
-                                            name="primerApellido"
-                                            value={formData.primerApellido}
+                                            id="last_name"
+                                            name="last_name"
+                                            value={formData.last_name}
                                             onChange={handleInputChange}
                                             placeholder="Primer apellido"
-                                            className={errors.primerApellido ? styles.inputError : ''}
+                                            className={errors.last_name ? styles.inputError : ''}
                                         />
-                                        {errors.primerApellido && <span className={styles.errorMessage}>{errors.primerApellido}</span>}
+                                        {errors.last_name && <span className={styles.errorMessage}>{errors.last_name}</span>}
                                     </div>
                                     <div className={styles.formField}>
-                                        <label htmlFor="segundoApellido">Segundo apellido</label>
+                                        <label htmlFor="second_last_name">Segundo apellido</label>
                                         <input
                                             type="text"
-                                            id="segundoApellido"
-                                            name="segundoApellido"
-                                            value={formData.segundoApellido}
+                                            id="second_last_name"
+                                            name="second_last_name"
+                                            value={formData.second_last_name}
                                             onChange={handleInputChange}
                                             placeholder="Segundo apellido"
-                                            className={errors.segundoApellido ? styles.inputError : ''}
+                                            className={errors.second_last_name ? styles.inputError : ''}
                                         />
-                                        {errors.segundoApellido && <span className={styles.errorMessage}>{errors.segundoApellido}</span>}
+                                        {errors.second_last_name && <span className={styles.errorMessage}>{errors.second_last_name}</span>}
                                     </div>
                                 </div>
 
                                 <div className={styles.formRow}>
                                     <div className={styles.formField}>
-                                        <label htmlFor="especializacion">Especialización *</label>
-                                        <input
-                                            type="text"
-                                            id="especializacion"
-                                            name="especializacion"
-                                            value={formData.especializacion}
+                                        <label htmlFor="specialization_id">Especialización *</label>
+                                        <select
+                                            id="specialization_id"
+                                            name="specialization_id"
+                                            value={formData.specialization_id}
                                             onChange={handleInputChange}
-                                            placeholder="Ejemplo: Psicología Clínica"
-                                            className={errors.especializacion ? styles.inputError : ''}
-                                        />
-                                        {errors.especializacion && <span className={styles.errorMessage}>{errors.especializacion}</span>}
+                                            className={errors.specialization_id ? styles.inputError : ''}
+                                        >
+                                            <option value="">Seleccione una especialización</option>
+                                            {specializaciones.map(esp => (
+                                                <option key={esp.id} value={esp.id}>
+                                                    {esp.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.specialization_id && <span className={styles.errorMessage}>{errors.specialization_id}</span>}
                                     </div>
                                     <div className={styles.formField}>
-                                        <label htmlFor="telefono">Teléfono</label>
-                                        <input
-                                            type="tel"
-                                            id="telefono"
-                                            name="telefono"
-                                            value={formData.telefono}
-                                            onChange={handleInputChange}
-                                            placeholder="Teléfono (10 dígitos)"
-                                            className={errors.telefono ? styles.inputError : ''}
-                                        />
-                                        {errors.telefono && <span className={styles.errorMessage}>{errors.telefono}</span>}
-                                    </div>
-                                </div>
-                                <div className={styles.formRow}>
-                                    <div className={styles.formField}>
-                                        <label htmlFor="correo">Correo electrónico *</label>
+                                        <label htmlFor="email">Correo electrónico *</label>
                                         <input
                                             type="email"
-                                            id="correo"
-                                            name="correo"
-                                            value={formData.correo}
+                                            id="email"
+                                            name="email"
+                                            value={formData.email}
                                             onChange={handleInputChange}
                                             placeholder="Correo electrónico"
-                                            className={errors.correo ? styles.inputError : ''}
+                                            className={errors.email ? styles.inputError : ''}
                                         />
-                                        {errors.correo && <span className={styles.errorMessage}>{errors.correo}</span>}
+                                        {errors.email && <span className={styles.errorMessage}>{errors.email}</span>}
+                                    </div>
+                                </div>
+
+                                <div className={styles.formRow}>
+                                    <div className={styles.formField}>
+                                        <label htmlFor="profile_description">Descripción del perfil</label>
+                                        <textarea
+                                            id="profile_description"
+                                            name="profile_description"
+                                            value={formData.profile_description}
+                                            onChange={handleInputChange}
+                                            placeholder="Descripción profesional"
+                                            rows={4}
+                                            className={errors.profile_description ? styles.inputError : ''}
+                                        />
+                                        {errors.profile_description && <span className={styles.errorMessage}>{errors.profile_description}</span>}
                                     </div>
                                 </div>
 
@@ -348,17 +372,17 @@ const AgregarPsicologo = () => {
                                         {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
                                     </div>
                                     <div className={styles.formField}>
-                                        <label htmlFor="confirmPassword">Confirmar contraseña *</label>
+                                        <label htmlFor="password_confirmation">Confirmar contraseña *</label>
                                         <input
                                             type="password"
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            value={formData.confirmPassword}
+                                            id="password_confirmation"
+                                            name="password_confirmation"
+                                            value={formData.password_confirmation}
                                             onChange={handleInputChange}
                                             placeholder="Confirmar contraseña"
-                                            className={errors.confirmPassword ? styles.inputError : ''}
+                                            className={errors.password_confirmation ? styles.inputError : ''}
                                         />
-                                        {errors.confirmPassword && <span className={styles.errorMessage}>{errors.confirmPassword}</span>}
+                                        {errors.password_confirmation && <span className={styles.errorMessage}>{errors.password_confirmation}</span>}
                                     </div>
                                 </div>
 

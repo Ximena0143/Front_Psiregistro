@@ -9,10 +9,30 @@ import api from './api';
  * @param {number} page - Número de página
  * @returns {Promise} - Promesa con la lista de usuarios
  */
-export const getUsers = async (perPage = 10, page = 1) => {
+export const getUsers = async (perPage = 100, page = 1) => {
   try {
     const response = await api.get(`/user/index?per_page=${perPage}&page=${page}`);
-    return response;
+    
+    if (!response || !response.data) {
+      console.warn('La respuesta no contiene datos');
+      return { data: [] };
+    }
+    
+    // Manejar la estructura de respuesta
+    if (Array.isArray(response.data)) {
+      console.log('Usando estructura de respuesta con array directo');
+      return { data: response.data };
+    } 
+    else if (response.data.data && Array.isArray(response.data.data)) {
+      console.log('Usando estructura de respuesta con data anidado');
+      return response.data;
+    } 
+    else {
+      console.warn('Estructura de respuesta no reconocida, intentando convertir:', response.data);
+      // Intentar convertir un objeto a un array si es necesario
+      const dataArray = response.data ? [response.data] : [];
+      return { data: dataArray };
+    }
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
     throw error;
