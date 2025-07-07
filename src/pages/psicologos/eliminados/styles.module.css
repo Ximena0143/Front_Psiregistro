@@ -14,7 +14,7 @@
     flex: 1;
     padding: 60px;
     overflow-y: auto;
-    background-color: #f5f5f5;
+    background-color: #f8f9fa;
 }
 
 .contentHeader {
@@ -27,32 +27,84 @@
 .headerLeft {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
 }
 
 .backButton {
-    background: none;
-    border: none;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 5px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
     padding: 5px;
-    border-radius: 50%;
-    color: #000000;
+    border-radius: 4px;
     transition: background-color 0.2s;
 }
 
 .backButton:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(79, 70, 229, 0.1);
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #FB8500;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+    text-align: center;
+    padding: 40px;
+}
+
+.errorMessage {
+    color: #FF3737;
+    margin-bottom: 20px;
+}
+
+.retryButton {
+    background-color: #FB8500;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.retryButton:hover {
+    background-color: #e67a00;
+}
+
+.emptyContainer {
+    text-align: center;
+    padding: 40px;
+    color: #666;
 }
 
 .tableContainer {
-    background-color: white;
+    background-color: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-x: auto;
 }
 
 .table {
@@ -64,21 +116,17 @@
 .table td {
     padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #eaeaea;
+    border-bottom: 1px solid #eee;
 }
 
 .table th {
     background-color: #f8f9fa;
+    color: #333;
     font-weight: 600;
-    color: #000000;
-}
-
-.table tr:last-child td {
-    border-bottom: none;
 }
 
 .table tr:hover {
-    background-color: #f9f9f9;
+    background-color: #f8f9fa;
 }
 
 .actionsCell {
@@ -110,50 +158,6 @@
 
 .restoreButton:disabled,
 .deleteButton:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-}
-
-.loadingContainer,
-.errorContainer,
-.emptyContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-}
-
-.errorContainer {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
-
-.retryButton {
-    margin-top: 15px;
-    padding: 8px 16px;
-    background-color: #FB8500;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-
-.retryButton:hover {
-    background-color: #e67a00;
-}
-
-h3{
-    color: #000000;
-    margin: 0;
-    font-family: 'DM Sans';
-    font-size: 27px;
 }

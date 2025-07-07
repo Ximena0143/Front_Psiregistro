@@ -108,7 +108,7 @@ export const deleteUser = async (id) => {
  */
 export const restoreUser = async (id) => {
   try {
-    const response = await api.post(`/user/restore/${id}`);
+    const response = await api.patch(`/user/restore/${id}`);
     return response;
   } catch (error) {
     console.error('Error al restaurar usuario:', error);

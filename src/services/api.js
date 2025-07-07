@@ -285,11 +285,70 @@ export const del = async (endpoint, options = {}) => {
   }
 };
 
+/**
+ * Realiza una petición PATCH a la API
+ * @param {string} endpoint - El endpoint a consultar (sin la URL base)
+ * @param {Object} data - Datos a enviar en el cuerpo de la petición
+ * @param {Object} options - Opciones adicionales para la petición fetch
+ * @returns {Promise} - Promesa con la respuesta en formato JSON
+ */
+export const patch = async (endpoint, data = {}, options = {}) => {
+  try {
+    // Aplicar interceptor de petición si existe
+    let config = {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      body: JSON.stringify(data),
+      ...options
+    };
+    
+    if (interceptors.request) {
+      config = interceptors.request(config);
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    
+    if (!response.ok) {
+      // Intentar obtener detalles del error en formato JSON si están disponibles
+      const errorData = await response.json().catch(() => ({ message: `Error HTTP: ${response.status}` }));
+      
+      // Crear un error personalizado con más información
+      const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
+      error.status = response.status;
+      error.data = errorData;
+      throw error;
+    }
+    
+    // Manejar respuestas que podrían ser string o json
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    } else {
+      // Podría ser un texto plano (como un token JWT)
+      const text = await response.text();
+      try {
+        // Intentar parsearlo como JSON por si acaso
+        return JSON.parse(text);
+      } catch {
+        // Si no es JSON, devolver el texto tal cual
+        return text;
+      }
+    }
+  } catch (error) {
+    console.error('Error en petición PATCH:', error);
+    throw error;
+  }
+};
+
 // Exportamos un objeto con todas las funciones para facilitar su uso
 const apiService = {
   get,
   post,
   put,
+  patch,
   del,
   BASE_URL: API_BASE_URL,
   // Agregamos la propiedad interceptors para permitir configurarlos desde otros servicios

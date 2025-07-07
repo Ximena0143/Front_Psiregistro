@@ -4,104 +4,107 @@ import Header from '../../../components/layout/Header/Header';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import { ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import userService from '../../../services/user';
 import styles from './styles.module.css';
-import patientService from '../../../services/patient';
 
-const PacientesEliminados = () => {
+/**
+ * Componente para mostrar y gestionar psicólogos eliminados
+ */
+const PsicologosEliminados = () => {
     const navigate = useNavigate();
-    const [patients, setPatients] = useState([]);
+    const [psychologists, setPsychologists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionInProgress, setActionInProgress] = useState(false);
 
     useEffect(() => {
-        fetchDeletedPatients();
+        fetchDeletedPsychologists();
     }, []);
 
-    const fetchDeletedPatients = async () => {
+    const fetchDeletedPsychologists = async () => {
         try {
             setLoading(true);
             setError(null);
             
-            // Llamar al servicio para obtener pacientes eliminados
-            const response = await patientService.getDeletedPatients();
-            console.log('Respuesta de pacientes eliminados (completa):', response);
+            // Llamar al servicio para obtener psicólogos eliminados
+            const response = await userService.getDeletedUsers();
+            console.log('Respuesta de psicólogos eliminados (completa):', response);
             
-            let deletedPatientsData = [];
+            let deletedPsychologistsData = [];
             
             // Determinar la estructura de la respuesta
             if (response) {
                 if (Array.isArray(response)) {
-                    deletedPatientsData = response;
+                    deletedPsychologistsData = response;
                 } else if (response.data && Array.isArray(response.data)) {
-                    deletedPatientsData = response.data;
+                    deletedPsychologistsData = response.data;
                 } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-                    deletedPatientsData = response.data.data;
+                    deletedPsychologistsData = response.data.data;
                 }
             }
             
-            console.log('Datos de pacientes eliminados procesados:', deletedPatientsData);
+            console.log('Datos de psicólogos eliminados procesados:', deletedPsychologistsData);
             
-            // Inspeccionar el primer paciente para ver su estructura exacta
-            if (deletedPatientsData && deletedPatientsData.length > 0) {
-                console.log('Ejemplo de estructura de un paciente eliminado:', JSON.stringify(deletedPatientsData[0], null, 2));
+            // Inspeccionar el primer psicólogo para ver su estructura exacta
+            if (deletedPsychologistsData && deletedPsychologistsData.length > 0) {
+                console.log('Ejemplo de estructura de un psicólogo eliminado:', JSON.stringify(deletedPsychologistsData[0], null, 2));
                 
                 // Transformar los datos al formato que espera el componente
-                const formattedData = deletedPatientsData.map(patient => {
+                const formattedData = deletedPsychologistsData.map(psychologist => {
                     // Crear un objeto con valores predeterminados
-                    const formattedPatient = {
-                        id: patient.id || 'unknown-id',
+                    const formattedPsychologist = {
+                        id: psychologist.id || 'unknown-id',
                         nombre: 'Sin nombre',
                         numeroIdentificacion: 'N/A',
                         fechaEliminacion: 'N/A',
-                        email: patient.email || 'N/A',
-                        human: patient.human || null
+                        email: psychologist.email || 'N/A',
+                        human: psychologist.human || null
                     };
                     
                     // Formatear el nombre completo
-                    if (patient.first_name || patient.last_name) {
-                        formattedPatient.nombre = `${patient.first_name || ''} ${patient.middle_name || ''} ${patient.last_name || ''} ${patient.second_last_name || ''}`.trim();
-                    } else if (patient.human) {
-                        const human = patient.human;
-                        formattedPatient.nombre = `${human.first_name || ''} ${human.middle_name || ''} ${human.last_name || ''} ${human.second_last_name || ''}`.trim();
+                    if (psychologist.first_name || psychologist.last_name) {
+                        formattedPsychologist.nombre = `${psychologist.first_name || ''} ${psychologist.middle_name || ''} ${psychologist.last_name || ''} ${psychologist.second_last_name || ''}`.trim();
+                    } else if (psychologist.human) {
+                        const human = psychologist.human;
+                        formattedPsychologist.nombre = `${human.first_name || ''} ${human.middle_name || ''} ${human.last_name || ''} ${human.second_last_name || ''}`.trim();
                     }
                     
                     // Obtener el número de documento
-                    if (patient.identification_number) {
-                        formattedPatient.numeroIdentificacion = patient.identification_number;
-                    } else if (patient.human && patient.human.document_number) {
-                        formattedPatient.numeroIdentificacion = patient.human.document_number;
+                    if (psychologist.identification_number) {
+                        formattedPsychologist.numeroIdentificacion = psychologist.identification_number;
+                    } else if (psychologist.human && psychologist.human.document_number) {
+                        formattedPsychologist.numeroIdentificacion = psychologist.human.document_number;
                     }
                     
                     // Formatear la fecha de eliminación
-                    if (patient.deleted_at) {
+                    if (psychologist.deleted_at) {
                         try {
-                            formattedPatient.fechaEliminacion = new Date(patient.deleted_at).toLocaleDateString();
+                            formattedPsychologist.fechaEliminacion = new Date(psychologist.deleted_at).toLocaleDateString();
                         } catch (e) {
                             console.error('Error al formatear la fecha de eliminación:', e);
                         }
                     }
                     
-                    return formattedPatient;
+                    return formattedPsychologist;
                 });
                 
-                console.log('Datos formateados de pacientes eliminados para mostrar:', formattedData);
-                setPatients(formattedData);
+                console.log('Datos formateados de psicólogos eliminados para mostrar:', formattedData);
+                setPsychologists(formattedData);
             } else {
-                setPatients([]);
-                console.warn('No se recibieron datos de pacientes eliminados del servidor');
+                setPsychologists([]);
+                console.warn('No se recibieron datos de psicólogos eliminados del servidor');
             }
         } catch (error) {
-            console.error('Error al obtener pacientes eliminados:', error);
-            setError('No se pudieron cargar los pacientes eliminados');
-            setPatients([]);
+            console.error('Error al obtener psicólogos eliminados:', error);
+            setError('No se pudieron cargar los psicólogos eliminados');
+            setPsychologists([]);
         } finally {
             setLoading(false);
         }
     };
 
     const handleGoBack = () => {
-        navigate('/dashboard');
+        navigate('/psicologos');
     };
 
     const handleRestore = async (id) => {
@@ -110,8 +113,8 @@ const PacientesEliminados = () => {
             
             // Confirmación antes de restaurar
             const result = await Swal.fire({
-                title: '¿Restaurar paciente?',
-                text: '¿Estás seguro de que deseas restaurar este paciente?',
+                title: '¿Restaurar psicólogo?',
+                text: '¿Estás seguro de que deseas restaurar este psicólogo?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#FB8500',
@@ -121,14 +124,14 @@ const PacientesEliminados = () => {
             });
             
             if (result.isConfirmed) {
-                await patientService.restorePatient(id);
+                await userService.restoreUser(id);
                 
                 // Actualizar la lista después de restaurar
-                await fetchDeletedPatients();
+                await fetchDeletedPsychologists();
                 
                 Swal.fire({
                     title: '¡Restaurado!',
-                    text: 'El paciente ha sido restaurado correctamente',
+                    text: 'El psicólogo ha sido restaurado correctamente',
                     icon: 'success',
                     confirmButtonColor: '#FB8500',
                     timer: 2000,
@@ -136,9 +139,9 @@ const PacientesEliminados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al restaurar paciente:', error);
+            console.error('Error al restaurar psicólogo:', error);
             
-            let errorMessage = 'No se pudo restaurar el paciente';
+            let errorMessage = 'No se pudo restaurar el psicólogo';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
             }
@@ -165,21 +168,21 @@ const PacientesEliminados = () => {
                 text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#dc3545',
+                confirmButtonColor: '#FF3737',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Sí, eliminar permanentemente',
                 cancelButtonText: 'Cancelar'
             });
             
             if (result.isConfirmed) {
-                await patientService.forceDeletePatient(id);
+                await userService.forceDeleteUser(id);
                 
                 // Actualizar la lista después de eliminar
-                await fetchDeletedPatients();
+                await fetchDeletedPsychologists();
                 
                 Swal.fire({
                     title: '¡Eliminado!',
-                    text: 'El paciente ha sido eliminado permanentemente',
+                    text: 'El psicólogo ha sido eliminado permanentemente',
                     icon: 'success',
                     confirmButtonColor: '#FB8500',
                     timer: 2000,
@@ -189,7 +192,7 @@ const PacientesEliminados = () => {
         } catch (error) {
             console.error('Error al eliminar permanentemente:', error);
             
-            let errorMessage = 'No se pudo eliminar el paciente permanentemente';
+            let errorMessage = 'No se pudo eliminar el psicólogo permanentemente';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
             }
@@ -207,14 +210,14 @@ const PacientesEliminados = () => {
     };
 
     // Función para formatear el nombre completo
-    const formatFullName = (patient) => {
-        if (!patient || !patient.human) return 'N/A';
+    const formatFullName = (psychologist) => {
+        if (!psychologist) return 'N/A';
         
-        const { first_name, middle_name, last_name, second_last_name } = patient.human;
-        const names = [first_name, middle_name].filter(Boolean).join(' ');
-        const surnames = [last_name, second_last_name].filter(Boolean).join(' ');
+        if (psychologist.nombre && psychologist.nombre !== 'Sin nombre') {
+            return psychologist.nombre;
+        }
         
-        return `${names} ${surnames}`.trim();
+        return 'N/A';
     };
 
     return (
@@ -231,27 +234,27 @@ const PacientesEliminados = () => {
                             >
                                 <ArrowLeft size={20} color="#4F46E5" />
                             </button>
-                            <h3>Pacientes Eliminados</h3>
+                            <h3>Psicólogos Eliminados</h3>
                         </div>
                     </div>
 
                     {loading ? (
                         <div className={styles.loadingContainer}>
-                            <p>Cargando pacientes eliminados...</p>
+                            <p>Cargando psicólogos eliminados...</p>
                         </div>
                     ) : error ? (
                         <div className={styles.errorContainer}>
                             <p>{error}</p>
                             <button 
                                 className={styles.retryButton}
-                                onClick={fetchDeletedPatients}
+                                onClick={fetchDeletedPsychologists}
                             >
                                 Reintentar
                             </button>
                         </div>
-                    ) : patients.length === 0 ? (
+                    ) : psychologists.length === 0 ? (
                         <div className={styles.emptyContainer}>
-                            <p>No hay pacientes eliminados</p>
+                            <p>No hay psicólogos eliminados</p>
                         </div>
                     ) : (
                         <div className={styles.tableContainer}>
@@ -259,31 +262,29 @@ const PacientesEliminados = () => {
                                 <thead>
                                     <tr>
                                         <th>Nombre</th>
-                                        <th>Identificación</th>
                                         <th>Correo</th>
                                         <th>Fecha de eliminación</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {patients.map((patient) => (
-                                        <tr key={patient.id}>
-                                            <td>{formatFullName(patient)}</td>
-                                            <td>{patient.numeroIdentificacion || 'N/A'}</td>
-                                            <td>{patient.email || 'N/A'}</td>
-                                            <td>{patient.fechaEliminacion || 'N/A'}</td>
+                                    {psychologists.map((psychologist) => (
+                                        <tr key={psychologist.id}>
+                                            <td>{formatFullName(psychologist)}</td>
+                                            <td>{psychologist.email || 'N/A'}</td>
+                                            <td>{psychologist.fechaEliminacion || 'N/A'}</td>
                                             <td className={styles.actionsCell}>
                                                 <button 
                                                     className={styles.restoreButton}
-                                                    onClick={() => handleRestore(patient.id)}
+                                                    onClick={() => handleRestore(psychologist.id)}
                                                     disabled={actionInProgress}
-                                                    title="Restaurar paciente"
+                                                    title="Restaurar psicólogo"
                                                 >
                                                     <RefreshCw size={16} color="#34C759" />
                                                 </button>
                                                 <button 
                                                     className={styles.deleteButton}
-                                                    onClick={() => handleForceDelete(patient.id)}
+                                                    onClick={() => handleForceDelete(psychologist.id)}
                                                     disabled={actionInProgress}
                                                     title="Eliminar permanentemente"
                                                 >
@@ -302,4 +303,4 @@ const PacientesEliminados = () => {
     );
 };
 
-export default PacientesEliminados;
+export default PsicologosEliminados;

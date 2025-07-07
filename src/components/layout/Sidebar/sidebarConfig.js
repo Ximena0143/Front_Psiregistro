@@ -31,6 +31,13 @@ export const sidebarItems = [
     {
         title: 'Psicologos',
         path: '/psicologos',
-        icon: FaUserMd
+        icon: FaUserMd,
+        subItems: [
+            {
+                title: 'Psicólogos Eliminados',
+                path: '/psicologos/eliminados',
+                icon: FaTrashRestore
+            }
+        ]
     }
 ];

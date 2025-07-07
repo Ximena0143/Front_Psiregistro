@@ -29,8 +29,19 @@ const AgregarPaciente = () => {
         const fetchIdentificationTypes = async () => {
             try {
                 const response = await patientService.getIdentificationTypes();
+                console.log('Respuesta de tipos de identificación:', response);
+                
+                // Manejar diferentes estructuras de respuesta posibles
                 if (response && response.data) {
                     setIdentificationTypes(response.data);
+                } else if (response && response.message && response.data) {
+                    // Nueva estructura con Res::info
+                    setIdentificationTypes(response.data);
+                } else if (Array.isArray(response)) {
+                    // Si la respuesta es un array directamente
+                    setIdentificationTypes(response);
+                } else {
+                    console.warn('Estructura de respuesta no reconocida:', response);
                 }
             } catch (error) {
                 console.error('Error al cargar tipos de identificación:', error);

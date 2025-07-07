@@ -25,7 +25,7 @@ const AgregarPsicologo = () => {
         password_confirmation: '',
         profile_description: '',
         profile_photo_path: '/default-profile.jpg', // Valor por defecto para la foto de perfil
-        roles: [2] // Por defecto, rol de psicólogo (asumiendo que el ID 2 corresponde a psicólogo)
+        role_id: '2' // Por defecto, rol de doctor (2)
     });
 
     // Cargar las especializaciones al montar el componente
@@ -108,7 +108,7 @@ const AgregarPsicologo = () => {
             password_confirmation: '',
             profile_description: '',
             profile_photo_path: '/default-profile.jpg',
-            roles: [2]
+            role_id: '2'
         });
         setErrors({});
     };
@@ -182,8 +182,18 @@ const AgregarPsicologo = () => {
             try {
                 setLoading(true);
                 
-                // Los datos ya están en el formato que espera el backend
-                await userService.registerUser(formData);
+                // Crear una copia del formData para modificarlo
+                const userData = { ...formData };
+                
+                // Transformar el role_id en un array de roles para el backend
+                userData.roles = [parseInt(userData.role_id)];
+                
+                // Eliminar role_id ya que no es parte del modelo esperado por el backend
+                delete userData.role_id;
+                
+                console.log("Datos a enviar:", userData);
+                
+                await userService.registerUser(userData);
                 
                 Swal.fire({
                     title: '¡Éxito!',
@@ -383,6 +393,24 @@ const AgregarPsicologo = () => {
                                             className={errors.password_confirmation ? styles.inputError : ''}
                                         />
                                         {errors.password_confirmation && <span className={styles.errorMessage}>{errors.password_confirmation}</span>}
+                                    </div>
+                                </div>
+
+                                <div className={styles.formRow}>
+                                    <div className={styles.formField}>
+                                        <label htmlFor="role_id">Rol *</label>
+                                        <select
+                                            id="role_id"
+                                            name="role_id"
+                                            value={formData.role_id}
+                                            onChange={handleInputChange}
+                                            className={errors.role_id ? styles.inputError : ''}
+                                        >
+                                            <option value="">Seleccione un rol</option>
+                                            <option value="1">Administrador</option>
+                                            <option value="2">Doctor</option>
+                                        </select>
+                                        {errors.role_id && <span className={styles.errorMessage}>{errors.role_id}</span>}
                                     </div>
                                 </div>
 
