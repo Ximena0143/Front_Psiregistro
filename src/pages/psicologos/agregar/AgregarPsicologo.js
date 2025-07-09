@@ -42,7 +42,18 @@ const AgregarPsicologo = () => {
             const data = await response.json();
             
             if (data && Array.isArray(data.data)) {
-                setEspecializaciones(data.data);
+                console.log('Especializaciones cargadas del backend:', data.data);
+                
+                // Asignar IDs a las especializaciones que no los tienen
+                const especializacionesConId = data.data.map((esp, index) => {
+                    if (esp && !esp.id) {
+                        return { ...esp, id: index + 1 }; // Asignar un ID numérico basado en el índice
+                    }
+                    return esp;
+                });
+                
+                console.log('Especializaciones con IDs asignados:', especializacionesConId);
+                setEspecializaciones(especializacionesConId);
             } else {
                 console.warn('No se recibieron datos de especializaciones válidos');
                 // Datos de ejemplo en caso de error
@@ -80,14 +91,36 @@ const AgregarPsicologo = () => {
         return password.length >= 8;
     };
 
+    // Función para manejar cambios en los campos del formulario
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-
-        // Limpiamos el error del campo que se está editando
+        
+        // Para el campo specialization_id, asegurarse de que se guarde el ID
+        if (name === 'specialization_id') {
+            // Buscar la especialización seleccionada por su ID
+            const especializacion = specializaciones.find(esp => esp.id === parseInt(value) || esp.id === value);
+            
+            if (especializacion) {
+                console.log('Especialización seleccionada:', especializacion);
+                setFormData({
+                    ...formData,
+                    [name]: especializacion.id
+                });
+            } else {
+                setFormData({
+                    ...formData,
+                    [name]: value
+                });
+            }
+        } else {
+            // Para otros campos, actualizar normalmente
+            setFormData({
+                ...formData,
+                [name]: value
+            });
+        }
+        
+        // Limpiar errores al cambiar un campo
         if (errors[name]) {
             setErrors({
                 ...errors,
@@ -188,8 +221,44 @@ const AgregarPsicologo = () => {
                 // Transformar el role_id en un array de roles para el backend
                 userData.roles = [parseInt(userData.role_id)];
                 
+                // Depurar el valor de specialization_id
+                console.log('Valor de specialization_id antes de convertir:', {
+                    valor: userData.specialization_id,
+                    tipo: typeof userData.specialization_id,
+                    esVacio: userData.specialization_id === '',
+                    esUndefined: userData.specialization_id === undefined,
+                    esNulo: userData.specialization_id === null,
+                    convertidoANumero: Number(userData.specialization_id),
+                    esNaN: isNaN(Number(userData.specialization_id)),
+                    especialización_seleccionada: specializaciones.find(esp => esp.id === userData.specialization_id)
+                });
+                
+                // Convertir specialization_id a entero solo si existe un valor
+                if (userData.specialization_id) {
+                    // Asegurarse de que sea un número válido
+                    const specId = Number(userData.specialization_id);
+                    if (isNaN(specId)) {
+                        throw new Error("La especialización seleccionada no es válida");
+                    }
+                    userData.specialization_id = specId;
+                } else {
+                    // Si no hay valor, asegurarse de que el error sea claro
+                    throw new Error("Debe seleccionar una especialización");
+                }
+                
                 // Eliminar role_id ya que no es parte del modelo esperado por el backend
                 delete userData.role_id;
+                
+                // Log detallado para depuración
+                console.log("Datos a enviar (detallado):", {
+                    ...userData,
+                    specialization_id_type: typeof userData.specialization_id,
+                    specialization_id_value: userData.specialization_id,
+                    specialization_id_raw: formData.specialization_id,
+                    specialization_id_parsed: parseInt(formData.specialization_id),
+                    has_specialization_id: 'specialization_id' in userData,
+                    especialización_seleccionada: specializaciones.find(esp => esp.id === formData.specialization_id)
+                });
                 
                 console.log("Datos a enviar:", userData);
                 
@@ -329,7 +398,7 @@ const AgregarPsicologo = () => {
                                         >
                                             <option value="">Seleccione una especialización</option>
                                             {specializaciones.map(esp => (
-                                                <option key={esp.id} value={esp.id}>
+                                                <option key={esp.id} value={esp.id.toString()}>
                                                     {esp.name}
                                                 </option>
                                             ))}

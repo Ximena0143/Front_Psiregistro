@@ -28,6 +28,7 @@ export const login = async (credentials) => {
     
     // Extraer el token JWT de la respuesta dependiendo de su formato
     let token = null;
+    let userData = { email: credentials.email };
     
     // Caso 1: La respuesta es directamente el token como string
     if (typeof response === 'string') {
@@ -49,6 +50,13 @@ export const login = async (credentials) => {
           token = response.data.access_token;
         }
       }
+      
+      // Extraer información del usuario si está disponible
+      if (response.user) {
+        userData = { ...userData, id: response.user.id };
+      } else if (response.data && response.data.user) {
+        userData = { ...userData, id: response.data.user.id };
+      }
     }
     
     // Si tenemos un token, lo guardamos y creamos la información básica del usuario
@@ -58,8 +66,7 @@ export const login = async (credentials) => {
       // Guardar el token en localStorage
       localStorage.setItem(TOKEN_KEY, token);
       
-      // Crear información básica del usuario con el email
-      const userData = { email: credentials.email };
+      // Guardar información del usuario
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
       
       // Devolver un objeto con la estructura que espera el frontend

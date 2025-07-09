@@ -231,7 +231,7 @@ const PacientesEliminados = () => {
                             >
                                 <ArrowLeft size={20} color="#4F46E5" />
                             </button>
-                            <h3>Pacientes Eliminados</h3>
+                            <h3 className={styles.title}>Pacientes Eliminados</h3>
                         </div>
                     </div>
 

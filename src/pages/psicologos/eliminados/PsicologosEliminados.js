@@ -234,7 +234,7 @@ const PsicologosEliminados = () => {
                             >
                                 <ArrowLeft size={20} color="#4F46E5" />
                             </button>
-                            <h3>Psicólogos Eliminados</h3>
+                            <h3 className={styles.title}>Psicólogos Eliminados</h3>
                         </div>
                     </div>
 

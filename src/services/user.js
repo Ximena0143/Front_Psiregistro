@@ -40,6 +40,34 @@ export const getUsers = async (perPage = 100, page = 1) => {
 };
 
 /**
+ * Obtiene la información de un usuario específico por su ID
+ * @param {number} id - ID del usuario a obtener
+ * @returns {Promise} - Promesa con los datos del usuario
+ */
+export const getUserById = async (id) => {
+  try {
+    const response = await api.get(`/user/${id}`);
+    
+    if (!response || !response.data) {
+      console.warn('La respuesta no contiene datos del usuario');
+      return null;
+    }
+    
+    // La respuesta puede tener diferentes estructuras, intentamos manejarlas todas
+    if (response.data.user) {
+      return response.data.user;
+    } else if (response.data.data && response.data.data.user) {
+      return response.data.data.user;
+    } else {
+      return response.data;
+    }
+  } catch (error) {
+    console.error(`Error al obtener usuario con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
  * Obtiene la lista de usuarios eliminados
  * @param {number} perPage - Número de elementos por página
  * @param {number} page - Número de página
@@ -62,7 +90,24 @@ export const getDeletedUsers = async (perPage = 10, page = 1) => {
  */
 export const registerUser = async (userData) => {
   try {
-    const response = await api.post('/user/register', userData);
+    // Asegurarse de que specialization_id sea un número entero
+    const dataToSend = { ...userData };
+    
+    // Verificar si specialization_id existe y es válido
+    if (dataToSend.specialization_id === undefined || dataToSend.specialization_id === '') {
+      throw new Error('Debe seleccionar una especialización');
+    }
+    
+    // Convertir explícitamente specialization_id a número
+    dataToSend.specialization_id = Number(dataToSend.specialization_id);
+    
+    // Asegurarse de que sea un número válido
+    if (isNaN(dataToSend.specialization_id)) {
+      throw new Error('La especialización debe ser un número válido');
+    }
+    
+    console.log('Datos enviados al backend:', dataToSend);
+    const response = await api.post('/user/register', dataToSend);
     return response;
   } catch (error) {
     console.error('Error al registrar usuario:', error);
@@ -138,7 +183,8 @@ const userService = {
   updateUser,
   deleteUser,
   restoreUser,
-  forceDeleteUser
+  forceDeleteUser,
+  getUserById
 };
 
 export default userService;

@@ -161,3 +161,11 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.title{
+    color: #000000;
+    margin: 0;
+    font-family: 'DM Sans';
+    font-size: 27px;
+}
+
