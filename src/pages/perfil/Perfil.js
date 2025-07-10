@@ -7,12 +7,19 @@ import styles from './styles.module.css';
 import userService from '../../services/user';
 import api from '../../services/api';
 import Swal from 'sweetalert2';
+import { isAdmin } from '../../services/auth';
 
 const Perfil = () => {
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [profileImage, setProfileImage] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [especializaciones, setEspecializaciones] = useState([]);
+    const [roles, setRoles] = useState([
+        { id: 1, name: 'Administrador' },
+        { id: 2, name: 'Doctor' }
+    ]);
+    const [isUserAdmin, setIsUserAdmin] = useState(false);
     const [formData, setFormData] = useState({
         primerNombre: '',
         segundoNombre: '',
@@ -20,8 +27,10 @@ const Perfil = () => {
         segundoApellido: '',
         correo: '',
         especializacion: '',
+        especializacion_id: '',
         descripcionPerfil: '',
-        rol: ''
+        rol: '',
+        rol_id: ''
     });
 
     useEffect(() => {
@@ -29,63 +38,59 @@ const Perfil = () => {
             try {
                 setLoading(true);
                 
-                // Primero, intentamos obtener el usuario actual usando el endpoint /auth/me
+                // Cargar especializaciones
+                await fetchEspecializaciones();
+                
+                // Obtener el usuario actual usando el endpoint /auth/me
                 const meResponse = await api.post('/auth/me');
                 console.log('Respuesta completa de /auth/me:', meResponse);
                 
-                if (!meResponse || !meResponse.data || !meResponse.data.email) {
-                    console.warn('No se pudo obtener el email del usuario desde /auth/me');
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'No se pudo obtener la información del usuario',
-                        icon: 'error',
-                        confirmButtonColor: '#FB8500'
-                    });
+                if (!meResponse || !meResponse.data) {
+                    console.warn('No se pudo obtener la información del usuario desde /auth/me');
                     setLoading(false);
                     return;
                 }
                 
-                // Obtenemos el email del usuario
-                const userEmail = meResponse.data.email;
+                // Verificar si el usuario es administrador
+                setIsUserAdmin(isAdmin());
+                console.log('¿El usuario es administrador?', isAdmin());
                 
-                // Obtenemos todos los usuarios y buscamos el que coincide con el email
-                const usersResponse = await userService.getUsers();
+                // Usar los datos del usuario desde meResponse.data
+                const basicUserData = meResponse.data;
                 
-                if (!usersResponse || !usersResponse.data || !Array.isArray(usersResponse.data)) {
-                    console.warn('No se pudieron obtener los usuarios');
-                    setLoading(false);
-                    return;
+                // Log detallado para ver la estructura exacta de los datos
+                console.log('Estructura completa de la respuesta:', JSON.stringify(basicUserData, null, 2));
+                console.log('Estructura detallada de userData:', {
+                    email: basicUserData.email,
+                    profile_description: basicUserData.profile_description,
+                    profile_photo_path: basicUserData.profile_photo_path,
+                    human: basicUserData.human,
+                    roles: basicUserData.roles,
+                    specialization: basicUserData.specialization
+                });
+                
+                // Mapear los datos del usuario a formData con verificaciones robustas
+                setFormData({
+                    primerNombre: basicUserData.human?.first_name || '',
+                    segundoNombre: basicUserData.human?.middle_name || '',
+                    primerApellido: basicUserData.human?.last_name || '',
+                    segundoApellido: basicUserData.human?.second_last_name || '',
+                    correo: basicUserData.email || '',
+                    especializacion: basicUserData.specialization?.name || '',
+                    especializacion_id: basicUserData.specialization?.id || '',
+                    descripcionPerfil: basicUserData.profile_description || '',
+                    rol: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
+                         basicUserData.roles[0]?.name || basicUserData.roles[0]?.role || '' : '',
+                    rol_id: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
+                           basicUserData.roles[0]?.id || '' : ''
+                });
+                
+                // Establecer la imagen de perfil si existe
+                if (basicUserData.profile_photo_path) {
+                    setProfileImage(basicUserData.profile_photo_path);
                 }
                 
-                // Buscamos el usuario con el email correspondiente
-                const userData = usersResponse.data.find(user => user.email === userEmail);
-                
-                if (!userData) {
-                    console.warn('No se encontró el usuario con el email:', userEmail);
-                    setLoading(false);
-                    return;
-                }
-                
-                console.log('Usuario encontrado:', userData);
-                
-                if (userData && userData.human) {
-                    // Mapear los datos del backend al formato del formulario
-                    setFormData({
-                        primerNombre: userData.human.first_name || '',
-                        segundoNombre: userData.human.middle_name || '',
-                        primerApellido: userData.human.last_name || '',
-                        segundoApellido: userData.human.second_last_name || '',
-                        correo: userData.email || '',
-                        especializacion: userData.specialization?.name || '',
-                        descripcionPerfil: userData.profile_description || '',
-                        rol: userData.roles && userData.roles.length > 0 ? userData.roles[0]?.role || '' : ''
-                    });
-                    
-                    // Si hay una foto de perfil, la establecemos
-                    if (userData.profile_photo_path) {
-                        setProfileImage(userData.profile_photo_path);
-                    }
-                }
+                setLoading(false);
             } catch (error) {
                 console.error('Error al obtener datos del usuario:', error);
                 Swal.fire({
@@ -101,6 +106,45 @@ const Perfil = () => {
         
         fetchUserData();
     }, []);
+
+    // Función para obtener las especializaciones del backend
+    const fetchEspecializaciones = async () => {
+        try {
+            // Usar el servicio API que ya incluye el token de autenticación
+            const response = await api.get('/specialization/index');
+            
+            if (response && response.data && Array.isArray(response.data)) {
+                console.log('Especializaciones cargadas del backend:', response.data);
+                
+                // Asignar IDs a las especializaciones que no los tienen
+                const especializacionesConId = response.data.map((esp, index) => {
+                    if (esp && !esp.id) {
+                        return { ...esp, id: index + 1 }; // Asignar un ID numérico basado en el índice
+                    }
+                    return esp;
+                });
+                
+                console.log('Especializaciones con IDs asignados:', especializacionesConId);
+                setEspecializaciones(especializacionesConId);
+            } else {
+                console.warn('No se recibieron datos de especializaciones válidos');
+                // Datos de ejemplo en caso de error
+                setEspecializaciones([
+                    { id: 1, name: 'Psicología Clínica' },
+                    { id: 2, name: 'Psicología Educativa' },
+                    { id: 3, name: 'Psicología Organizacional' }
+                ]);
+            }
+        } catch (error) {
+            console.error('Error al cargar especializaciones:', error);
+            // Datos de ejemplo en caso de error
+            setEspecializaciones([
+                { id: 1, name: 'Psicología Clínica' },
+                { id: 2, name: 'Psicología Educativa' },
+                { id: 3, name: 'Psicología Organizacional' }
+            ]);
+        }
+    };
 
     const handleGoBack = () => {
         navigate(-1);
@@ -122,30 +166,14 @@ const Perfil = () => {
         try {
             setLoading(true);
             
-            // Primero, obtenemos el email del usuario actual
+            // Obtener el usuario actual usando el endpoint /auth/me
             const meResponse = await api.post('/auth/me');
             
-            if (!meResponse || !meResponse.data || !meResponse.data.email) {
-                throw new Error('No se pudo obtener el email del usuario');
+            if (!meResponse || !meResponse.data) {
+                throw new Error('No se pudo obtener la información del usuario desde /auth/me');
             }
             
-            const userEmail = meResponse.data.email;
-            
-            // Obtenemos todos los usuarios y buscamos el ID del que coincide con el email
-            const usersResponse = await userService.getUsers();
-            
-            if (!usersResponse || !usersResponse.data || !Array.isArray(usersResponse.data)) {
-                throw new Error('No se pudieron obtener los usuarios');
-            }
-            
-            // Buscamos el usuario con el email correspondiente
-            const user = usersResponse.data.find(user => user.email === userEmail);
-            
-            if (!user || !user.id) {
-                throw new Error('No se encontró el usuario con el email: ' + userEmail);
-            }
-            
-            const userId = user.id;
+            const userData = meResponse.data;
             
             // Preparar los datos para la actualización
             const updateData = {
@@ -157,22 +185,21 @@ const Perfil = () => {
                 
                 // Datos del user
                 email: formData.correo,
-                password: user.password || 'password123', // Siempre enviar una contraseña
-                specialization_id: user.specialization?.id || 1,
+                password: userData.password || 'password123', // Siempre enviar una contraseña
+                specialization_id: formData.especializacion_id ? Number(formData.especializacion_id) : null,
                 profile_description: formData.descripcionPerfil || '',
-                profile_photo_path: user.profile_photo_path || 'default.jpg',
+                profile_photo_path: userData.profile_photo_path || 'default.jpg',
                 
                 // Roles (siempre debe ser un array con al menos un elemento)
-                // Como la API no devuelve IDs de roles, usamos un valor por defecto
-                roles: [1] // ID por defecto para el rol
+                roles: formData.rol_id ? [Number(formData.rol_id)] : [2] // Por defecto, rol de doctor (2)
             };
             
             console.log('Datos que se enviarán para actualizar:', updateData);
-            console.log('URL que se usará:', `/user/update/${userId}`);
+            console.log('URL que se usará:', `/user/update/${userData.id}`);
             
             try {
                 // Llamar al servicio para actualizar el usuario
-                const updateResponse = await userService.updateUser(userId, updateData);
+                const updateResponse = await userService.updateUser(userData.id, updateData);
                 console.log('Respuesta de actualización:', updateResponse);
                 
                 Swal.fire({
@@ -207,6 +234,83 @@ const Perfil = () => {
         }
     };
 
+    const handleCancel = () => {
+        // Mostrar confirmación antes de cancelar la edición
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: '¿Quieres salir sin guardar los cambios?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FB8500',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, salir',
+            cancelButtonText: 'No, continuar editando'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Recargar los datos originales y salir del modo edición
+                const fetchUserData = async () => {
+                    try {
+                        setLoading(true);
+                        
+                        // Obtener el usuario actual usando el endpoint /auth/me
+                        const meResponse = await api.post('/auth/me');
+                        
+                        if (!meResponse || !meResponse.data) {
+                            console.warn('No se pudo obtener la información del usuario desde /auth/me');
+                            setLoading(false);
+                            return;
+                        }
+                        
+                        // Usar los datos del usuario desde meResponse.data
+                        const basicUserData = meResponse.data;
+                        
+                        // Log detallado para ver la estructura exacta de los datos
+                        console.log('Estructura completa de la respuesta:', JSON.stringify(basicUserData, null, 2));
+                        console.log('Estructura detallada de userData:', {
+                            email: basicUserData.email,
+                            profile_description: basicUserData.profile_description,
+                            profile_photo_path: basicUserData.profile_photo_path,
+                            human: basicUserData.human,
+                            roles: basicUserData.roles,
+                            specialization: basicUserData.specialization
+                        });
+                        
+                        // Mapear los datos del usuario a formData con verificaciones robustas
+                        setFormData({
+                            primerNombre: basicUserData.human?.first_name || '',
+                            segundoNombre: basicUserData.human?.middle_name || '',
+                            primerApellido: basicUserData.human?.last_name || '',
+                            segundoApellido: basicUserData.human?.second_last_name || '',
+                            correo: basicUserData.email || '',
+                            especializacion: basicUserData.specialization?.name || '',
+                            especializacion_id: basicUserData.specialization?.id || '',
+                            descripcionPerfil: basicUserData.profile_description || '',
+                            rol: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
+                                 basicUserData.roles[0]?.name || basicUserData.roles[0]?.role || '' : '',
+                            rol_id: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
+                                   basicUserData.roles[0]?.id || '' : ''
+                        });
+                        
+                        // Establecer la imagen de perfil si existe
+                        if (basicUserData.profile_photo_path) {
+                            setProfileImage(basicUserData.profile_photo_path);
+                        }
+                        
+                        setLoading(false);
+                        setIsEditing(false);
+                    } catch (error) {
+                        console.error('Error al obtener datos del usuario:', error);
+                    } finally {
+                        setLoading(false);
+                        setIsEditing(false);
+                    }
+                };
+                
+                fetchUserData();
+            }
+        });
+    };
+
     const handleImageChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -233,13 +337,32 @@ const Perfil = () => {
                             </button>
                             <h3>Perfil personal</h3>
                         </div>
-                        <button 
-                            className={styles.addButton} 
-                            onClick={isEditing ? handleSave : handleEditToggle}
-                            disabled={loading}
-                        >
-                            {isEditing ? 'Guardar' : 'Editar'}
-                        </button>
+                        {isEditing ? (
+                            <div className={styles.buttonGroup}>
+                                <button 
+                                    className={`${styles.cancelButton}`} 
+                                    onClick={handleCancel}
+                                    disabled={loading}
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    className={styles.addButton} 
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                >
+                                    Guardar
+                                </button>
+                            </div>
+                        ) : (
+                            <button 
+                                className={styles.addButton} 
+                                onClick={handleEditToggle}
+                                disabled={loading}
+                            >
+                                Editar
+                            </button>
+                        )}
                     </div>
 
                     <div className={styles.profileContainer}>
@@ -352,15 +475,31 @@ const Perfil = () => {
                                     <div className={styles.formRow}>
                                         <div className={styles.formField}>
                                             <label htmlFor="especializacion">Especialización</label>
-                                            <input
-                                                type="text"
-                                                id="especializacion"
-                                                name="especializacion"
-                                                value={formData.especializacion}
-                                                onChange={handleInputChange}
-                                                disabled={!isEditing}
-                                                placeholder="Especialización"
-                                            />
+                                            {isEditing ? (
+                                                <select
+                                                    id="especializacion_id"
+                                                    name="especializacion_id"
+                                                    value={formData.especializacion_id}
+                                                    onChange={handleInputChange}
+                                                >
+                                                    <option value="">Seleccione una especialización</option>
+                                                    {especializaciones.map(esp => (
+                                                        <option key={esp.id} value={esp.id.toString()}>
+                                                            {esp.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    id="especializacion"
+                                                    name="especializacion"
+                                                    value={formData.especializacion}
+                                                    onChange={handleInputChange}
+                                                    disabled={!isEditing}
+                                                    placeholder="Especialización"
+                                                />
+                                            )}
                                         </div>
                                         <div className={styles.formField}>
                                             <label htmlFor="descripcionPerfil">Descripción del perfil</label>
@@ -379,15 +518,49 @@ const Perfil = () => {
                                     <div className={styles.formRow}>
                                         <div className={styles.formField}>
                                             <label htmlFor="rol">Rol</label>
-                                            <input
-                                                type="text"
-                                                id="rol"
-                                                name="rol"
-                                                value={formData.rol}
-                                                onChange={handleInputChange}
-                                                disabled={!isEditing}
-                                                placeholder="Rol"
-                                            />
+                                            {isEditing ? (
+                                                isUserAdmin ? (
+                                                    <select
+                                                        id="rol_id"
+                                                        name="rol_id"
+                                                        value={formData.rol_id}
+                                                        onChange={handleInputChange}
+                                                    >
+                                                        <option value="">Seleccione un rol</option>
+                                                        {roles.map(rol => (
+                                                            <option key={rol.id} value={rol.id.toString()}>
+                                                                {rol.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <input
+                                                        type="text"
+                                                        id="rol"
+                                                        name="rol"
+                                                        value={formData.rol}
+                                                        onChange={handleInputChange}
+                                                        disabled={true}
+                                                        placeholder="Rol"
+                                                        className={styles.disabledInput}
+                                                    />
+                                                )
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    id="rol"
+                                                    name="rol"
+                                                    value={formData.rol}
+                                                    onChange={handleInputChange}
+                                                    disabled={!isEditing}
+                                                    placeholder="Rol"
+                                                />
+                                            )}
+                                            {isEditing && !isUserAdmin && (
+                                                <p className={styles.roleRestrictionMessage}>
+                                                    Solo los administradores pueden cambiar el rol
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

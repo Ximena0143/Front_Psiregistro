@@ -53,9 +53,17 @@ export const login = async (credentials) => {
       
       // Extraer información del usuario si está disponible
       if (response.user) {
-        userData = { ...userData, id: response.user.id };
+        userData = { 
+          ...userData, 
+          id: response.user.id,
+          roles: response.user.roles || [] // Guardar los roles del usuario
+        };
       } else if (response.data && response.data.user) {
-        userData = { ...userData, id: response.data.user.id };
+        userData = { 
+          ...userData, 
+          id: response.data.user.id,
+          roles: response.data.user.roles || [] // Guardar los roles del usuario
+        };
       }
     }
     
@@ -65,6 +73,24 @@ export const login = async (credentials) => {
       
       // Guardar el token en localStorage
       localStorage.setItem(TOKEN_KEY, token);
+      
+      // Intentar extraer información de roles del token JWT (si es posible)
+      try {
+        // Decodificar el payload del JWT (la parte central del token)
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('Payload del token JWT:', payload);
+          
+          // Si hay información de roles en el payload, la usamos
+          if (payload && payload.role) {
+            userData.roles = payload.role;
+            console.log('Roles extraídos del token JWT:', userData.roles);
+          }
+        }
+      } catch (e) {
+        console.warn('No se pudieron extraer roles del token JWT:', e);
+      }
       
       // Guardar información del usuario
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -137,6 +163,46 @@ export const isAuthenticated = () => {
 };
 
 /**
+ * Verifica si el usuario actual tiene un rol específico
+ * @param {string} roleName - Nombre del rol a verificar
+ * @returns {boolean} - true si el usuario tiene el rol, false en caso contrario
+ */
+export const hasRole = (roleName) => {
+  const user = getCurrentUser();
+  if (!user || !user.roles) return false;
+  
+  console.log('Verificando rol:', roleName, 'en roles del usuario:', user.roles);
+  
+  // Verificar si el usuario tiene el rol especificado
+  return user.roles.some(role => 
+    typeof role === 'string' 
+      ? role.toLowerCase() === roleName.toLowerCase() 
+      : ((role.role && role.role.toLowerCase() === roleName.toLowerCase()) || 
+         (role.name && role.name.toLowerCase() === roleName.toLowerCase()))
+  );
+};
+
+/**
+ * Verifica si el usuario actual es administrador
+ * @returns {boolean} - true si el usuario es admin, false en caso contrario
+ */
+export const isAdmin = () => {
+  const result = hasRole('admin');
+  console.log('¿Es administrador?', result);
+  return result;
+};
+
+/**
+ * Verifica si el usuario actual es doctor
+ * @returns {boolean} - true si el usuario es doctor, false en caso contrario
+ */
+export const isDoctor = () => {
+  const result = hasRole('doctor');
+  console.log('¿Es doctor?', result);
+  return result;
+};
+
+/**
  * Actualiza el token cuando se refresca
  * @returns {Promise} - Nuevo token
  */
@@ -177,7 +243,10 @@ const authService = {
   getCurrentUser,
   getToken,
   isAuthenticated,
-  refreshToken
+  refreshToken,
+  hasRole,
+  isAdmin,
+  isDoctor
 };
 
 export default authService;

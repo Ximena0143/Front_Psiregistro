@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 import userService from '../../../services/user';
+import api from '../../../services/api';
 
 const AgregarPsicologo = () => {
     const navigate = useNavigate();
@@ -36,16 +37,14 @@ const AgregarPsicologo = () => {
     // Función para obtener las especializaciones del backend
     const fetchEspecializaciones = async () => {
         try {
-            // Aquí deberías llamar a un servicio para obtener las especializaciones
-            // Por ahora, usaremos datos de ejemplo
-            const response = await fetch('http://localhost:8000/api/specialization/index');
-            const data = await response.json();
+            // Usar el servicio API que ya incluye el token de autenticación
+            const response = await api.get('/specialization/index');
             
-            if (data && Array.isArray(data.data)) {
-                console.log('Especializaciones cargadas del backend:', data.data);
+            if (response && response.data && Array.isArray(response.data)) {
+                console.log('Especializaciones cargadas del backend:', response.data);
                 
                 // Asignar IDs a las especializaciones que no los tienen
-                const especializacionesConId = data.data.map((esp, index) => {
+                const especializacionesConId = response.data.map((esp, index) => {
                     if (esp && !esp.id) {
                         return { ...esp, id: index + 1 }; // Asignar un ID numérico basado en el índice
                     }
