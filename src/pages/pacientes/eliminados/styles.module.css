@@ -24,69 +24,93 @@
     margin-bottom: 20px;
 }
 
-.headerLeft {
+.titleContainer {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.backButton {
-    background: none;
-    border: none;
+.backIcon {
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
-    border-radius: 50%;
-    color: #000000;
-    transition: background-color 0.2s;
+    transition: transform 0.2s;
 }
 
-.backButton:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+.backIcon:hover {
+    transform: translateX(-3px);
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
 }
 
 .tableContainer {
-    background-color: white;
+    background: white;
+    padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    margin-top: 20px;
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
+.loadingContainer,
+.errorContainer,
+.emptyContainer {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+    font-family: 'DM Sans', sans-serif;
 }
 
-.table th,
-.table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eaeaea;
+.retryButton {
+    background-color: #4F46E5;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 10px;
+    transition: background-color 0.2s;
 }
 
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #000000;
+.retryButton:hover {
+    background-color: #4338CA;
 }
 
-.table tr:last-child td {
-    border-bottom: none;
-}
-
-.table tr:hover {
-    background-color: #f9f9f9;
-}
-
-.actionsCell {
+/* Estilos para los iconos de acción */
+.actionIcons {
     display: flex;
     gap: 10px;
-    justify-content: flex-start;
+    justify-content: flex-end;
 }
 
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.actionIcon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s;
+}
+
+.actionIcon:hover {
+    transform: scale(1.2);
+}
+
+.restoreIcon {
+    color: #34C759;
+}
+
+.deleteIcon {
+    color: #FF3737;
+}
+
+/* Estilos para los botones de acción (mantener compatibilidad) */
 .restoreButton,
 .deleteButton {
     background: none;
@@ -110,50 +134,6 @@
 
 .restoreButton:disabled,
 .deleteButton:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-}
-
-.loadingContainer,
-.errorContainer,
-.emptyContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-}
-
-.errorContainer {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
-
-.retryButton {
-    margin-top: 15px;
-    padding: 8px 16px;
-    background-color: #FB8500;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-
-.retryButton:hover {
-    background-color: #e67a00;
-}
-
-.title{
-    color: #000000;
-    margin: 0;
-    font-family: 'DM Sans';
-    font-size: 27px;
 }

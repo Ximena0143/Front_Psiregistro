@@ -1,4 +1,4 @@
-import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaUserMd, FaTrashRestore } from "react-icons/fa";
+import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaUserMd, FaTrashRestore, FaGraduationCap } from "react-icons/fa";
 
 export const sidebarItems = [
     {
@@ -37,6 +37,11 @@ export const sidebarItems = [
                 title: 'Psicólogos Eliminados',
                 path: '/psicologos/eliminados',
                 icon: FaTrashRestore
+            },
+            {
+                title: 'Especializaciones',
+                path: '/especializaciones',
+                icon: FaGraduationCap
             }
         ]
     }

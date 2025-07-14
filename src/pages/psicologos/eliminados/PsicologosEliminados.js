@@ -4,12 +4,11 @@ import Header from '../../../components/layout/Header/Header';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import { ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import userService from '../../../services/user';
 import styles from './styles.module.css';
+import userService from '../../../services/user';
+import DataTable from '../../../components/common/DataTable/DataTable';
 
-/**
- * Componente para mostrar y gestionar psicólogos eliminados
- */
+// Componente para mostrar y gestionar psicólogos eliminados
 const PsicologosEliminados = () => {
     const navigate = useNavigate();
     const [psychologists, setPsychologists] = useState([]);
@@ -51,60 +50,43 @@ const PsicologosEliminados = () => {
                 
                 // Transformar los datos al formato que espera el componente
                 const formattedData = deletedPsychologistsData.map(psychologist => {
-                    // Crear un objeto con valores predeterminados
-                    const formattedPsychologist = {
-                        id: psychologist.id || 'unknown-id',
-                        nombre: 'Sin nombre',
-                        numeroIdentificacion: 'N/A',
-                        fechaEliminacion: 'N/A',
+                    // Asegurarse de que todos los campos necesarios estén presentes
+                    return {
+                        id: psychologist.id,
+                        nombre: formatFullName(psychologist),
                         email: psychologist.email || 'N/A',
-                        human: psychologist.human || null
+                        fechaEliminacion: psychologist.fechaEliminacion || psychologist.deleted_at || 'N/A',
+                        // Mantener el objeto original para acceder a todos sus datos si es necesario
+                        originalData: psychologist
                     };
-                    
-                    // Formatear el nombre completo
-                    if (psychologist.first_name || psychologist.last_name) {
-                        formattedPsychologist.nombre = `${psychologist.first_name || ''} ${psychologist.middle_name || ''} ${psychologist.last_name || ''} ${psychologist.second_last_name || ''}`.trim();
-                    } else if (psychologist.human) {
-                        const human = psychologist.human;
-                        formattedPsychologist.nombre = `${human.first_name || ''} ${human.middle_name || ''} ${human.last_name || ''} ${human.second_last_name || ''}`.trim();
-                    }
-                    
-                    // Obtener el número de documento
-                    if (psychologist.identification_number) {
-                        formattedPsychologist.numeroIdentificacion = psychologist.identification_number;
-                    } else if (psychologist.human && psychologist.human.document_number) {
-                        formattedPsychologist.numeroIdentificacion = psychologist.human.document_number;
-                    }
-                    
-                    // Formatear la fecha de eliminación
-                    if (psychologist.deleted_at) {
-                        try {
-                            formattedPsychologist.fechaEliminacion = new Date(psychologist.deleted_at).toLocaleDateString();
-                        } catch (e) {
-                            console.error('Error al formatear la fecha de eliminación:', e);
-                        }
-                    }
-                    
-                    return formattedPsychologist;
                 });
                 
-                console.log('Datos formateados de psicólogos eliminados para mostrar:', formattedData);
                 setPsychologists(formattedData);
             } else {
                 setPsychologists([]);
-                console.warn('No se recibieron datos de psicólogos eliminados del servidor');
             }
-        } catch (error) {
-            console.error('Error al obtener psicólogos eliminados:', error);
-            setError('No se pudieron cargar los psicólogos eliminados');
-            setPsychologists([]);
+        } catch (err) {
+            console.error('Error al cargar psicólogos eliminados:', err);
+            setError('No se pudieron cargar los psicólogos eliminados. Por favor, intente de nuevo más tarde.');
         } finally {
             setLoading(false);
         }
     };
 
+    const formatFullName = (psychologist) => {
+        // Función para formatear el nombre completo del psicólogo
+        const human = psychologist.human || psychologist;
+        
+        const firstName = human.first_name || human.firstName || '';
+        const middleName = human.middle_name || human.middleName || '';
+        const lastName = human.last_name || human.lastName || '';
+        const secondLastName = human.second_last_name || human.secondLastName || '';
+        
+        return [firstName, middleName, lastName, secondLastName].filter(Boolean).join(' ');
+    };
+
     const handleGoBack = () => {
-        navigate('/psicologos');
+        navigate(-1);
     };
 
     const handleRestore = async (id) => {
@@ -114,10 +96,10 @@ const PsicologosEliminados = () => {
             // Confirmación antes de restaurar
             const result = await Swal.fire({
                 title: '¿Restaurar psicólogo?',
-                text: '¿Estás seguro de que deseas restaurar este psicólogo?',
+                text: 'El psicólogo será restaurado y volverá a estar activo',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#FB8500',
+                confirmButtonColor: '#34C759',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Sí, restaurar',
                 cancelButtonText: 'Cancelar'
@@ -139,7 +121,7 @@ const PsicologosEliminados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al restaurar psicólogo:', error);
+            console.error('Error al restaurar:', error);
             
             let errorMessage = 'No se pudo restaurar el psicólogo';
             if (error.response && error.response.data && error.response.data.message) {
@@ -168,7 +150,7 @@ const PsicologosEliminados = () => {
                 text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#FF3737',
+                confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Sí, eliminar permanentemente',
                 cancelButtonText: 'Cancelar'
@@ -209,16 +191,34 @@ const PsicologosEliminados = () => {
         }
     };
 
-    // Función para formatear el nombre completo
-    const formatFullName = (psychologist) => {
-        if (!psychologist) return 'N/A';
-        
-        if (psychologist.nombre && psychologist.nombre !== 'Sin nombre') {
-            return psychologist.nombre;
+    // Definición de columnas para DataTable
+    const columns = [
+        { id: 'nombre', label: 'Nombre', minWidth: 200 },
+        { id: 'email', label: 'Correo', minWidth: 200 },
+        { id: 'fechaEliminacion', label: 'Fecha de eliminación', minWidth: 150 },
+        {
+            id: 'acciones',
+            label: '',
+            minWidth: 120,
+            align: 'right',
+            render: (value, row) => (
+                <div className={styles.actionIcons}>
+                    <div className={styles.iconWrapper} title="Restaurar psicólogo">
+                        <RefreshCw
+                            className={`${styles.actionIcon} ${styles.restoreIcon}`}
+                            onClick={() => handleRestore(row.id)}
+                        />
+                    </div>
+                    <div className={styles.iconWrapper} title="Eliminar permanentemente">
+                        <Trash2
+                            className={`${styles.actionIcon} ${styles.deleteIcon}`}
+                            onClick={() => handleForceDelete(row.id)}
+                        />
+                    </div>
+                </div>
+            )
         }
-        
-        return 'N/A';
-    };
+    ];
 
     return (
         <div className={styles.dashboard}>
@@ -227,76 +227,44 @@ const PsicologosEliminados = () => {
                 <Sidebar />
                 <div className={styles.content}>
                     <div className={styles.contentHeader}>
-                        <div className={styles.headerLeft}>
-                            <button 
-                                className={styles.backButton}
+                        <div className={styles.titleContainer}>
+                            <ArrowLeft 
+                                size={20} 
+                                color="#4F46E5" 
+                                className={styles.backIcon} 
                                 onClick={handleGoBack}
-                            >
-                                <ArrowLeft size={20} color="#4F46E5" />
-                            </button>
-                            <h3 className={styles.title}>Psicólogos Eliminados</h3>
+                            />
+                            <h3 className={styles.title}>Psicólogos eliminados</h3>
                         </div>
                     </div>
-
-                    {loading ? (
-                        <div className={styles.loadingContainer}>
-                            <p>Cargando psicólogos eliminados...</p>
-                        </div>
-                    ) : error ? (
-                        <div className={styles.errorContainer}>
-                            <p>{error}</p>
-                            <button 
-                                className={styles.retryButton}
-                                onClick={fetchDeletedPsychologists}
-                            >
-                                Reintentar
-                            </button>
-                        </div>
-                    ) : psychologists.length === 0 ? (
-                        <div className={styles.emptyContainer}>
-                            <p>No hay psicólogos eliminados</p>
-                        </div>
-                    ) : (
-                        <div className={styles.tableContainer}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Correo</th>
-                                        <th>Fecha de eliminación</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {psychologists.map((psychologist) => (
-                                        <tr key={psychologist.id}>
-                                            <td>{formatFullName(psychologist)}</td>
-                                            <td>{psychologist.email || 'N/A'}</td>
-                                            <td>{psychologist.fechaEliminacion || 'N/A'}</td>
-                                            <td className={styles.actionsCell}>
-                                                <button 
-                                                    className={styles.restoreButton}
-                                                    onClick={() => handleRestore(psychologist.id)}
-                                                    disabled={actionInProgress}
-                                                    title="Restaurar psicólogo"
-                                                >
-                                                    <RefreshCw size={16} color="#34C759" />
-                                                </button>
-                                                <button 
-                                                    className={styles.deleteButton}
-                                                    onClick={() => handleForceDelete(psychologist.id)}
-                                                    disabled={actionInProgress}
-                                                    title="Eliminar permanentemente"
-                                                >
-                                                    <Trash2 size={16} color="#FF3737" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                    
+                    <div className={styles.tableContainer}>
+                        {loading ? (
+                            <div className={styles.loadingContainer}>
+                                <p>Cargando psicólogos eliminados...</p>
+                            </div>
+                        ) : error ? (
+                            <div className={styles.errorContainer}>
+                                <p>{error}</p>
+                                <button 
+                                    className={styles.retryButton}
+                                    onClick={fetchDeletedPsychologists}
+                                >
+                                    Reintentar
+                                </button>
+                            </div>
+                        ) : psychologists.length === 0 ? (
+                            <div className={styles.emptyContainer}>
+                                <p>No hay psicólogos eliminados</p>
+                            </div>
+                        ) : (
+                            <DataTable
+                                columns={columns}
+                                data={psychologists}
+                                searchPlaceholder="Buscar psicólogos eliminados..."
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

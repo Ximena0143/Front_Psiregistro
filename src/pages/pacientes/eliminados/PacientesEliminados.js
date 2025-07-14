@@ -5,7 +5,8 @@ import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import { ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
-import patientService from '../../../services/patient';
+import { getDeletedPatients, restorePatient, forceDeletePatient } from '../../../services/patient';
+import DataTable from '../../../components/common/DataTable/DataTable';
 
 const PacientesEliminados = () => {
     const navigate = useNavigate();
@@ -24,7 +25,7 @@ const PacientesEliminados = () => {
             setError(null);
             
             // Llamar al servicio para obtener pacientes eliminados
-            const response = await patientService.getDeletedPatients();
+            const response = await getDeletedPatients();
             console.log('Respuesta de pacientes eliminados (completa):', response);
             
             let deletedPatientsData = [];
@@ -48,60 +49,46 @@ const PacientesEliminados = () => {
                 
                 // Transformar los datos al formato que espera el componente
                 const formattedData = deletedPatientsData.map(patient => {
-                    // Crear un objeto con valores predeterminados
-                    const formattedPatient = {
-                        id: patient.id || 'unknown-id',
-                        nombre: 'Sin nombre',
-                        numeroIdentificacion: 'N/A',
-                        fechaEliminacion: 'N/A',
+                    // Asegurarse de que todos los campos necesarios estén presentes
+                    return {
+                        id: patient.id,
+                        nombre: formatFullName(patient),
+                        identificacion: `${patient.identification_number || 'N/A'} (${patient.identification_type || 'N/A'})`,
+                        numeroIdentificacion: patient.identification_number || 'N/A',
+                        tipoIdentificacion: patient.identification_type || 'N/A',
                         email: patient.email || 'N/A',
-                        human: patient.human || null
+                        fechaEliminacion: patient.fechaEliminacion || patient.deleted_at || 'N/A',
+                        // Mantener el objeto original para acceder a todos sus datos si es necesario
+                        originalData: patient
                     };
-                    
-                    // Formatear el nombre completo
-                    if (patient.first_name || patient.last_name) {
-                        formattedPatient.nombre = `${patient.first_name || ''} ${patient.middle_name || ''} ${patient.last_name || ''} ${patient.second_last_name || ''}`.trim();
-                    } else if (patient.human) {
-                        const human = patient.human;
-                        formattedPatient.nombre = `${human.first_name || ''} ${human.middle_name || ''} ${human.last_name || ''} ${human.second_last_name || ''}`.trim();
-                    }
-                    
-                    // Obtener el número de documento
-                    if (patient.identification_number) {
-                        formattedPatient.numeroIdentificacion = patient.identification_number;
-                    } else if (patient.human && patient.human.document_number) {
-                        formattedPatient.numeroIdentificacion = patient.human.document_number;
-                    }
-                    
-                    // Formatear la fecha de eliminación
-                    if (patient.deleted_at) {
-                        try {
-                            formattedPatient.fechaEliminacion = new Date(patient.deleted_at).toLocaleDateString();
-                        } catch (e) {
-                            console.error('Error al formatear la fecha de eliminación:', e);
-                        }
-                    }
-                    
-                    return formattedPatient;
                 });
                 
-                console.log('Datos formateados de pacientes eliminados para mostrar:', formattedData);
                 setPatients(formattedData);
             } else {
                 setPatients([]);
-                console.warn('No se recibieron datos de pacientes eliminados del servidor');
             }
-        } catch (error) {
-            console.error('Error al obtener pacientes eliminados:', error);
-            setError('No se pudieron cargar los pacientes eliminados');
-            setPatients([]);
+        } catch (err) {
+            console.error('Error al cargar pacientes eliminados:', err);
+            setError('No se pudieron cargar los pacientes eliminados. Por favor, intente de nuevo más tarde.');
         } finally {
             setLoading(false);
         }
     };
 
+    const formatFullName = (patient) => {
+        // Función para formatear el nombre completo del paciente
+        const human = patient.human || patient;
+        
+        const firstName = human.first_name || human.firstName || '';
+        const middleName = human.middle_name || human.middleName || '';
+        const lastName = human.last_name || human.lastName || '';
+        const secondLastName = human.second_last_name || human.secondLastName || '';
+        
+        return [firstName, middleName, lastName, secondLastName].filter(Boolean).join(' ');
+    };
+
     const handleGoBack = () => {
-        navigate('/dashboard');
+        navigate(-1);
     };
 
     const handleRestore = async (id) => {
@@ -111,17 +98,17 @@ const PacientesEliminados = () => {
             // Confirmación antes de restaurar
             const result = await Swal.fire({
                 title: '¿Restaurar paciente?',
-                text: '¿Estás seguro de que deseas restaurar este paciente?',
+                text: 'El paciente será restaurado y volverá a estar activo',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#FB8500',
+                confirmButtonColor: '#34C759',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Sí, restaurar',
                 cancelButtonText: 'Cancelar'
             });
             
             if (result.isConfirmed) {
-                await patientService.restorePatient(id);
+                await restorePatient(id);
                 
                 // Actualizar la lista después de restaurar
                 await fetchDeletedPatients();
@@ -136,7 +123,7 @@ const PacientesEliminados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al restaurar paciente:', error);
+            console.error('Error al restaurar:', error);
             
             let errorMessage = 'No se pudo restaurar el paciente';
             if (error.response && error.response.data && error.response.data.message) {
@@ -172,7 +159,7 @@ const PacientesEliminados = () => {
             });
             
             if (result.isConfirmed) {
-                await patientService.forceDeletePatient(id);
+                await forceDeletePatient(id);
                 
                 // Actualizar la lista después de eliminar
                 await fetchDeletedPatients();
@@ -206,16 +193,35 @@ const PacientesEliminados = () => {
         }
     };
 
-    // Función para formatear el nombre completo
-    const formatFullName = (patient) => {
-        if (!patient || !patient.human) return 'N/A';
-        
-        const { first_name, middle_name, last_name, second_last_name } = patient.human;
-        const names = [first_name, middle_name].filter(Boolean).join(' ');
-        const surnames = [last_name, second_last_name].filter(Boolean).join(' ');
-        
-        return `${names} ${surnames}`.trim();
-    };
+    // Definición de columnas para DataTable
+    const columns = [
+        { id: 'nombre', label: 'Nombre', minWidth: 200 },
+        { id: 'numeroIdentificacion', label: 'Identificación', minWidth: 150 },
+        { id: 'email', label: 'Correo', minWidth: 200 },
+        { id: 'fechaEliminacion', label: 'Fecha de eliminación', minWidth: 150 },
+        {
+            id: 'acciones',
+            label: '',
+            minWidth: 120,
+            align: 'right',
+            render: (value, row) => (
+                <div className={styles.actionIcons}>
+                    <div className={styles.iconWrapper} title="Restaurar paciente">
+                        <RefreshCw
+                            className={`${styles.actionIcon} ${styles.restoreIcon}`}
+                            onClick={() => handleRestore(row.id)}
+                        />
+                    </div>
+                    <div className={styles.iconWrapper} title="Eliminar permanentemente">
+                        <Trash2
+                            className={`${styles.actionIcon} ${styles.deleteIcon}`}
+                            onClick={() => handleForceDelete(row.id)}
+                        />
+                    </div>
+                </div>
+            )
+        }
+    ];
 
     return (
         <div className={styles.dashboard}>
@@ -224,78 +230,44 @@ const PacientesEliminados = () => {
                 <Sidebar />
                 <div className={styles.content}>
                     <div className={styles.contentHeader}>
-                        <div className={styles.headerLeft}>
-                            <button 
-                                className={styles.backButton}
+                        <div className={styles.titleContainer}>
+                            <ArrowLeft 
+                                size={20} 
+                                color="#4F46E5" 
+                                className={styles.backIcon} 
                                 onClick={handleGoBack}
-                            >
-                                <ArrowLeft size={20} color="#4F46E5" />
-                            </button>
-                            <h3 className={styles.title}>Pacientes Eliminados</h3>
+                            />
+                            <h3 className={styles.title}>Pacientes eliminados</h3>
                         </div>
                     </div>
-
-                    {loading ? (
-                        <div className={styles.loadingContainer}>
-                            <p>Cargando pacientes eliminados...</p>
-                        </div>
-                    ) : error ? (
-                        <div className={styles.errorContainer}>
-                            <p>{error}</p>
-                            <button 
-                                className={styles.retryButton}
-                                onClick={fetchDeletedPatients}
-                            >
-                                Reintentar
-                            </button>
-                        </div>
-                    ) : patients.length === 0 ? (
-                        <div className={styles.emptyContainer}>
-                            <p>No hay pacientes eliminados</p>
-                        </div>
-                    ) : (
-                        <div className={styles.tableContainer}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Identificación</th>
-                                        <th>Correo</th>
-                                        <th>Fecha de eliminación</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {patients.map((patient) => (
-                                        <tr key={patient.id}>
-                                            <td>{formatFullName(patient)}</td>
-                                            <td>{patient.numeroIdentificacion || 'N/A'}</td>
-                                            <td>{patient.email || 'N/A'}</td>
-                                            <td>{patient.fechaEliminacion || 'N/A'}</td>
-                                            <td className={styles.actionsCell}>
-                                                <button 
-                                                    className={styles.restoreButton}
-                                                    onClick={() => handleRestore(patient.id)}
-                                                    disabled={actionInProgress}
-                                                    title="Restaurar paciente"
-                                                >
-                                                    <RefreshCw size={16} color="#34C759" />
-                                                </button>
-                                                <button 
-                                                    className={styles.deleteButton}
-                                                    onClick={() => handleForceDelete(patient.id)}
-                                                    disabled={actionInProgress}
-                                                    title="Eliminar permanentemente"
-                                                >
-                                                    <Trash2 size={16} color="#FF3737" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                    
+                    <div className={styles.tableContainer}>
+                        {loading ? (
+                            <div className={styles.loadingContainer}>
+                                <p>Cargando pacientes eliminados...</p>
+                            </div>
+                        ) : error ? (
+                            <div className={styles.errorContainer}>
+                                <p>{error}</p>
+                                <button 
+                                    className={styles.retryButton}
+                                    onClick={fetchDeletedPatients}
+                                >
+                                    Reintentar
+                                </button>
+                            </div>
+                        ) : patients.length === 0 ? (
+                            <div className={styles.emptyContainer}>
+                                <p>No hay pacientes eliminados</p>
+                            </div>
+                        ) : (
+                            <DataTable
+                                columns={columns}
+                                data={patients}
+                                searchPlaceholder="Buscar pacientes eliminados..."
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
