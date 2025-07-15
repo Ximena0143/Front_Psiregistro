@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layout/Header/Header';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 import userService from '../../../services/user';
@@ -28,6 +28,10 @@ const AgregarPsicologo = () => {
         profile_photo_path: '/default-profile.jpg', // Valor por defecto para la foto de perfil
         role_id: '2' // Por defecto, rol de doctor (2)
     });
+    
+    // Estados para mostrar/ocultar contraseñas
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Cargar las especializaciones al montar el componente
     useEffect(() => {
@@ -438,28 +442,48 @@ const AgregarPsicologo = () => {
                                 <div className={styles.formRow}>
                                     <div className={styles.formField}>
                                         <label htmlFor="password">Contraseña *</label>
-                                        <input
-                                            type="password"
-                                            id="password"
-                                            name="password"
-                                            value={formData.password}
-                                            onChange={handleInputChange}
-                                            placeholder="Contraseña"
-                                            className={errors.password ? styles.inputError : ''}
-                                        />
+                                        <div className={styles.passwordInputContainer}>
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                id="password"
+                                                name="password"
+                                                value={formData.password}
+                                                onChange={handleInputChange}
+                                                placeholder="Contraseña"
+                                                className={errors.password ? styles.inputError : ''}
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className={styles.passwordToggle}
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                            >
+                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
                                         {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
                                     </div>
                                     <div className={styles.formField}>
                                         <label htmlFor="password_confirmation">Confirmar contraseña *</label>
-                                        <input
-                                            type="password"
-                                            id="password_confirmation"
-                                            name="password_confirmation"
-                                            value={formData.password_confirmation}
-                                            onChange={handleInputChange}
-                                            placeholder="Confirmar contraseña"
-                                            className={errors.password_confirmation ? styles.inputError : ''}
-                                        />
+                                        <div className={styles.passwordInputContainer}>
+                                            <input
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                id="password_confirmation"
+                                                name="password_confirmation"
+                                                value={formData.password_confirmation}
+                                                onChange={handleInputChange}
+                                                placeholder="Confirmar contraseña"
+                                                className={errors.password_confirmation ? styles.inputError : ''}
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className={styles.passwordToggle}
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                            >
+                                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
                                         {errors.password_confirmation && <span className={styles.errorMessage}>{errors.password_confirmation}</span>}
                                     </div>
                                 </div>

@@ -363,7 +363,7 @@ const AgregarPaciente = () => {
                                 </div>
 
                                 <div className={styles.formRow}>
-                                    <div className={styles.formField} style={{ width: '100%' }}>
+                                    <div className={styles.formField}>
                                         <label htmlFor="correo">Correo electrónico *</label>
                                         <input
                                             type="email"
@@ -377,25 +377,27 @@ const AgregarPaciente = () => {
                                         />
                                         {errors.correo && <span className={styles.errorMessage}>{errors.correo}</span>}
                                     </div>
-                                </div>
-
-                                <div className={styles.buttonContainer}>
-                                    <button 
-                                        className={styles.clearButton}
-                                        onClick={handleLimpiarForm}
-                                        type="button"
-                                        disabled={loading}
-                                    >
-                                        Limpiar
-                                    </button>
-                                    <button 
-                                        className={styles.saveButton}
-                                        onClick={handleGuardar}
-                                        type="button"
-                                        disabled={loading}
-                                    >
-                                        {loading ? 'Guardando...' : 'Guardar'}
-                                    </button>
+                                    <div className={styles.buttonsField}>
+                                        <label>&nbsp;</label> {/* Espacio vacío para alinear con el campo de correo */}
+                                        <div className={styles.inlineButtonContainer}>
+                                            <button 
+                                                className={styles.clearButton}
+                                                onClick={handleLimpiarForm}
+                                                type="button"
+                                                disabled={loading}
+                                            >
+                                                Limpiar
+                                            </button>
+                                            <button 
+                                                className={styles.saveButton}
+                                                onClick={handleGuardar}
+                                                type="button"
+                                                disabled={loading}
+                                            >
+                                                {loading ? 'Guardando...' : 'Guardar'}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

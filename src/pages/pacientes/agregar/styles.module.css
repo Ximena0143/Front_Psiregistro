@@ -12,7 +12,7 @@
 
 .content {
     flex: 1;
-    padding: 20px;
+    padding: 60px;
     overflow-y: auto;
     background-color: #f5f5f5;
 }
@@ -121,6 +121,28 @@
     box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.1);
 }
 
+.buttonsField {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.inlineButtonContainer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    align-items: flex-start;
+    margin-top: 2px; /* Ajustar según sea necesario para alineación vertical */
+}
+
+.inlineButtonContainer .clearButton,
+.inlineButtonContainer .saveButton {
+    padding: 8px 16px;
+    min-width: 100px;
+}
+
 .buttonContainer {
     display: flex;
     justify-content: flex-end;
@@ -172,4 +194,14 @@
     font-size: 13px;
     margin-top: 2px;
     font-family: 'DM Sans', sans-serif;
+}
+
+@media (max-width: 768px) {
+    .buttonsField {
+        margin-top: 12px;
+    }
+    
+    .inlineButtonContainer {
+        justify-content: flex-start;
+    }
 }

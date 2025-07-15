@@ -56,14 +56,59 @@ export const login = async (credentials) => {
         userData = { 
           ...userData, 
           id: response.user.id,
+          first_name: response.user.first_name || response.user.firstName || response.user.nombre || 
+                     (response.user.human && response.user.human.first_name),
+          last_name: response.user.last_name || response.user.lastName || response.user.apellido || 
+                    (response.user.human && response.user.human.last_name),
+          name: response.user.name || response.user.nombre_completo || response.user.nombreCompleto,
           roles: response.user.roles || [] // Guardar los roles del usuario
         };
+        
+        console.log('Datos de usuario extraídos de response.user:', userData);
       } else if (response.data && response.data.user) {
         userData = { 
           ...userData, 
           id: response.data.user.id,
+          first_name: response.data.user.first_name || response.data.user.firstName || response.data.user.nombre || 
+                     (response.data.user.human && response.data.user.human.first_name),
+          last_name: response.data.user.last_name || response.data.user.lastName || response.data.user.apellido || 
+                    (response.data.user.human && response.data.user.human.last_name),
+          name: response.data.user.name || response.data.user.nombre_completo || response.data.user.nombreCompleto,
           roles: response.data.user.roles || [] // Guardar los roles del usuario
         };
+        
+        console.log('Datos de usuario extraídos de response.data.user:', userData);
+      } else if (response.data && response.data.data) {
+        // Estructura específica donde los datos están en response.data.data
+        const userDataSource = response.data.data;
+        userData = { 
+          ...userData, 
+          id: userDataSource.id,
+          first_name: userDataSource.first_name || userDataSource.firstName || userDataSource.nombre || 
+                     (userDataSource.human && userDataSource.human.first_name),
+          last_name: userDataSource.last_name || userDataSource.lastName || userDataSource.apellido || 
+                    (userDataSource.human && userDataSource.human.last_name),
+          name: userDataSource.name || userDataSource.nombre_completo || userDataSource.nombreCompleto,
+          email: userDataSource.email,
+          roles: userDataSource.roles || [] 
+        };
+        
+        console.log('Datos de usuario extraídos de response.data.data:', userData);
+      } else if ((response.userData) || (response.data && response.data.userData)) {
+        // Algunos backends pueden devolver los datos del usuario en un campo userData
+        const userDataSource = (response.userData) || (response.data && response.data.userData);
+        userData = { 
+          ...userData, 
+          id: userDataSource.id,
+          first_name: userDataSource.first_name || userDataSource.firstName || userDataSource.nombre || 
+                     (userDataSource.human && userDataSource.human.first_name),
+          last_name: userDataSource.last_name || userDataSource.lastName || userDataSource.apellido || 
+                    (userDataSource.human && userDataSource.human.last_name),
+          name: userDataSource.name || userDataSource.nombre_completo || userDataSource.nombreCompleto,
+          roles: userDataSource.roles || [] 
+        };
+        
+        console.log('Datos de usuario extraídos de userData:', userData);
       }
     }
     
@@ -223,6 +268,83 @@ export const refreshToken = async () => {
   }
 };
 
+/**
+ * Obtiene los datos actualizados del usuario desde el backend
+ * @returns {Promise} - Datos actualizados del usuario
+ */
+export const me = async () => {
+  try {
+    // Usar POST en lugar de GET para la ruta /auth/me
+    const response = await api.post('/auth/me');
+    console.log('Respuesta completa de /auth/me:', response);
+    
+    let userData = null;
+    
+    // Manejar la estructura anidada donde los datos están en response.data.data
+    if (response && response.data && response.data.data) {
+      const userDataSource = response.data.data;
+      console.log('Datos de usuario en response.data.data:', userDataSource);
+      
+      // Extraer datos básicos
+      userData = {
+        id: userDataSource.id,
+        email: userDataSource.email,
+        profile_description: userDataSource.profile_description,
+        profile_photo_path: userDataSource.profile_photo_path
+      };
+      
+      // Extraer first_name y last_name del objeto human si existe
+      if (userDataSource.human) {
+        console.log('Objeto human encontrado:', userDataSource.human);
+        userData.first_name = userDataSource.human.first_name;
+        userData.last_name = userDataSource.human.last_name;
+        console.log('Nombre y apellido extraídos:', userData.first_name, userData.last_name);
+      }
+      
+      // Extraer roles si existen
+      if (userDataSource.roles && Array.isArray(userDataSource.roles)) {
+        userData.roles = userDataSource.roles.map(role => role.role || role);
+      }
+      
+      console.log('Datos de usuario extraídos y procesados de /auth/me:', userData);
+      
+      // Actualizar los datos en localStorage
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+      
+      return userData;
+    } else if (response && response.data) {
+      // Intentar extraer datos directamente de response.data si no hay estructura anidada
+      const userDataSource = response.data;
+      console.log('Intentando extraer datos directamente de response.data:', userDataSource);
+      
+      userData = {
+        ...userDataSource
+      };
+      
+      // Extraer first_name y last_name del objeto human si existe
+      if (userData.human) {
+        console.log('Objeto human encontrado en response.data:', userData.human);
+        userData.first_name = userData.human.first_name;
+        userData.last_name = userData.human.last_name;
+        console.log('Nombre y apellido extraídos de response.data:', userData.first_name, userData.last_name);
+      }
+      
+      console.log('Datos finales del usuario:', userData);
+      
+      // Actualizar los datos en localStorage
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+      
+      return userData;
+    } else {
+      console.error('Formato de respuesta inesperado en /auth/me:', response);
+      throw new Error('Formato de respuesta inesperado en /auth/me');
+    }
+  } catch (error) {
+    console.error('Error al obtener datos del usuario:', error);
+    throw error;
+  }
+};
+
 // Configuramos interceptor para añadir el token a las peticiones
 api.interceptors = {
   request: (config) => {
@@ -246,7 +368,8 @@ const authService = {
   refreshToken,
   hasRole,
   isAdmin,
-  isDoctor
+  isDoctor,
+  me
 };
 
 export default authService;

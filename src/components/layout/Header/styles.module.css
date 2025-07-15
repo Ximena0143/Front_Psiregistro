@@ -167,6 +167,13 @@
   cursor: pointer;
 }
 
+.welcome_text {
+  font-family: 'Libre Baskerville', serif;
+  color: #ffffff;
+  font-size: 20px;
+  margin: 0;
+}
+
 .user {
   display: flex;
   align-items: center;

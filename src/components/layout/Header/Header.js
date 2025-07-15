@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { HiUserCircle } from "react-icons/hi2";
-import { FaRegBell } from "react-icons/fa6";
 import { FaRegUser } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
 import Swal from 'sweetalert2';
@@ -15,13 +14,145 @@ const Header = ({ variant = 'landing' }) => {
     
     // Cargar información del usuario al montar el componente
     useEffect(() => {
-        const currentUser = authService.getCurrentUser();
-        if (currentUser) {
-            // Si hay usuario, mostrar su nombre o email
-            setUserName(currentUser.name || currentUser.email || 'Usuario');
-        }
+        // Función para obtener datos del usuario
+        const fetchUserData = async () => {
+            try {
+                // Intentar obtener datos actualizados del backend
+                console.log('Intentando obtener datos actualizados del usuario desde el backend...');
+                const userData = await authService.me();
+                
+                if (userData) {
+                    console.log('Datos obtenidos correctamente del backend:', userData);
+                    let displayName = 'Usuario';
+                    
+                    // Intentar obtener nombre y apellido
+                    if (userData.first_name && userData.last_name) {
+                        displayName = `${userData.first_name} ${userData.last_name}`;
+                        console.log('Usando first_name y last_name del backend:', displayName);
+                    } else if (userData.first_name) {
+                        displayName = userData.first_name;
+                        console.log('Usando solo first_name del backend:', displayName);
+                    } else if (userData.name) {
+                        displayName = userData.name;
+                        console.log('Usando name del backend:', displayName);
+                    } else if (userData.email) {
+                        // Extraer nombre del email (parte antes del @)
+                        const emailParts = userData.email.split('@');
+                        if (emailParts.length > 0) {
+                            // Verificar si el email tiene formato nombre.apellido
+                            const nameParts = emailParts[0].split('.');
+                            if (nameParts.length > 1) {
+                                // Formato nombre.apellido@dominio
+                                const firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+                                const lastName = nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
+                                displayName = `${firstName} ${lastName}`;
+                            } else {
+                                // Convertir primera letra a mayúscula y reemplazar puntos por espacios
+                                const emailName = emailParts[0]
+                                    .replace(/\./g, ' ')
+                                    .split(' ')
+                                    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                                    .join(' ');
+                                    
+                                // Añadir un apellido basado en el dominio si es posible
+                                if (emailParts.length > 1) {
+                                    const domain = emailParts[1].split('.')[0];
+                                    const domainName = domain.charAt(0).toUpperCase() + domain.slice(1);
+                                    displayName = `${emailName} ${domainName !== 'Example' ? domainName : ''}`;
+                                } else {
+                                    displayName = emailName;
+                                }
+                            }
+                            console.log('Usando email del backend:', displayName);
+                        }
+                    }
+                    
+                    setUserName(displayName);
+                    return; // Salir temprano si ya procesamos los datos del backend
+                }
+            } catch (error) {
+                console.error('Error al obtener datos del usuario desde el backend:', error);
+                console.log('Usando datos del localStorage como fallback...');
+            }
+            
+            // Fallback: Obtener datos del localStorage
+            const userStr = localStorage.getItem('auth_user');
+            console.log('Usuario en localStorage (raw):', userStr);
+            
+            // Intentar parsear el JSON
+            try {
+                if (userStr) {
+                    const userFromStorage = JSON.parse(userStr);
+                    console.log('Usuario parseado desde localStorage:', userFromStorage);
+                    
+                    // Depurar todos los campos disponibles
+                    console.log('Campos disponibles:', {
+                        first_name: userFromStorage.first_name,
+                        last_name: userFromStorage.last_name,
+                        name: userFromStorage.name,
+                        email: userFromStorage.email,
+                        id: userFromStorage.id,
+                        roles: userFromStorage.roles
+                    });
+                    
+                    // Usar directamente los datos del localStorage
+                    if (userFromStorage) {
+                        let displayName = 'Usuario';
+                        
+                        // Intentar obtener nombre y apellido
+                        if (userFromStorage.first_name && userFromStorage.last_name) {
+                            displayName = `${userFromStorage.first_name} ${userFromStorage.last_name}`;
+                            console.log('Usando first_name y last_name desde localStorage:', displayName);
+                        } else if (userFromStorage.first_name) {
+                            displayName = userFromStorage.first_name;
+                            console.log('Usando first_name desde localStorage:', displayName);
+                        } else if (userFromStorage.name) {
+                            displayName = userFromStorage.name;
+                            console.log('Usando name desde localStorage:', displayName);
+                        } else if (userFromStorage.email) {
+                            // Extraer nombre del email (parte antes del @)
+                            const emailParts = userFromStorage.email.split('@');
+                            if (emailParts.length > 0) {
+                                // Verificar si el email tiene formato nombre.apellido
+                                const nameParts = emailParts[0].split('.');
+                                if (nameParts.length > 1) {
+                                    // Formato nombre.apellido@dominio
+                                    const firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+                                    const lastName = nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
+                                    displayName = `${firstName} ${lastName}`;
+                                } else {
+                                    // Convertir primera letra a mayúscula y reemplazar puntos por espacios
+                                    const emailName = emailParts[0]
+                                        .replace(/\./g, ' ')
+                                        .split(' ')
+                                        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                                        .join(' ');
+                                        
+                                    // Añadir un apellido basado en el dominio si es posible
+                                    if (emailParts.length > 1) {
+                                        const domain = emailParts[1].split('.')[0];
+                                        const domainName = domain.charAt(0).toUpperCase() + domain.slice(1);
+                                        displayName = `${emailName} ${domainName !== 'Example' ? domainName : ''}`;
+                                    } else {
+                                        displayName = emailName;
+                                    }
+                                }
+                                console.log('Usando email desde localStorage:', displayName);
+                            }
+                        }
+                        
+                        setUserName(displayName);
+                    }
+                }
+            } catch (error) {
+                console.error('Error al parsear usuario desde localStorage:', error);
+            }
+        };
+        
+        // Ejecutar la función asíncrona
+        fetchUserData();
     }, []);
-
+    
     const toggleMenu = () => {
         setShowMenu(!showMenu);
     };
@@ -89,7 +220,7 @@ const Header = ({ variant = 'landing' }) => {
                         <p>Righteous</p>
                     </div>
                     <nav className={styles.nav_header}>
-                        <FaRegBell className={styles.icon} size={29} />
+                        <p className={styles.welcome_text}>Bienvenid@</p>
                         <div className={styles.user} onClick={toggleMenu}>
                             <p className={styles.name_user}>{userName}</p>
                             <HiUserCircle className={styles.icon_user} size={35}/>
