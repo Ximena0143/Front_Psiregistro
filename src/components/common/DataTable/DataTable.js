@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Table,
     TableBody,
@@ -10,7 +10,14 @@ import {
     TablePagination,
     TextField,
     Box,
-    InputAdornment
+    InputAdornment,
+    useMediaQuery,
+    useTheme,
+    Typography,
+    Card,
+    CardContent,
+    Divider,
+    Stack
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -22,6 +29,11 @@ const DataTable = ({ columns, data, searchPlaceholder = "Buscar..." }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [orderBy, setOrderBy] = useState('');
     const [orderDirection, setOrderDirection] = useState('asc');
+    
+    // Usar theme y mediaQuery para detectar tamaño de pantalla
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
     // Ordenar y filtrar datos
     const sortAndFilterData = () => {
@@ -73,6 +85,72 @@ const DataTable = ({ columns, data, searchPlaceholder = "Buscar..." }) => {
         setOrderBy(columnId);
     };
 
+    // Renderizar vista de tarjetas para móviles
+    const renderMobileCards = () => {
+        return sortAndFilterData()
+            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            .map((row, index) => (
+                <Card 
+                    key={index} 
+                    sx={{ 
+                        mb: 2, 
+                        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
+                        '&:hover': {
+                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)'
+                        }
+                    }}
+                >
+                    <CardContent sx={{ p: 2 }}>
+                        <Stack spacing={1.5}>
+                            {columns.map((column, colIndex) => {
+                                // Omitir columna de ID en vista móvil para ahorrar espacio
+                                if (column.id === 'id' && isMobile) return null;
+                                
+                                const value = row[column.id];
+                                return (
+                                    <Box key={colIndex}>
+                                        {column.id !== 'acciones' && (
+                                            <Typography 
+                                                variant="caption" 
+                                                sx={{ 
+                                                    fontFamily: 'DM Sans', 
+                                                    fontWeight: 600,
+                                                    color: '#666',
+                                                    display: 'block'
+                                                }}
+                                            >
+                                                {column.label}
+                                            </Typography>
+                                        )}
+                                        <Box sx={{ 
+                                            mt: 0.5, 
+                                            display: 'flex',
+                                            justifyContent: column.id === 'acciones' ? 'flex-end' : 'flex-start'
+                                        }}>
+                                            {column.render ? column.render(value, row) : (
+                                                <Typography 
+                                                    variant="body2" 
+                                                    sx={{ 
+                                                        fontFamily: 'DM Sans',
+                                                        fontWeight: 400
+                                                    }}
+                                                >
+                                                    {value}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        {colIndex < columns.length - 1 && column.id !== 'acciones' && (
+                                            <Divider sx={{ mt: 1.5 }} />
+                                        )}
+                                    </Box>
+                                );
+                            })}
+                        </Stack>
+                    </CardContent>
+                </Card>
+            ));
+    };
+
     return (
         <Paper sx={{ width: '100%', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
             {/* Barra de búsqueda */}
@@ -107,90 +185,115 @@ const DataTable = ({ columns, data, searchPlaceholder = "Buscar..." }) => {
                 />
             </Box>
 
-            {/* Tabla */}
-            <TableContainer sx={{ maxWidth: '100%', overflowX: 'auto' }}>
-                <Table stickyHeader sx={{ tableLayout: 'fixed', width: '100%' }}>
-                    <TableHead>
-                        <TableRow>
-                            {columns.map((column) => (
-                                <TableCell
-                                    key={column.id}
-                                    align={column.align || 'left'}
-                                    style={{ 
-                                        width: column.width || 'auto',
-                                        maxWidth: column.maxWidth || 'none',
-                                        fontFamily: 'DM Sans',
-                                        fontWeight: 600,
-                                        fontSize: '15px',
-                                        color: '#000000',
-                                        backgroundColor: '#FFFFFF',
-                                        cursor: column.id !== 'acciones' ? 'pointer' : 'default',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis'
-                                    }}
-                                    onClick={() => column.id !== 'acciones' && handleSort(column.id)}
-                                >
-                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: column.align === 'right' ? 'flex-end' : 'flex-start' }}>
-                                        {column.label}
-                                        {orderBy === column.id && (
-                                            <Box component="span" sx={{ ml: 1 }}>
-                                                {orderDirection === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />}
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {sortAndFilterData()
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map((row, index) => (
-                                <TableRow 
-                                    hover 
-                                    key={index}
-                                    sx={{
-                                        '&:hover': {
-                                            backgroundColor: '#F8FAFC !important'
-                                        }
-                                    }}
-                                >
-                                    {columns.map((column) => {
-                                        const value = row[column.id];
-                                        return (
-                                            <TableCell
-                                                key={column.id}
-                                                align={column.align || 'left'}
-                                                style={{
-                                                    fontFamily: 'DM Sans',
-                                                    fontSize: '14px',
-                                                    color: '#000000',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis'
-                                                }}
-                                            >
-                                                {column.render ? column.render(value, row) : value}
-                                            </TableCell>
-                                        );
-                                    })}
-                                </TableRow>
-                            ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            {/* Vista de tabla para escritorio o vista de tarjetas para móvil */}
+            {isMobile ? (
+                <Box sx={{ p: 2 }}>
+                    {renderMobileCards()}
+                </Box>
+            ) : (
+                <TableContainer sx={{ 
+                    maxWidth: '100%', 
+                    overflowX: 'auto',
+                    '&::-webkit-scrollbar': {
+                        height: '8px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: '#E6EDF0',
+                        borderRadius: '4px',
+                    },
+                    '&::-webkit-scrollbar-thumb:hover': {
+                        backgroundColor: '#FB8500',
+                    }
+                }}>
+                    <Table stickyHeader sx={{ 
+                        tableLayout: isTablet ? 'auto' : 'fixed', 
+                        width: '100%' 
+                    }}>
+                        <TableHead>
+                            <TableRow>
+                                {columns.map((column) => (
+                                    <TableCell
+                                        key={column.id}
+                                        align={column.align || 'left'}
+                                        style={{ 
+                                            width: isTablet ? 'auto' : (column.width || 'auto'),
+                                            maxWidth: column.maxWidth || 'none',
+                                            minWidth: isTablet ? (column.minWidth || '100px') : 'auto',
+                                            fontFamily: 'DM Sans',
+                                            fontWeight: 600,
+                                            fontSize: isTablet ? '14px' : '15px',
+                                            color: '#000000',
+                                            backgroundColor: '#FFFFFF',
+                                            cursor: column.id !== 'acciones' ? 'pointer' : 'default',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            padding: isTablet ? '10px' : '16px'
+                                        }}
+                                        onClick={() => column.id !== 'acciones' && handleSort(column.id)}
+                                    >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: column.align === 'right' ? 'flex-end' : 'flex-start' }}>
+                                            {column.label}
+                                            {orderBy === column.id && (
+                                                <Box component="span" sx={{ ml: 1 }}>
+                                                    {orderDirection === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />}
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {sortAndFilterData()
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((row, index) => (
+                                    <TableRow 
+                                        hover 
+                                        key={index}
+                                        sx={{
+                                            '&:hover': {
+                                                backgroundColor: '#F8FAFC !important'
+                                            }
+                                        }}
+                                    >
+                                        {columns.map((column) => {
+                                            const value = row[column.id];
+                                            return (
+                                                <TableCell
+                                                    key={column.id}
+                                                    align={column.align || 'left'}
+                                                    style={{
+                                                        fontFamily: 'DM Sans',
+                                                        fontSize: isTablet ? '13px' : '14px',
+                                                        color: '#000000',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        padding: isTablet ? '10px' : '16px'
+                                                    }}
+                                                >
+                                                    {column.render ? column.render(value, row) : value}
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
 
             {/* Paginación */}
             <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={isMobile ? [5, 10] : [5, 10, 25]}
                 component="div"
                 count={sortAndFilterData().length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage="Filas por página:"
+                labelRowsPerPage={isMobile ? "Filas:" : "Filas por página:"}
                 labelDisplayedRows={({ from, to, count }) => 
                     `${from}-${to} de ${count}`
                 }
@@ -203,6 +306,7 @@ const DataTable = ({ columns, data, searchPlaceholder = "Buscar..." }) => {
                     },
                     '.MuiTablePagination-selectLabel': {
                         fontFamily: 'DM Sans',
+                        display: isMobile ? 'none' : 'block'
                     }
                 }}
             />

@@ -238,3 +238,106 @@
 .dropdown a:hover {
   text-decoration: none;
 }
+
+/* Media queries para responsividad */
+@media (max-width: 992px) {
+  .header {
+    padding: 0 1rem;
+  }
+  
+  .logo {
+    gap: 30px;
+  }
+  
+  .header[data-variant="dashboard"] .logo {
+    gap: 20px;
+  }
+  
+  .nav_links {
+    gap: 20px;
+  }
+  
+  .welcome_text {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    height: 80px;
+  }
+  
+  .header[data-variant="dashboard"] {
+    height: 70px;
+  }
+  
+  .logo p {
+    font-size: 20px;
+  }
+  
+  .header[data-variant="dashboard"] .logo p {
+    font-size: 18px;
+  }
+  
+  .welcome_text {
+    display: none;
+  }
+  
+  .nav_links {
+    gap: 15px;
+  }
+  
+  .boton_header {
+    font-size: 17px;
+  }
+  
+  .boton_header_sesion {
+    font-size: 17px;
+    padding: 4px 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    height: 70px;
+    padding: 0 0.75rem;
+  }
+  
+  .header[data-variant="dashboard"] {
+    height: 60px;
+  }
+  
+  .logo img {
+    width: 50px;
+  }
+  
+  .header[data-variant="dashboard"] .logo img {
+    width: 35px;
+  }
+  
+  .logo p {
+    font-size: 18px;
+  }
+  
+  .header[data-variant="dashboard"] .logo p {
+    font-size: 16px;
+  }
+  
+  .name_user {
+    display: none;
+  }
+  
+  .nav_links {
+    gap: 10px;
+  }
+  
+  .boton_header {
+    font-size: 16px;
+    padding: 8px 10px;
+  }
+  
+  .boton_header_sesion {
+    font-size: 16px;
+    padding: 3px 10px;
+  }
+}

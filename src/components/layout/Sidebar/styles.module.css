@@ -88,3 +88,59 @@ li:has(.active) .expandIcon {
 .subItem a {
     font-size: 0.9em;
 }
+
+/* Media queries para responsividad */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 180px;
+    }
+
+    .sidebar p {
+        font-size: 14px;
+    }
+
+    .sidebar li {
+        height: 50px;
+    }
+}
+
+/* Para dispositivos móviles, implementamos un sidebar colapsable */
+@media (max-width: 576px) {
+    .sidebar {
+        position: fixed;
+        left: -230px;
+        top: 60px;
+        height: calc(100% - 60px);
+        z-index: 100;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .toggleButton {
+        position: fixed;
+        top: 70px;
+        left: 10px;
+        z-index: 101;
+        background: #219EBC;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+}

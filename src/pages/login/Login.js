@@ -21,8 +21,15 @@ export default function Login() {
       icon: 'warning',
       confirmButtonText: 'Entendido',
       confirmButtonColor: '#FB8500',
-      backdrop: false,
-      allowOutsideClick: false
+      backdrop: true,
+      allowOutsideClick: false,
+      customClass: {
+        container: 'swal-overlay-login',
+        popup: 'swal-modal-login',
+        confirmButton: 'font-dm-sans'
+      },
+      heightAuto: false, // Evita que SweetAlert modifique la altura del documento
+      position: 'center' // Posición centrada
     });
   }, []);
 
@@ -125,12 +132,15 @@ export default function Login() {
             customClass: {
               confirmButton: 'font-dm-sans',
               title: 'font-dm-sans',
-              popup: 'font-dm-sans'
+              popup: 'font-dm-sans swal-modal-login',
+              container: 'swal-overlay-login'
             },
             timer: 1500,
             timerProgressBar: true,
             showConfirmButton: false,
-            backdrop: false
+            backdrop: true,
+            heightAuto: false, // Evita que SweetAlert modifique la altura del documento
+            position: 'center' // Posición centrada
           });
           
           // Redirigir al dashboard después de un breve retraso para permitir que se vea el mensaje
@@ -159,10 +169,13 @@ export default function Login() {
             customClass: {
               confirmButton: 'font-dm-sans',
               title: 'font-dm-sans',
-              popup: 'font-dm-sans'
+              popup: 'font-dm-sans swal-modal-login',
+              container: 'swal-overlay-login'
             },
             confirmButtonText: 'Continuar de todos modos',
-            backdrop: false
+            backdrop: true,
+            heightAuto: false, // Evita que SweetAlert modifique la altura del documento
+            position: 'center' // Posición centrada
           }).then((result) => {
             if (result.isConfirmed) {
               navigate('/dashboard');
@@ -212,9 +225,12 @@ export default function Login() {
           customClass: {
             confirmButton: 'font-dm-sans',
             title: 'font-dm-sans',
-            popup: 'font-dm-sans'
+            popup: 'font-dm-sans swal-modal-login',
+            container: 'swal-overlay-login'
           },
-          backdrop: false
+          backdrop: true,
+          heightAuto: false, // Evita que SweetAlert modifique la altura del documento
+          position: 'center' // Posición centrada
         });
       } finally {
         setLoading(false);
@@ -242,9 +258,12 @@ export default function Login() {
         customClass: {
           confirmButton: 'font-dm-sans',
           title: 'font-dm-sans',
-          popup: 'font-dm-sans'
+          popup: 'font-dm-sans swal-modal-login',
+          container: 'swal-overlay-login'
         },
-        backdrop: false
+        backdrop: true,
+        heightAuto: false, // Evita que SweetAlert modifique la altura del documento
+        position: 'center' // Posición centrada
       });
     }
   };
@@ -258,12 +277,15 @@ export default function Login() {
       customClass: {
         confirmButton: 'font-dm-sans',
         title: 'font-dm-sans',
-        popup: 'font-dm-sans'
+        popup: 'font-dm-sans swal-modal-login',
+        container: 'swal-overlay-login'
       },
       timer: 2000,
       timerProgressBar: true,
       showConfirmButton: false,
-      backdrop: false
+      backdrop: true,
+      heightAuto: false, // Evita que SweetAlert modifique la altura del documento
+      position: 'center' // Posición centrada
     });
   };
 

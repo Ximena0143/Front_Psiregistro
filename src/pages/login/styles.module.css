@@ -15,10 +15,11 @@ html {
 .container_login {
   display: flex;
   position: relative;
-  height: 100%;
+  height: 100vh; /* Altura fija para evitar saltos */
   align-items: center;
   justify-content: flex-end;
   flex-direction: column;
+  overflow-x: hidden; /* Evitar scroll horizontal */
 }
 
 /*-----------Fondo-----------*/
@@ -34,6 +35,11 @@ html {
 .color_login{
   height: 50%;
   background-color: #219EBC;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Centrado vertical */
+  padding: 20px;
 }
 
 .container_image_login{
@@ -49,41 +55,30 @@ html {
   padding-top: 2px;
 }
 
-.image_login::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: inherit;
-  filter: blur(5px);
-  z-index: 1;
-}
-
 /*-----------Fin Fondo-----------*/
-
-.color_login{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
 .titulo{
   font-family: 'Libre Baskerville', serif;
   font-size: 80px;
   color: white;
-  margin-top: 55px;
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 10px;
 }
 
 .bienvenido{
   font-family: 'DM Sans', serif;
   font-size: 30px;
   color: white;
+  text-align: center;
 }
 
 /*-----------Login-----------*/
 .card {
   width: 380px;
-  height: 450px;
+  max-width: 90%; /* Limitar ancho en pantallas pequeñas */
+  height: auto; /* Altura automática para adaptarse al contenido */
+  min-height: 450px; /* Altura mínima */
   padding: 40px;
   background-color: #ffffff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -93,6 +88,8 @@ html {
   flex-direction: column;
   justify-content: space-around;
   margin-bottom: 25px;
+  position: relative; /* Para posicionamiento absoluto de elementos internos */
+  z-index: 1; /* Asegurar que esté por encima del fondo */
 }
   
 .titulo_inicio {
@@ -111,16 +108,17 @@ html {
 /*-----------Input-----------*/
 .container_input {
   position: relative;
-  margin: 15px;
+  margin: 15px 0; /* Cambio de margen para mejor alineación */
   display: flex;
   flex-direction: column-reverse;
+  min-height: 60px; /* Altura mínima para evitar saltos */
 }
 
 .input_field {
   display: block;
   width: 100%;
   padding: 10px;
-  font-size: 12px;
+  font-size: 14px; /* Aumentado para mejor legibilidad */
   font-family: 'DM Sans', serif;
   border: none;
   border-bottom: 2px solid #cbcbcb;
@@ -132,7 +130,7 @@ html {
   position: absolute;
   top: 0;
   left: 0;
-  font-size: 12px;
+  font-size: 14px; /* Aumentado para mejor legibilidad */
   color: rgba(204, 204, 204, 0);
   pointer-events: none;
   transition: all 0.3s ease;
@@ -150,7 +148,7 @@ html {
 
 .input_field:focus + .input_label {
   top: -20px;
-  font-size: 12px;
+  font-size: 14px;
   color: #FB8500;
 }
 
@@ -161,23 +159,27 @@ html {
 .eye_icon {
   position: absolute;
   right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 10px; /* Ajustado para mejor posicionamiento */
   cursor: pointer;
 }
 
 .error_text {
   color: red;
   font-size: 0.8rem;
-  margin-top: 0.3rem;
+  margin-top: 5px;
+  position: absolute;
+  bottom: -20px; /* Posicionado debajo del input */
+  left: 0;
+  width: 100%;
+  text-align: left;
 }
 
 .forgot_password {
   font-family: 'DM Sans', serif;
-  font-size: 0.8rem;
+  font-size: 0.9rem; /* Aumentado para mejor legibilidad */
   color: #000000;
   text-align: right;
-  margin: 0;
+  margin: 5px 0 15px; /* Ajustado para mejor espaciado */
   cursor: pointer;
   text-decoration: underline;
 }
@@ -189,31 +191,113 @@ html {
   display: flex;
   gap: 20px;
   justify-content: center;
+  margin-top: 10px;
 }
 
 .card button {
   padding: 13px 10px;
   cursor: pointer;
   border-radius: 30px;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.2s;
+  font-family: 'DM Sans', serif;
+  font-size: 14px;
 }
 
 .card button:hover {
   background: #ff9b58;
+  transform: translateY(-2px);
 }
 
 .boton_inicio {
   background: #FB8500;
   border: none;
   color: white;
-  width: 120px;
+  width: 140px; /* Aumentado para mejor visualización */
 }
 
 .boton_crear {
   background: transparent;
   border: 2px solid #FB8500;
   color: #FB8500;
-  width: 120px;
+  width: 140px; /* Aumentado para mejor visualización */
   font-family: 'DM Sans', serif;
 }
 /*-----------Fin Botones-----------*/
+
+/* Media queries para responsividad */
+@media (max-width: 992px) {
+  .titulo {
+    font-size: 60px;
+  }
+  
+  .bienvenido {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container_login {
+    justify-content: flex-end; /* Ajustar posición en tablets */
+  }
+  
+  .titulo {
+    font-size: 50px;
+    margin-top: 20px;
+  }
+  
+  .bienvenido {
+    font-size: 20px;
+  }
+  
+  .card {
+    width: 340px;
+    padding: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .container_login {
+    height: 100vh;
+    justify-content: flex-end;
+  }
+  
+  .color_login {
+    height: 40%; /* Reducir altura del fondo azul */
+  }
+  
+  .container_image_login {
+    height: 60%; /* Aumentar altura de la imagen */
+  }
+  
+  .titulo {
+    font-size: 40px;
+    margin-top: 10px;
+  }
+  
+  .bienvenido {
+    font-size: 18px;
+  }
+  
+  .card {
+    width: 90%;
+    max-width: 320px;
+    padding: 25px 20px;
+    margin-bottom: 40px; /* Espacio en la parte inferior */
+  }
+  
+  .titulo_inicio {
+    font-size: 22px;
+    margin-bottom: 15px;
+  }
+  
+  .botones {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .boton_inicio, .boton_crear {
+    width: 100%;
+    max-width: 200px;
+  }
+}

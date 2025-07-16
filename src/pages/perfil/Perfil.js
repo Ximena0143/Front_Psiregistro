@@ -15,7 +15,7 @@ const Perfil = () => {
     const [profileImage, setProfileImage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [especializaciones, setEspecializaciones] = useState([]);
-    const [roles, setRoles] = useState([
+    const [roles] = useState([
         { id: 1, name: 'Administrador' },
         { id: 2, name: 'Doctor' }
     ]);
@@ -503,14 +503,14 @@ const Perfil = () => {
                                         </div>
                                         <div className={styles.formField}>
                                             <label htmlFor="descripcionPerfil">Descripción del perfil</label>
-                                            <input
-                                                type="text"
+                                            <textarea
                                                 id="descripcionPerfil"
                                                 name="descripcionPerfil"
                                                 value={formData.descripcionPerfil}
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
                                                 placeholder="Descripción del perfil"
+                                                rows={4}
                                             />
                                         </div>
                                     </div>
