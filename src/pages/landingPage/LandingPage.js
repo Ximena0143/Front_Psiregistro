@@ -1,9 +1,90 @@
 import SeccionTexto from '../../components/common/SeccionTexto/SeccionTexto';
 import styles from './styles.module.css';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header/Header';
+import { ChevronUp } from 'lucide-react';
 
 const LandingPage = () => {
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    // Función para controlar la visibilidad del botón según el scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            // Mostrar el botón cuando el scroll es mayor a 300px
+            if (window.scrollY > 300) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+
+        // Añadir el evento de scroll
+        window.addEventListener('scroll', handleScroll);
+        
+        // Limpiar el evento cuando el componente se desmonte
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
+    // Función para volver al inicio al hacer clic en la flecha
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+
+    // Función para manejar el desplazamiento suave a las secciones con offset
+    useEffect(() => {
+        // Seleccionar todos los enlaces internos que comienzan con #
+        const links = document.querySelectorAll('a[href^="#"]');
+        
+        // Función para manejar el clic en los enlaces
+        const handleClick = (e) => {
+            e.preventDefault();
+            const href = e.currentTarget.getAttribute('href');
+            
+            // Si el enlace es #, volver al inicio
+            if (href === '#') {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                return;
+            }
+            
+            // Obtener el elemento objetivo
+            const targetElement = document.querySelector(href);
+            
+            if (targetElement) {
+                // Calcular la posición del elemento
+                const headerHeight = document.querySelector(`.${styles.header}`) ? 
+                    document.querySelector(`.${styles.header}`).offsetHeight : 100;
+                
+                // Obtener la posición del elemento relativa al documento
+                const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                
+                // Desplazarse a la posición con offset
+                window.scrollTo({
+                    top: elementPosition - headerHeight - 20, // 20px extra de margen
+                    behavior: 'smooth'
+                });
+            }
+        };
+        
+        // Añadir evento de clic a cada enlace
+        links.forEach(link => {
+            link.addEventListener('click', handleClick);
+        });
+        
+        // Limpiar los eventos cuando el componente se desmonte
+        return () => {
+            links.forEach(link => {
+                link.removeEventListener('click', handleClick);
+            });
+        };
+    }, []);
 
     return (
         <div className={styles.container}>
@@ -175,8 +256,17 @@ const LandingPage = () => {
                     </div>
                 </div>
             </section>
+            {/* Botón para volver al inicio */}
+            <button 
+                className={`${styles.scrollTopButton} ${showScrollTop ? styles.showScrollButton : ''}`}
+                onClick={scrollToTop}
+                aria-label="Volver al inicio"
+            >
+                <ChevronUp size={24} />
+            </button>
             </body>
         </div>
     );
 };
+
 export default LandingPage;

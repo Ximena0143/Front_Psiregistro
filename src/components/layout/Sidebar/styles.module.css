@@ -125,22 +125,30 @@ li:has(.active) .expandIcon {
     .sidebar.open {
         left: 0;
     }
+}
 
+/* Estilos para el botón toggle */
+.toggleButton {
+    display: none; /* Por defecto oculto en pantallas grandes */
+    position: fixed;
+    top: 70px;
+    left: 10px;
+    z-index: 101;
+    background: #219EBC;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Solo mostrar el botón toggle en pantallas pequeñas */
+@media (max-width: 576px) {
     .toggleButton {
-        position: fixed;
-        top: 70px;
-        left: 10px;
-        z-index: 101;
-        background: #219EBC;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 }

@@ -15,11 +15,11 @@ html {
 .container_login {
   display: flex;
   position: relative;
-  height: 100vh; /* Altura fija para evitar saltos */
+  height: 100vh;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   flex-direction: column;
-  overflow-x: hidden; /* Evitar scroll horizontal */
+  overflow-x: hidden;
 }
 
 /*-----------Fondo-----------*/
@@ -38,8 +38,8 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Centrado vertical */
-  padding: 20px;
+  justify-content: flex-start;
+  padding-top: 50px;
 }
 
 .container_image_login{
@@ -63,6 +63,7 @@ html {
   color: white;
   text-align: center;
   line-height: 1.2;
+  margin-top: 0;
   margin-bottom: 10px;
 }
 
@@ -71,14 +72,15 @@ html {
   font-size: 30px;
   color: white;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 /*-----------Login-----------*/
 .card {
   width: 380px;
-  max-width: 90%; /* Limitar ancho en pantallas pequeñas */
-  height: auto; /* Altura automática para adaptarse al contenido */
-  min-height: 450px; /* Altura mínima */
+  max-width: 90%; 
+  height: auto; 
+  min-height: 450px; 
   padding: 40px;
   background-color: #ffffff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -88,8 +90,9 @@ html {
   flex-direction: column;
   justify-content: space-around;
   margin-bottom: 25px;
-  position: relative; /* Para posicionamiento absoluto de elementos internos */
-  z-index: 1; /* Asegurar que esté por encima del fondo */
+  position: relative; 
+  z-index: 1; 
+  margin-top: 200px;
 }
   
 .titulo_inicio {
@@ -108,17 +111,17 @@ html {
 /*-----------Input-----------*/
 .container_input {
   position: relative;
-  margin: 15px 0; /* Cambio de margen para mejor alineación */
+  margin: 15px 0; 
   display: flex;
   flex-direction: column-reverse;
-  min-height: 60px; /* Altura mínima para evitar saltos */
+  min-height: 60px; 
 }
 
 .input_field {
   display: block;
   width: 100%;
   padding: 10px;
-  font-size: 14px; /* Aumentado para mejor legibilidad */
+  font-size: 14px; 
   font-family: 'DM Sans', serif;
   border: none;
   border-bottom: 2px solid #cbcbcb;
@@ -130,7 +133,7 @@ html {
   position: absolute;
   top: 0;
   left: 0;
-  font-size: 14px; /* Aumentado para mejor legibilidad */
+  font-size: 14px; 
   color: rgba(204, 204, 204, 0);
   pointer-events: none;
   transition: all 0.3s ease;
@@ -159,7 +162,7 @@ html {
 .eye_icon {
   position: absolute;
   right: 10px;
-  top: 10px; /* Ajustado para mejor posicionamiento */
+  top: 10px; 
   cursor: pointer;
 }
 
@@ -168,7 +171,7 @@ html {
   font-size: 0.8rem;
   margin-top: 5px;
   position: absolute;
-  bottom: -20px; /* Posicionado debajo del input */
+  bottom: -20px; 
   left: 0;
   width: 100%;
   text-align: left;
@@ -176,10 +179,10 @@ html {
 
 .forgot_password {
   font-family: 'DM Sans', serif;
-  font-size: 0.9rem; /* Aumentado para mejor legibilidad */
+  font-size: 0.9rem; 
   color: #000000;
   text-align: right;
-  margin: 5px 0 15px; /* Ajustado para mejor espaciado */
+  margin: 5px 0 15px; 
   cursor: pointer;
   text-decoration: underline;
 }
@@ -212,14 +215,14 @@ html {
   background: #FB8500;
   border: none;
   color: white;
-  width: 140px; /* Aumentado para mejor visualización */
+  width: 140px; 
 }
 
 .boton_crear {
   background: transparent;
   border: 2px solid #FB8500;
   color: #FB8500;
-  width: 140px; /* Aumentado para mejor visualización */
+  width: 140px; 
   font-family: 'DM Sans', serif;
 }
 /*-----------Fin Botones-----------*/
@@ -233,16 +236,24 @@ html {
   .bienvenido {
     font-size: 24px;
   }
+  
+  .card {
+    margin-top: 170px; 
+  }
 }
 
 @media (max-width: 768px) {
   .container_login {
-    justify-content: flex-end; /* Ajustar posición en tablets */
+    justify-content: center;
+  }
+  
+  .color_login {
+    padding-top: 30px; 
   }
   
   .titulo {
     font-size: 50px;
-    margin-top: 20px;
+    margin-top: 0;
   }
   
   .bienvenido {
@@ -252,26 +263,28 @@ html {
   .card {
     width: 340px;
     padding: 30px;
+    margin-top: 140px; 
   }
 }
 
 @media (max-width: 576px) {
   .container_login {
     height: 100vh;
-    justify-content: flex-end;
+    justify-content: center;
   }
   
   .color_login {
-    height: 40%; /* Reducir altura del fondo azul */
+    height: 40%; 
+    padding-top: 20px; 
   }
   
   .container_image_login {
-    height: 60%; /* Aumentar altura de la imagen */
+    height: 60%; 
   }
   
   .titulo {
     font-size: 40px;
-    margin-top: 10px;
+    margin-top: 0;
   }
   
   .bienvenido {
@@ -282,7 +295,8 @@ html {
     width: 90%;
     max-width: 320px;
     padding: 25px 20px;
-    margin-bottom: 40px; /* Espacio en la parte inferior */
+    margin-bottom: 40px; 
+    margin-top: 110px; 
   }
   
   .titulo_inicio {
