@@ -3,13 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { HiUserCircle } from "react-icons/hi2";
 import { FaRegUser } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
+import { FiMenu, FiX } from "react-icons/fi"; 
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
-import authService from '../../../services/auth'; // Importar el servicio de autenticación
+import authService from '../../../services/auth'; 
 
 const Header = ({ variant = 'landing' }) => {
     const [showMenu, setShowMenu] = useState(false);
     const [userName, setUserName] = useState('Usuario');
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
     const navigate = useNavigate();
     
     // Cargar información del usuario al montar el componente
@@ -157,6 +159,38 @@ const Header = ({ variant = 'landing' }) => {
         setShowMenu(!showMenu);
     };
     
+    const toggleMobileMenu = () => {
+        setMobileMenuOpen(!mobileMenuOpen);
+        // Prevenir scroll cuando el menú está abierto
+        if (!mobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+    };
+    
+    // Cerrar el menú móvil cuando se hace clic fuera de él
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const navHeader = document.querySelector(`.${styles.nav_header}`);
+            const menuToggle = document.querySelector(`.${styles.menu_toggle}`);
+            
+            if (mobileMenuOpen && navHeader && !navHeader.contains(event.target) && 
+                menuToggle && !menuToggle.contains(event.target)) {
+                setMobileMenuOpen(false);
+                document.body.style.overflow = 'auto';
+            }
+        };
+
+        if (mobileMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [mobileMenuOpen]);
+    
     const handleLogout = async () => {
         Swal.fire({
             title: '¿Cerrar sesión?',
@@ -252,13 +286,22 @@ const Header = ({ variant = 'landing' }) => {
                     <img src="/Images/Logo.jpeg" alt="Logo" />
                     <p>Righteous</p>
                 </div>
-                <nav className={styles.nav_header}>
+                
+                {/* Botón de menú hamburguesa para móvil */}
+                <div className={styles.menu_toggle} onClick={toggleMobileMenu}>
+                    {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+                </div>
+                
+                {/* Overlay para cuando el menú está abierto */}
+                {mobileMenuOpen && <div className={styles.menu_overlay} onClick={toggleMobileMenu}></div>}
+                
+                <nav className={`${styles.nav_header} ${mobileMenuOpen ? styles.show : ''}`}>
                     <ul className={styles.nav_links}>
-                        <li><a href="#Inicio"><button className={styles.boton_header}>Inicio</button></a></li>
-                        <li><a href="#Nosotros"><button className={styles.boton_header}>Nosotros</button></a></li>
-                        <li><a href="#Servicios"><button className={styles.boton_header}>Servicios</button></a></li>
-                        <li><a href="#Contacto"><button className={styles.boton_header}>Contacto</button></a></li>
-                        <li><Link to="/login"><button className={styles.boton_header_sesion}>Iniciar Sesión</button></Link></li>
+                        <li><a href="#Inicio" onClick={mobileMenuOpen ? toggleMobileMenu : undefined}><button className={styles.boton_header}>Inicio</button></a></li>
+                        <li><a href="#Nosotros" onClick={mobileMenuOpen ? toggleMobileMenu : undefined}><button className={styles.boton_header}>Nosotros</button></a></li>
+                        <li><a href="#Servicios" onClick={mobileMenuOpen ? toggleMobileMenu : undefined}><button className={styles.boton_header}>Servicios</button></a></li>
+                        <li><a href="#Contacto" onClick={mobileMenuOpen ? toggleMobileMenu : undefined}><button className={styles.boton_header}>Contacto</button></a></li>
+                        <li><Link to="/login" onClick={mobileMenuOpen ? toggleMobileMenu : undefined}><button className={styles.boton_header_sesion}>Iniciar Sesión</button></Link></li>
                     </ul>
                 </nav>
             </div>
