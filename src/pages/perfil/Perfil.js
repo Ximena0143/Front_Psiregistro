@@ -43,31 +43,17 @@ const Perfil = () => {
                 
                 // Obtener el usuario actual usando el endpoint /auth/me
                 const meResponse = await api.post('/auth/me');
-                console.log('Respuesta completa de /auth/me:', meResponse);
                 
                 if (!meResponse || !meResponse.data) {
-                    console.warn('No se pudo obtener la información del usuario desde /auth/me');
                     setLoading(false);
                     return;
                 }
                 
                 // Verificar si el usuario es administrador
                 setIsUserAdmin(isAdmin());
-                console.log('¿El usuario es administrador?', isAdmin());
                 
                 // Usar los datos del usuario desde meResponse.data
                 const basicUserData = meResponse.data;
-                
-                // Log detallado para ver la estructura exacta de los datos
-                console.log('Estructura completa de la respuesta:', JSON.stringify(basicUserData, null, 2));
-                console.log('Estructura detallada de userData:', {
-                    email: basicUserData.email,
-                    profile_description: basicUserData.profile_description,
-                    profile_photo_path: basicUserData.profile_photo_path,
-                    human: basicUserData.human,
-                    roles: basicUserData.roles,
-                    specialization: basicUserData.specialization
-                });
                 
                 // Mapear los datos del usuario a formData con verificaciones robustas
                 setFormData({
@@ -92,7 +78,6 @@ const Perfil = () => {
                 
                 setLoading(false);
             } catch (error) {
-                console.error('Error al obtener datos del usuario:', error);
                 Swal.fire({
                     title: 'Error',
                     text: 'No se pudo cargar la información del perfil',
@@ -114,8 +99,6 @@ const Perfil = () => {
             const response = await api.get('/specialization/index');
             
             if (response && response.data && Array.isArray(response.data)) {
-                console.log('Especializaciones cargadas del backend:', response.data);
-                
                 // Asignar IDs a las especializaciones que no los tienen
                 const especializacionesConId = response.data.map((esp, index) => {
                     if (esp && !esp.id) {
@@ -124,10 +107,8 @@ const Perfil = () => {
                     return esp;
                 });
                 
-                console.log('Especializaciones con IDs asignados:', especializacionesConId);
                 setEspecializaciones(especializacionesConId);
             } else {
-                console.warn('No se recibieron datos de especializaciones válidos');
                 // Datos de ejemplo en caso de error
                 setEspecializaciones([
                     { id: 1, name: 'Psicología Clínica' },
@@ -136,7 +117,6 @@ const Perfil = () => {
                 ]);
             }
         } catch (error) {
-            console.error('Error al cargar especializaciones:', error);
             // Datos de ejemplo en caso de error
             setEspecializaciones([
                 { id: 1, name: 'Psicología Clínica' },
@@ -194,13 +174,9 @@ const Perfil = () => {
                 roles: formData.rol_id ? [Number(formData.rol_id)] : [2] // Por defecto, rol de doctor (2)
             };
             
-            console.log('Datos que se enviarán para actualizar:', updateData);
-            console.log('URL que se usará:', `/user/update/${userData.id}`);
-            
             try {
                 // Llamar al servicio para actualizar el usuario
                 const updateResponse = await userService.updateUser(userData.id, updateData);
-                console.log('Respuesta de actualización:', updateResponse);
                 
                 Swal.fire({
                     title: 'Éxito',
@@ -211,8 +187,6 @@ const Perfil = () => {
                 
                 setIsEditing(false);
             } catch (updateError) {
-                console.error('Error detallado al actualizar:', updateError);
-                
                 // Mensaje de error más descriptivo
                 Swal.fire({
                     title: 'Error',
@@ -222,7 +196,6 @@ const Perfil = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al guardar los cambios:', error);
             Swal.fire({
                 title: 'Error',
                 text: 'No se pudieron guardar los cambios',
@@ -256,24 +229,12 @@ const Perfil = () => {
                         const meResponse = await api.post('/auth/me');
                         
                         if (!meResponse || !meResponse.data) {
-                            console.warn('No se pudo obtener la información del usuario desde /auth/me');
                             setLoading(false);
                             return;
                         }
                         
                         // Usar los datos del usuario desde meResponse.data
                         const basicUserData = meResponse.data;
-                        
-                        // Log detallado para ver la estructura exacta de los datos
-                        console.log('Estructura completa de la respuesta:', JSON.stringify(basicUserData, null, 2));
-                        console.log('Estructura detallada de userData:', {
-                            email: basicUserData.email,
-                            profile_description: basicUserData.profile_description,
-                            profile_photo_path: basicUserData.profile_photo_path,
-                            human: basicUserData.human,
-                            roles: basicUserData.roles,
-                            specialization: basicUserData.specialization
-                        });
                         
                         // Mapear los datos del usuario a formData con verificaciones robustas
                         setFormData({
@@ -299,8 +260,6 @@ const Perfil = () => {
                         setLoading(false);
                         setIsEditing(false);
                     } catch (error) {
-                        console.error('Error al obtener datos del usuario:', error);
-                    } finally {
                         setLoading(false);
                         setIsEditing(false);
                     }
@@ -402,165 +361,119 @@ const Perfil = () => {
                                     )}
                                 </div>
 
-                                <div className={styles.formGroup}>
+                                <div className={styles.profileInfo}>
                                     <div className={styles.formRow}>
-                                        <div className={styles.formField}>
+                                        <div className={styles.formGroup}>
                                             <label htmlFor="primerNombre">Primer nombre</label>
-                                            <input
-                                                type="text"
+                                            <input 
                                                 id="primerNombre"
                                                 name="primerNombre"
-                                                value={formData.primerNombre}
+                                                type="text" 
+                                                value={formData.primerNombre} 
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                placeholder="Primer nombre"
+                                                className={!isEditing ? styles.disabledInput : ''}
                                             />
                                         </div>
-                                        <div className={styles.formField}>
+                                        <div className={styles.formGroup}>
                                             <label htmlFor="segundoNombre">Segundo nombre</label>
-                                            <input
-                                                type="text"
+                                            <input 
                                                 id="segundoNombre"
                                                 name="segundoNombre"
-                                                value={formData.segundoNombre}
+                                                type="text" 
+                                                value={formData.segundoNombre} 
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                placeholder="Segundo nombre"
+                                                className={!isEditing ? styles.disabledInput : ''}
                                             />
                                         </div>
                                     </div>
-
                                     <div className={styles.formRow}>
-                                        <div className={styles.formField}>
+                                        <div className={styles.formGroup}>
                                             <label htmlFor="primerApellido">Primer apellido</label>
-                                            <input
-                                                type="text"
+                                            <input 
                                                 id="primerApellido"
                                                 name="primerApellido"
-                                                value={formData.primerApellido}
+                                                type="text" 
+                                                value={formData.primerApellido} 
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                placeholder="Primer apellido"
+                                                className={!isEditing ? styles.disabledInput : ''}
                                             />
                                         </div>
-                                        <div className={styles.formField}>
+                                        <div className={styles.formGroup}>
                                             <label htmlFor="segundoApellido">Segundo apellido</label>
-                                            <input
-                                                type="text"
+                                            <input 
                                                 id="segundoApellido"
                                                 name="segundoApellido"
-                                                value={formData.segundoApellido}
+                                                type="text" 
+                                                value={formData.segundoApellido} 
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                placeholder="Segundo apellido"
+                                                className={!isEditing ? styles.disabledInput : ''}
                                             />
                                         </div>
                                     </div>
-
                                     <div className={styles.formRow}>
-                                        <div className={styles.formField}>
+                                        <div className={styles.formGroup}>
                                             <label htmlFor="correo">Correo electrónico</label>
-                                            <input
-                                                type="email"
+                                            <input 
                                                 id="correo"
                                                 name="correo"
-                                                value={formData.correo}
+                                                type="email" 
+                                                value={formData.correo} 
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                placeholder="Correo electrónico"
+                                                className={!isEditing ? styles.disabledInput : ''}
                                             />
                                         </div>
-                                    </div>
-
-                                    <div className={styles.formRow}>
-                                        <div className={styles.formField}>
-                                            <label htmlFor="especializacion">Especialización</label>
-                                            {isEditing ? (
-                                                <select
-                                                    id="especializacion_id"
-                                                    name="especializacion_id"
-                                                    value={formData.especializacion_id}
-                                                    onChange={handleInputChange}
-                                                >
-                                                    <option value="">Seleccione una especialización</option>
-                                                    {especializaciones.map(esp => (
-                                                        <option key={esp.id} value={esp.id.toString()}>
-                                                            {esp.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                <input
-                                                    type="text"
-                                                    id="especializacion"
-                                                    name="especializacion"
-                                                    value={formData.especializacion}
-                                                    onChange={handleInputChange}
-                                                    disabled={!isEditing}
-                                                    placeholder="Especialización"
-                                                />
-                                            )}
+                                        <div className={styles.formGroup}>
+                                            <label htmlFor="rol">Rol</label>
+                                            <select 
+                                                id="rol_id"
+                                                name="rol_id"
+                                                value={formData.rol_id} 
+                                                onChange={handleInputChange}
+                                                disabled={!isEditing || !isUserAdmin}
+                                                className={!isEditing ? styles.disabledInput : ''}
+                                            >
+                                                <option value="">Seleccionar rol</option>
+                                                {roles.map(rol => (
+                                                    <option key={rol.id} value={rol.id}>{rol.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <div className={styles.formField}>
+                                    </div>
+                                    <div className={styles.formRow}>
+                                        <div className={styles.formGroup}>
+                                            <label htmlFor="especializacion_id">Especialización</label>
+                                            <select 
+                                                id="especializacion_id"
+                                                name="especializacion_id"
+                                                value={formData.especializacion_id} 
+                                                onChange={handleInputChange}
+                                                disabled={!isEditing}
+                                                className={!isEditing ? styles.disabledInput : ''}
+                                            >
+                                                <option value="">Seleccionar especialización</option>
+                                                {especializaciones.map(esp => (
+                                                    <option key={esp.id} value={esp.id}>{esp.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className={styles.formRow}>
+                                        <div className={styles.formGroup + ' ' + styles.fullWidth}>
                                             <label htmlFor="descripcionPerfil">Descripción del perfil</label>
-                                            <textarea
+                                            <textarea 
                                                 id="descripcionPerfil"
                                                 name="descripcionPerfil"
-                                                value={formData.descripcionPerfil}
+                                                value={formData.descripcionPerfil} 
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                placeholder="Descripción del perfil"
+                                                className={!isEditing ? styles.disabledInput : ''}
                                                 rows={4}
                                             />
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.formRow}>
-                                        <div className={styles.formField}>
-                                            <label htmlFor="rol">Rol</label>
-                                            {isEditing ? (
-                                                isUserAdmin ? (
-                                                    <select
-                                                        id="rol_id"
-                                                        name="rol_id"
-                                                        value={formData.rol_id}
-                                                        onChange={handleInputChange}
-                                                    >
-                                                        <option value="">Seleccione un rol</option>
-                                                        {roles.map(rol => (
-                                                            <option key={rol.id} value={rol.id.toString()}>
-                                                                {rol.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                ) : (
-                                                    <input
-                                                        type="text"
-                                                        id="rol"
-                                                        name="rol"
-                                                        value={formData.rol}
-                                                        onChange={handleInputChange}
-                                                        disabled={true}
-                                                        placeholder="Rol"
-                                                        className={styles.disabledInput}
-                                                    />
-                                                )
-                                            ) : (
-                                                <input
-                                                    type="text"
-                                                    id="rol"
-                                                    name="rol"
-                                                    value={formData.rol}
-                                                    onChange={handleInputChange}
-                                                    disabled={!isEditing}
-                                                    placeholder="Rol"
-                                                />
-                                            )}
-                                            {isEditing && !isUserAdmin && (
-                                                <p className={styles.roleRestrictionMessage}>
-                                                    Solo los administradores pueden cambiar el rol
-                                                </p>
-                                            )}
                                         </div>
                                     </div>
                                 </div>

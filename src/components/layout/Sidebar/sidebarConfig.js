@@ -1,4 +1,4 @@
-import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaUserMd, FaTrashRestore, FaGraduationCap } from "react-icons/fa";
+import { FaUserFriends, FaImage, FaFileAlt, FaUserMd, FaTrashRestore, FaGraduationCap } from "react-icons/fa";
 
 export const sidebarItems = [
     {
@@ -14,19 +14,14 @@ export const sidebarItems = [
         ]
     },
     {
-        title: 'Documentos',
-        path: '/documentos',
-        icon: FaFileAlt
-    },
-    {
         title: 'Publicaciones',
         path: '/publicaciones',
         icon: FaImage
     },
     {
-        title: 'Test',
+        title: 'Documentos',
         path: '/test',
-        icon: FaClipboard
+        icon: FaFileAlt
     },
     {
         title: 'Psicologos',

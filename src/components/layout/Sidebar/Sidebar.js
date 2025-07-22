@@ -13,23 +13,19 @@ const Sidebar = () => {
     useEffect(() => {
         // Obtener información del usuario actual
         const currentUser = authService.getCurrentUser();
-        console.log('Usuario actual en Sidebar:', currentUser);
         
         // Verificar si el usuario es admin
         const isAdmin = authService.isAdmin();
-        console.log('¿El usuario es administrador?', isAdmin);
         
         // Si es admin, mostrar todos los elementos
         // Si es doctor, filtrar la sección de psicólogos
         const items = sidebarItems.filter(item => {
             if (item.title === 'Psicologos' && !isAdmin) {
-                console.log('Ocultando sección de psicólogos porque el usuario no es admin');
                 return false; // Ocultar psicólogos para no-admin
             }
             return true;
         });
         
-        console.log('Elementos del sidebar después de filtrar:', items);
         setFilteredItems(items);
         
         // Añadir event listener para cerrar el sidebar cuando se hace clic fuera de él en móviles

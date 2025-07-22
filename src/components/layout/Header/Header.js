@@ -20,23 +20,18 @@ const Header = ({ variant = 'landing' }) => {
         const fetchUserData = async () => {
             try {
                 // Intentar obtener datos actualizados del backend
-                console.log('Intentando obtener datos actualizados del usuario desde el backend...');
                 const userData = await authService.me();
                 
                 if (userData) {
-                    console.log('Datos obtenidos correctamente del backend:', userData);
                     let displayName = 'Usuario';
                     
                     // Intentar obtener nombre y apellido
                     if (userData.first_name && userData.last_name) {
                         displayName = `${userData.first_name} ${userData.last_name}`;
-                        console.log('Usando first_name y last_name del backend:', displayName);
                     } else if (userData.first_name) {
                         displayName = userData.first_name;
-                        console.log('Usando solo first_name del backend:', displayName);
                     } else if (userData.name) {
                         displayName = userData.name;
-                        console.log('Usando name del backend:', displayName);
                     } else if (userData.email) {
                         // Extraer nombre del email (parte antes del @)
                         const emailParts = userData.email.split('@');
@@ -65,7 +60,6 @@ const Header = ({ variant = 'landing' }) => {
                                     displayName = emailName;
                                 }
                             }
-                            console.log('Usando email del backend:', displayName);
                         }
                     }
                     
@@ -73,29 +67,16 @@ const Header = ({ variant = 'landing' }) => {
                     return; // Salir temprano si ya procesamos los datos del backend
                 }
             } catch (error) {
-                console.error('Error al obtener datos del usuario desde el backend:', error);
-                console.log('Usando datos del localStorage como fallback...');
+                // Silenciar error y usar fallback
             }
             
             // Fallback: Obtener datos del localStorage
             const userStr = localStorage.getItem('auth_user');
-            console.log('Usuario en localStorage (raw):', userStr);
             
             // Intentar parsear el JSON
             try {
                 if (userStr) {
                     const userFromStorage = JSON.parse(userStr);
-                    console.log('Usuario parseado desde localStorage:', userFromStorage);
-                    
-                    // Depurar todos los campos disponibles
-                    console.log('Campos disponibles:', {
-                        first_name: userFromStorage.first_name,
-                        last_name: userFromStorage.last_name,
-                        name: userFromStorage.name,
-                        email: userFromStorage.email,
-                        id: userFromStorage.id,
-                        roles: userFromStorage.roles
-                    });
                     
                     // Usar directamente los datos del localStorage
                     if (userFromStorage) {
@@ -104,13 +85,10 @@ const Header = ({ variant = 'landing' }) => {
                         // Intentar obtener nombre y apellido
                         if (userFromStorage.first_name && userFromStorage.last_name) {
                             displayName = `${userFromStorage.first_name} ${userFromStorage.last_name}`;
-                            console.log('Usando first_name y last_name desde localStorage:', displayName);
                         } else if (userFromStorage.first_name) {
                             displayName = userFromStorage.first_name;
-                            console.log('Usando first_name desde localStorage:', displayName);
                         } else if (userFromStorage.name) {
                             displayName = userFromStorage.name;
-                            console.log('Usando name desde localStorage:', displayName);
                         } else if (userFromStorage.email) {
                             // Extraer nombre del email (parte antes del @)
                             const emailParts = userFromStorage.email.split('@');
@@ -139,7 +117,6 @@ const Header = ({ variant = 'landing' }) => {
                                         displayName = emailName;
                                     }
                                 }
-                                console.log('Usando email desde localStorage:', displayName);
                             }
                         }
                         
@@ -147,7 +124,7 @@ const Header = ({ variant = 'landing' }) => {
                     }
                 }
             } catch (error) {
-                console.error('Error al parsear usuario desde localStorage:', error);
+                // Silenciar error
             }
         };
         
@@ -207,8 +184,6 @@ const Header = ({ variant = 'landing' }) => {
                     // Llamar a la función de logout del servicio de autenticación
                     await authService.logout();
                     
-                    console.log('Sesión cerrada correctamente');
-                    
                     // Mostrar mensaje de éxito
                     Swal.fire({
                         title: 'Sesión cerrada',
@@ -221,8 +196,6 @@ const Header = ({ variant = 'landing' }) => {
                         navigate('/login', { replace: true });
                     });
                 } catch (error) {
-                    console.error('Error al cerrar sesión:', error);
-                    
                     // Aún con error, limpiamos el almacenamiento local y redirigimos
                     localStorage.removeItem('auth_token');
                     localStorage.removeItem('auth_user');

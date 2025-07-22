@@ -11,6 +11,42 @@ const interceptors = {
   response: null
 };
 
+// Variable para controlar si ya se mostró el mensaje de sesión expirada
+let sessionExpiredMessageShown = false;
+
+// Función para manejar errores de autenticación
+const handleAuthError = (error) => {
+  // Si el error es 401 (Unauthorized) o 403 (Forbidden) y no hemos mostrado el mensaje aún
+  if ((error.status === 401 || error.status === 403) && !sessionExpiredMessageShown) {
+    // Importar SweetAlert2 dinámicamente para evitar problemas de dependencia circular
+    import('sweetalert2').then((Swal) => {
+      Swal.default.fire({
+        title: 'Sesión expirada',
+        text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+        icon: 'warning',
+        confirmButtonText: 'Iniciar sesión',
+        allowOutsideClick: false
+      }).then(() => {
+        // Marcar que ya se mostró el mensaje
+        sessionExpiredMessageShown = false;
+        
+        // Limpiar el almacenamiento local
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        
+        // Redirigir a la página de login
+        window.location.href = '/login';
+      });
+      
+      // Marcar que ya mostramos el mensaje para evitar múltiples alertas
+      sessionExpiredMessageShown = true;
+    });
+  }
+  
+  // Propagar el error para que pueda ser manejado por la función que hizo la petición
+  throw error;
+};
+
 /**
  * Realiza una petición GET a la API
  * @param {string} endpoint - El endpoint a consultar (sin la URL base)
@@ -43,6 +79,10 @@ export const get = async (endpoint, options = {}) => {
       const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -62,7 +102,6 @@ export const get = async (endpoint, options = {}) => {
       }
     }
   } catch (error) {
-    console.error('Error en petición GET:', error);
     throw error;
   }
 };
@@ -88,12 +127,6 @@ export const post = async (endpoint, data = {}, options = {}) => {
       ...options
     };
     
-    // Debug de la petición que estamos a punto de hacer
-    console.log(`Iniciando petición POST a ${API_BASE_URL}${endpoint}`, {
-      headers: config.headers,
-      data: data
-    });
-    
     // Aplicar interceptor si existe
     if (interceptors.request) {
       config = interceptors.request(config);
@@ -101,14 +134,6 @@ export const post = async (endpoint, data = {}, options = {}) => {
 
     // Realizar la petición
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    
-    // Debug de la respuesta recibida
-    console.log(`Respuesta recibida de ${endpoint}:`, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: Object.fromEntries([...response.headers]),
-      ok: response.ok
-    });
     
     // Si la respuesta no es exitosa
     if (!response.ok) {
@@ -118,7 +143,6 @@ export const post = async (endpoint, data = {}, options = {}) => {
       try {
         // Primero intentamos obtener el texto de la respuesta
         errorText = await response.text();
-        console.log('Texto de error:', errorText);
         
         // Luego intentamos parsearlo como JSON si es posible
         try {
@@ -130,7 +154,6 @@ export const post = async (endpoint, data = {}, options = {}) => {
       } catch (readError) {
         // Si no podemos leer la respuesta, usamos un mensaje genérico
         errorData = { message: `Error HTTP: ${response.status}` };
-        console.error('Error al leer la respuesta de error:', readError);
       }
       
       // Crear un error personalizado con toda la información disponible
@@ -139,6 +162,10 @@ export const post = async (endpoint, data = {}, options = {}) => {
       error.statusText = response.statusText;
       error.data = errorData;
       error.url = `${API_BASE_URL}${endpoint}`;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -163,10 +190,8 @@ export const post = async (endpoint, data = {}, options = {}) => {
       }
     }
     
-    console.log('Datos de respuesta procesados:', responseData);
     return responseData;
   } catch (error) {
-    console.error('Error en petición POST:', error);
     throw error;
   }
 };
@@ -205,6 +230,10 @@ export const put = async (endpoint, data = {}, options = {}) => {
       const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -224,7 +253,6 @@ export const put = async (endpoint, data = {}, options = {}) => {
       }
     }
   } catch (error) {
-    console.error('Error en petición PUT:', error);
     throw error;
   }
 };
@@ -261,6 +289,10 @@ export const del = async (endpoint, options = {}) => {
       const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -280,7 +312,6 @@ export const del = async (endpoint, options = {}) => {
       }
     }
   } catch (error) {
-    console.error('Error en petición DELETE:', error);
     throw error;
   }
 };
@@ -319,6 +350,10 @@ export const patch = async (endpoint, data = {}, options = {}) => {
       const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -338,7 +373,6 @@ export const patch = async (endpoint, data = {}, options = {}) => {
       }
     }
   } catch (error) {
-    console.error('Error en petición PATCH:', error);
     throw error;
   }
 };
@@ -359,6 +393,14 @@ const apiService = {
   get interceptors() {
     return interceptors;
   }
+};
+
+// Agregar un interceptor de respuesta para detectar errores de autenticación
+interceptors.response = async (response) => {
+  if (!response.ok && (response.status === 401 || response.status === 403)) {
+    handleAuthError(response);
+  }
+  return response;
 };
 
 export default apiService;

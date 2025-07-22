@@ -14,17 +14,8 @@ const USER_KEY = 'auth_user';
  */
 export const login = async (credentials) => {
   try {
-    // Imprimir para depuración lo que estamos enviando al backend
-    console.log('Enviando credenciales al backend:', {
-      endpoint: '/auth/login',
-      credentials: { ...credentials, password: '****' } // No mostrar la contraseña real
-    });
-    
     // Hacer la petición al backend
     const response = await api.post('/auth/login', credentials);
-    
-    // Registrar la respuesta para depuración
-    console.log('Respuesta del backend:', response);
     
     // Extraer el token JWT de la respuesta dependiendo de su formato
     let token = null;
@@ -63,8 +54,6 @@ export const login = async (credentials) => {
           name: response.user.name || response.user.nombre_completo || response.user.nombreCompleto,
           roles: response.user.roles || [] // Guardar los roles del usuario
         };
-        
-        console.log('Datos de usuario extraídos de response.user:', userData);
       } else if (response.data && response.data.user) {
         userData = { 
           ...userData, 
@@ -76,8 +65,6 @@ export const login = async (credentials) => {
           name: response.data.user.name || response.data.user.nombre_completo || response.data.user.nombreCompleto,
           roles: response.data.user.roles || [] // Guardar los roles del usuario
         };
-        
-        console.log('Datos de usuario extraídos de response.data.user:', userData);
       } else if (response.data && response.data.data) {
         // Estructura específica donde los datos están en response.data.data
         const userDataSource = response.data.data;
@@ -92,8 +79,6 @@ export const login = async (credentials) => {
           email: userDataSource.email,
           roles: userDataSource.roles || [] 
         };
-        
-        console.log('Datos de usuario extraídos de response.data.data:', userData);
       } else if ((response.userData) || (response.data && response.data.userData)) {
         // Algunos backends pueden devolver los datos del usuario en un campo userData
         const userDataSource = (response.userData) || (response.data && response.data.userData);
@@ -107,15 +92,11 @@ export const login = async (credentials) => {
           name: userDataSource.name || userDataSource.nombre_completo || userDataSource.nombreCompleto,
           roles: userDataSource.roles || [] 
         };
-        
-        console.log('Datos de usuario extraídos de userData:', userData);
       }
     }
     
     // Si tenemos un token, lo guardamos y creamos la información básica del usuario
     if (token) {
-      console.log('Token obtenido correctamente');
-      
       // Guardar el token en localStorage
       localStorage.setItem(TOKEN_KEY, token);
       
@@ -125,16 +106,14 @@ export const login = async (credentials) => {
         const tokenParts = token.split('.');
         if (tokenParts.length === 3) {
           const payload = JSON.parse(atob(tokenParts[1]));
-          console.log('Payload del token JWT:', payload);
           
           // Si hay información de roles en el payload, la usamos
           if (payload && payload.role) {
             userData.roles = payload.role;
-            console.log('Roles extraídos del token JWT:', userData.roles);
           }
         }
       } catch (e) {
-        console.warn('No se pudieron extraer roles del token JWT:', e);
+        // Error al decodificar el token, continuamos sin extraer roles
       }
       
       // Guardar información del usuario
@@ -150,14 +129,6 @@ export const login = async (credentials) => {
     // Si no encontramos un token, lanzamos un error
     throw new Error('No se pudo extraer el token de la respuesta del servidor');
   } catch (error) {
-    // Mejorar el log de errores para depuración
-    console.error('Error detallado en el inicio de sesión:', {
-      message: error.message,
-      statusCode: error.status || 'Desconocido',
-      stack: error.stack,
-      data: error.data
-    });
-    
     // Propagar el error para que el componente Login pueda manejarlo
     throw error;
   }
@@ -174,7 +145,7 @@ export const logout = async () => {
       await api.post('/auth/logout');
     }
   } catch (error) {
-    console.error('Error al cerrar sesión en el servidor:', error);
+    // Error al cerrar sesión en el servidor, continuamos con la limpieza local
   } finally {
     // Siempre limpiamos el almacenamiento local
     localStorage.removeItem(TOKEN_KEY);
@@ -216,8 +187,6 @@ export const hasRole = (roleName) => {
   const user = getCurrentUser();
   if (!user || !user.roles) return false;
   
-  console.log('Verificando rol:', roleName, 'en roles del usuario:', user.roles);
-  
   // Verificar si el usuario tiene el rol especificado
   return user.roles.some(role => 
     typeof role === 'string' 
@@ -232,9 +201,7 @@ export const hasRole = (roleName) => {
  * @returns {boolean} - true si el usuario es admin, false en caso contrario
  */
 export const isAdmin = () => {
-  const result = hasRole('admin');
-  console.log('¿Es administrador?', result);
-  return result;
+  return hasRole('admin');
 };
 
 /**
@@ -242,9 +209,7 @@ export const isAdmin = () => {
  * @returns {boolean} - true si el usuario es doctor, false en caso contrario
  */
 export const isDoctor = () => {
-  const result = hasRole('doctor');
-  console.log('¿Es doctor?', result);
-  return result;
+  return hasRole('doctor');
 };
 
 /**
@@ -261,7 +226,6 @@ export const refreshToken = async () => {
     
     return response.data;
   } catch (error) {
-    console.error('Error al refrescar el token:', error);
     // Si hay un error al refrescar, cerramos la sesión
     logout();
     throw error;
@@ -276,14 +240,12 @@ export const me = async () => {
   try {
     // Usar POST en lugar de GET para la ruta /auth/me
     const response = await api.post('/auth/me');
-    console.log('Respuesta completa de /auth/me:', response);
     
     let userData = null;
     
     // Manejar la estructura anidada donde los datos están en response.data.data
     if (response && response.data && response.data.data) {
       const userDataSource = response.data.data;
-      console.log('Datos de usuario en response.data.data:', userDataSource);
       
       // Extraer datos básicos
       userData = {
@@ -295,18 +257,14 @@ export const me = async () => {
       
       // Extraer first_name y last_name del objeto human si existe
       if (userDataSource.human) {
-        console.log('Objeto human encontrado:', userDataSource.human);
         userData.first_name = userDataSource.human.first_name;
         userData.last_name = userDataSource.human.last_name;
-        console.log('Nombre y apellido extraídos:', userData.first_name, userData.last_name);
       }
       
       // Extraer roles si existen
       if (userDataSource.roles && Array.isArray(userDataSource.roles)) {
         userData.roles = userDataSource.roles.map(role => role.role || role);
       }
-      
-      console.log('Datos de usuario extraídos y procesados de /auth/me:', userData);
       
       // Actualizar los datos en localStorage
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -315,7 +273,6 @@ export const me = async () => {
     } else if (response && response.data) {
       // Intentar extraer datos directamente de response.data si no hay estructura anidada
       const userDataSource = response.data;
-      console.log('Intentando extraer datos directamente de response.data:', userDataSource);
       
       userData = {
         ...userDataSource
@@ -323,24 +280,18 @@ export const me = async () => {
       
       // Extraer first_name y last_name del objeto human si existe
       if (userData.human) {
-        console.log('Objeto human encontrado en response.data:', userData.human);
         userData.first_name = userData.human.first_name;
         userData.last_name = userData.human.last_name;
-        console.log('Nombre y apellido extraídos de response.data:', userData.first_name, userData.last_name);
       }
-      
-      console.log('Datos finales del usuario:', userData);
       
       // Actualizar los datos en localStorage
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
       
       return userData;
     } else {
-      console.error('Formato de respuesta inesperado en /auth/me:', response);
       throw new Error('Formato de respuesta inesperado en /auth/me');
     }
   } catch (error) {
-    console.error('Error al obtener datos del usuario:', error);
     throw error;
   }
 };
