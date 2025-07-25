@@ -21,7 +21,8 @@ const ProtectedRoute = ({ children }) => {
   // Si no está autenticado, mostrar una alerta y redirigir a login
   if (!isAuthenticated) {
     // Solo mostrar la alerta si viene de una página interna (no al cargar directamente la ruta)
-    if (location.key) {
+    // y no es una ruta pública como la landing page
+    if (location.key && !location.pathname.includes('/login') && !location.pathname.includes('/register') && location.pathname !== '/') {
       Swal.fire({
         title: 'Sesión expirada',
         text: 'Tu sesión ha expirado o has cerrado sesión. Por favor, inicia sesión nuevamente.',

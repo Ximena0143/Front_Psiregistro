@@ -240,6 +240,89 @@ export const getPatientById = async (id) => {
   }
 };
 
+/**
+ * Obtiene los documentos de un paciente específico
+ * @param {number} patientId - ID del paciente
+ * @returns {Promise} - Promesa con los documentos del paciente
+ */
+export const getPatientDocuments = async (patientId) => {
+  try {
+    console.log(`Obteniendo documentos del paciente con ID: ${patientId}`);
+    // Usar la ruta correcta del backend (sin duplicar /api/ ya que está en la URL base)
+    const response = await api.get(`/document/gdbpi/${patientId}`);
+    console.log('Respuesta completa de getPatientDocuments:', response);
+    
+    // Verificar la estructura de la respuesta
+    if (!response || !response.data) {
+      console.warn('La respuesta no contiene datos');
+      return [];
+    }
+    
+    // La respuesta tiene la estructura { message, error, data: [...documentos] }
+    if (response.data.data && Array.isArray(response.data.data)) {
+      console.log('Documentos obtenidos correctamente:', response.data.data);
+      return response.data.data;
+    } else if (response.data && Array.isArray(response.data)) {
+      console.log('Documentos obtenidos correctamente:', response.data);
+      return response.data;
+    } else {
+      console.log('Documentos obtenidos:', response.data);
+      // Si data es un objeto con los documentos dentro
+      return response.data && response.data.data ? response.data.data : [];
+    }
+  } catch (error) {
+    console.error('Error al obtener documentos del paciente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Sube un documento para un paciente específico
+ * @param {number} patientId - ID del paciente
+ * @param {File} document - Archivo a subir
+ * @param {string} title - Título del documento
+ * @param {string} documentType - Tipo de documento (authorization, test, medical_history)
+ * @param {number} statusId - Estado del documento (1: finalized, 2: under review, 3: pending, 4: archived)
+ * @returns {Promise} - Promesa con la respuesta del servidor
+ */
+export const uploadPatientDocument = async (patientId, document, title, documentType, statusId) => {
+  try {
+    // Crear un objeto FormData para enviar el archivo y los datos
+    const formData = new FormData();
+    formData.append('patient_id', patientId);
+    formData.append('tittle', title); // Nota: el backend usa 'tittle' en lugar de 'title'
+    formData.append('document_type', documentType);
+    formData.append('status_id', statusId);
+    formData.append('document', document);
+    
+    // No es necesario especificar Content-Type para FormData
+    const options = {};
+    
+    // Realizar la petición POST
+    const response = await api.post('/document/upload', formData, options);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error al subir documento del paciente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Elimina un documento por su ID
+ * @param {number} documentId - ID del documento a eliminar
+ * @returns {Promise} - Promesa con la respuesta del servidor
+ */
+export const deletePatientDocument = async (documentId) => {
+  try {
+    const response = await api.del(`/document/delete/${documentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar documento:', error);
+    throw error;
+  }
+};
+
 // Exportar todas las funciones como un objeto para facilitar su importación
 const patientService = {
   getPatients,
@@ -250,7 +333,10 @@ const patientService = {
   restorePatient,
   forceDeletePatient,
   getIdentificationTypes,
-  getPatientById
+  getPatientById,
+  getPatientDocuments,
+  uploadPatientDocument,
+  deletePatientDocument
 };
 
 export default patientService;

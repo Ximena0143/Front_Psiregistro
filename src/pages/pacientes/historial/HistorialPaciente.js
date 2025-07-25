@@ -1,11 +1,63 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Header from '../../../components/layout/Header/Header';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Eye, Download, Upload, FileText, Trash2, ArrowLeft, Plus } from 'react-feather';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
-import { ArrowLeft, Eye, Download, FileText, Upload, Plus } from 'lucide-react';
+import Header from '../../../components/layout/Header/Header';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 import patientService from '../../../services/patient';
+
+// Función auxiliar para detectar si un documento es PDF
+const isPdfDocument = (documento) => {
+    if (!documento) return false;
+    
+    // Verificar por la URL
+    if (documento.signed_url && documento.signed_url.toLowerCase().includes('.pdf')) {
+        return true;
+    }
+    
+    // Verificar por el nombre original del archivo
+    if (documento.tituloOriginal && documento.tituloOriginal.toLowerCase().endsWith('.pdf')) {
+        return true;
+    }
+    
+    return false;
+};
+
+// Función para obtener información del estado del documento con color
+const getDocumentStatus = (statusId) => {
+    switch (parseInt(statusId)) {
+        case 1:
+            return { text: 'Finalizado', color: '#059669', bgColor: '#ECFDF5' }; // Verde
+        case 2:
+            return { text: 'En revisión', color: '#9333EA', bgColor: '#F5F3FF' }; // Morado
+        case 3:
+            return { text: 'Pendiente', color: '#F59E0B', bgColor: '#FFFBEB' }; // Amarillo
+        case 4:
+            return { text: 'Archivado', color: '#6B7280', bgColor: '#F9FAFB' }; // Gris
+        default:
+            return { text: 'Desconocido', color: '#6B7280', bgColor: '#F9FAFB' }; // Gris
+    }
+};
+
+// Función para obtener el icono según la extensión del archivo
+const getFileIcon = (documento) => {
+    if (!documento || !documento.signed_url) return <FileText size={24} color="#0891B2" />;
+    
+    const url = documento.signed_url.toLowerCase();
+    
+    if (url.includes('.pdf')) {
+        return <FileText size={24} color="#E11D48" />; // Rojo para PDF
+    } else if (url.includes('.doc') || url.includes('.docx')) {
+        return <FileText size={24} color="#2563EB" />; // Azul para Word
+    } else if (url.includes('.xls') || url.includes('.xlsx')) {
+        return <FileText size={24} color="#059669" />; // Verde para Excel
+    } else if (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png')) {
+        return <FileText size={24} color="#7C3AED" />; // Morado para imágenes
+    } else {
+        return <FileText size={24} color="#0891B2" />; // Color por defecto
+    }
+};
 
 const HistorialPaciente = () => {
     const navigate = useNavigate();
@@ -18,12 +70,30 @@ const HistorialPaciente = () => {
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [newDocument, setNewDocument] = useState({
         titulo: '',
-        archivo: null
+        archivo: null,
+        document_type: 'medical_history', // Valor por defecto: medical_history
+        status_id: 1 // Valor por defecto: 1 (finalized)
     });
+    
+    // Opciones para tipos de documento
+    const documentTypes = [
+        { value: 'authorization', label: 'Autorización' },
+        { value: 'test', label: 'Test' },
+        { value: 'medical_history', label: 'Historia Médica' }
+    ];
+    
+    // Opciones para estados de documento
+    const documentStatuses = [
+        { value: 1, label: 'Finalizado' },
+        { value: 2, label: 'En revisión' },
+        { value: 3, label: 'Pendiente' },
+        { value: 4, label: 'Archivado' }
+    ];
     const [selectedFileName, setSelectedFileName] = useState('');
     const fileInputRef = useRef(null);
     const [error, setError] = useState(null);
     const [tiposIdentificacion, setTiposIdentificacion] = useState([]);
+    const [loadingDocuments, setLoadingDocuments] = useState(false);
 
     // Cargar los tipos de identificación
     useEffect(() => {
@@ -112,57 +182,9 @@ const HistorialPaciente = () => {
                 
                 setPaciente(pacienteData);
                 
-                // Mantenemos los documentos de ejemplo por ahora
-                // En una implementación futura, estos vendrían del backend
-                const documentosData = [
-                    {
-                        id: 1,
-                        titulo: 'Test de Ansiedad',
-                        tipo: 'Evaluación Psicológica',
-                        fechaCreacion: '2023-08-15',
-                        fechaActualizacion: '2023-08-15',
-                        estado: 'Completado',
-                        icono: 'FileCheck'
-                    },
-                    {
-                        id: 2,
-                        titulo: 'Test de Depresión de Beck',
-                        tipo: 'Evaluación Psicológica',
-                        fechaCreacion: '2023-09-23',
-                        fechaActualizacion: '2023-09-25',
-                        estado: 'Completado',
-                        icono: 'FileCheck'
-                    },
-                    {
-                        id: 3,
-                        titulo: 'Evaluación Cognitiva',
-                        tipo: 'Evaluación Neuropsicológica',
-                        fechaCreacion: '2023-10-10',
-                        fechaActualizacion: '2023-10-15',
-                        estado: 'En revisión',
-                        icono: 'FileText'
-                    },
-                    {
-                        id: 4,
-                        titulo: 'Plan de Intervención',
-                        tipo: 'Documento Clínico',
-                        fechaCreacion: '2023-11-05',
-                        fechaActualizacion: '2023-11-05',
-                        estado: 'Pendiente',
-                        icono: 'FileX'
-                    },
-                    {
-                        id: 5,
-                        titulo: 'Evaluación de Personalidad',
-                        tipo: 'Evaluación Psicológica',
-                        fechaCreacion: '2024-01-20',
-                        fechaActualizacion: '2024-01-25',
-                        estado: 'Completado',
-                        icono: 'FileCheck'
-                    }
-                ];
+                // Cargar los documentos del paciente
+                fetchPatientDocuments(patient.id);
                 
-                setDocumentos(documentosData);
             } catch (err) {
                 console.error('Error al cargar datos del paciente:', err);
                 setError(err.message || 'Error al cargar datos del paciente');
@@ -184,6 +206,70 @@ const HistorialPaciente = () => {
         fetchPatientData();
     }, [id, navigate, tiposIdentificacion]);
 
+    // Función para cargar los documentos del paciente
+    const fetchPatientDocuments = async (patientId) => {
+        try {
+            setLoadingDocuments(true);
+            const documentosData = await patientService.getPatientDocuments(patientId);
+            console.log('Documentos obtenidos:', documentosData);
+            
+            // Transformar los documentos al formato que espera el componente
+            const documentosFormateados = documentosData.map(doc => {
+                // Extraer un título más amigable del nombre del archivo
+                let tituloAmigable = doc.tittle || '';
+                
+                // Eliminar prefijos como 'Auth-', 'Test-', 'Medical-history-'
+                tituloAmigable = tituloAmigable
+                    .replace(/^Auth-/i, '')
+                    .replace(/^Test-/i, '')
+                    .replace(/^Medical-history-/i, '');
+                
+                // Eliminar códigos numéricos al final (como 12345678911)
+                tituloAmigable = tituloAmigable.replace(/-\d+(\.\w+)?$/, '');
+                
+                // Eliminar extensión de archivo
+                tituloAmigable = tituloAmigable.replace(/\.[^.]+$/, '');
+                
+                // Reemplazar guiones por espacios y capitalizar palabras
+                tituloAmigable = tituloAmigable
+                    .replace(/-/g, ' ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                
+                return {
+                    id: doc.id,
+                    titulo: tituloAmigable, // Título amigable extraído del nombre del archivo
+                    tituloOriginal: doc.tittle, // Guardamos el título original por si se necesita
+                    tipo: doc.document_type || 'Documento',
+                    fechaCreacion: new Date().toISOString().split('T')[0], // Usamos fecha actual ya que no viene en la respuesta
+                    fechaActualizacion: new Date().toISOString().split('T')[0],
+                    estado: doc.status_id === 1 ? 'Completado' : 'En proceso',
+                    icono: 'FileText',
+                    signed_url: doc.signed_url,
+                    expires_in: doc.expires_in,
+                    status_id: doc.status_id // Añadimos el status_id para mostrarlo en la UI
+                };
+            });
+            
+            console.log('Documentos formateados con status_id:', documentosFormateados);
+            setDocumentos(documentosFormateados);
+        } catch (error) {
+            console.error('Error al cargar documentos del paciente:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudieron cargar los documentos del paciente',
+                icon: 'error',
+                confirmButtonColor: '#FB8500',
+                timer: 3000
+            });
+            // Si hay un error, dejamos la lista de documentos vacía
+            setDocumentos([]);
+        } finally {
+            setLoadingDocuments(false);
+        }
+    };
+
     const handleGoBack = () => {
         navigate(-1);
     };
@@ -191,6 +277,68 @@ const HistorialPaciente = () => {
     const handleViewDocument = (documento) => {
         setPreviewDocument(documento);
         setShowPreview(true);
+    };
+    
+    const handleDownloadDocument = (documento) => {
+        if (documento.signed_url) {
+            // Abrir el documento directamente en una nueva pestaña sin mostrar anuncio
+            window.open(documento.signed_url, '_blank');
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se puede descargar el documento. URL no disponible.',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+        }
+    };
+    
+    const handleDeleteDocument = async (documentId) => {
+        try {
+            // Mostrar confirmación antes de eliminar
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'El documento será eliminado permanentemente',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (result.isConfirmed) {
+                // Mostrar loading mientras se elimina
+                Swal.fire({
+                    title: 'Eliminando documento...',
+                    text: 'Por favor espera',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Llamar al servicio para eliminar el documento
+                await patientService.deletePatientDocument(documentId);
+                
+                // Actualizar la lista de documentos
+                fetchPatientDocuments(paciente.id);
+                
+                // Mostrar mensaje de éxito
+                Swal.fire(
+                    'Eliminado',
+                    'El documento ha sido eliminado correctamente',
+                    'success'
+                );
+            }
+        } catch (error) {
+            console.error('Error al eliminar documento:', error);
+            Swal.fire(
+                'Error',
+                'No se pudo eliminar el documento. Inténtalo de nuevo.',
+                'error'
+            );
+        }
     };
 
     const handleClosePreview = () => {
@@ -206,26 +354,28 @@ const HistorialPaciente = () => {
         setShowUploadModal(false);
         setNewDocument({
             titulo: '',
-            archivo: null
+            archivo: null,
+            document_type: 'medical_history',
+            status_id: 1
         });
         setSelectedFileName('');
     };
 
     const handleDocumentInputChange = (e) => {
         const { name, value } = e.target;
-        setNewDocument({
-            ...newDocument,
-            [name]: value
-        });
+        setNewDocument(prev => ({
+            ...prev,
+            [name]: name === 'status_id' ? parseInt(value, 10) : value
+        }));
     };
 
     const handleFileSelect = (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            setNewDocument({
-                ...newDocument,
+            setNewDocument(prev => ({
+                ...prev,
                 archivo: file
-            });
+            }));
             setSelectedFileName(file.name);
         }
     };
@@ -234,52 +384,84 @@ const HistorialPaciente = () => {
         fileInputRef.current.click();
     };
 
-    const handleUploadDocument = () => {
-        // Aquí iría la lógica real para subir el documento al servidor
-        console.log('Subiendo documento:', newDocument);
-        
-        // Añadimos el documento nuevo a la lista (simulación)
-        const fechaActual = new Date().toISOString().split('T')[0];
-        const nuevoDocumento = {
-            id: documentos.length + 1,
-            titulo: newDocument.titulo,
-            fechaCreacion: fechaActual,
-            fechaActualizacion: fechaActual,
-            icono: 'FileText'
-        };
-        
-        setDocumentos([nuevoDocumento, ...documentos]);
-        
-        // Mostrar alerta de éxito
-        Swal.fire({
-            title: 'Documento subido',
-            text: 'El documento se ha subido correctamente',
-            icon: 'success',
-            confirmButtonColor: '#FB8500',
-            timer: 2000,
-            showConfirmButton: false
-        });
-        
-        // Cerrar el modal
-        handleCloseUploadModal();
-    };
-
-    const handleDownloadDocument = (documento) => {
-        // Aquí iría la lógica real para descargar el documento
-        console.log('Descargando documento:', documento);
-        
-        // Simulamos la descarga
-        setTimeout(() => {
+    const handleUploadDocument = async () => {
+        try {
+            // Verificar que tenemos todos los datos necesarios
+            if (!newDocument.titulo || !newDocument.archivo || !paciente?.id) {
+                throw new Error('Faltan datos requeridos para subir el documento');
+            }
+            
+            // Mostrar indicador de carga
             Swal.fire({
-                title: 'Descarga completada',
-                text: `El documento "${documento.titulo}" se ha descargado correctamente`,
+                title: 'Subiendo documento...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Log detallado de los datos que se van a enviar
+            console.log('Datos del documento a subir:', {
+                patientId: paciente.id,
+                document: {
+                    name: newDocument.archivo?.name,
+                    type: newDocument.archivo?.type,
+                    size: newDocument.archivo?.size
+                },
+                title: newDocument.titulo,
+                documentType: newDocument.document_type,
+                statusId: newDocument.status_id
+            });
+            
+            // Convertir status_id a número si es string
+            const statusId = typeof newDocument.status_id === 'string' 
+                ? parseInt(newDocument.status_id, 10) 
+                : newDocument.status_id;
+                
+            // Llamar al servicio para subir el documento
+            const response = await patientService.uploadPatientDocument(
+                paciente.id,
+                newDocument.archivo,
+                newDocument.titulo,
+                newDocument.document_type,
+                statusId
+            );
+            
+            console.log('Respuesta de subida:', response);
+            
+            // Cerrar el indicador de carga
+            Swal.close();
+            
+            // Mostrar alerta de éxito
+            Swal.fire({
+                title: 'Documento subido',
+                text: 'El documento se ha subido correctamente',
                 icon: 'success',
                 confirmButtonColor: '#FB8500',
-                timer: 3000,
+                timer: 2000,
                 showConfirmButton: false
             });
-        }, 1500);
+            
+            // Actualizar la lista de documentos
+            fetchPatientDocuments(paciente.id);
+            
+            // Cerrar el modal
+            handleCloseUploadModal();
+            
+        } catch (error) {
+            console.error('Error al subir documento:', error);
+            
+            Swal.fire({
+                title: 'Error',
+                text: error.message || 'No se pudo subir el documento',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+        }
     };
+
+    // La función handleDownloadDocument ya está definida arriba
 
     const renderDocumentIcon = (icono, color) => {
         switch(icono) {
@@ -374,43 +556,118 @@ const HistorialPaciente = () => {
                             </button>
                         </div>
                         
-                        <div className={styles.documentosGrid}>
-                            {documentos.map(documento => (
-                                <div className={styles.documentCard} key={documento.id}>
-                                    <div className={styles.documentHeader}>
-                                        <div className={styles.documentIcon}>
-                                            {renderDocumentIcon(documento.icono, "#219EBC")}
-                                        </div>
-                                        <div className={styles.documentTitle}>
-                                            <h5>{documento.titulo}</h5>
-                                            <span className={styles.documentType}>{documento.tipo}</span>
-                                        </div>
-                                    </div>
-                                    <div className={styles.documentInfo}>
-                                        <p><strong>Creado:</strong> {documento.fechaCreacion}</p>
-                                        <p><strong>Actualizado:</strong> {documento.fechaActualizacion}</p>
-                                    </div>
-                                    <div className={styles.documentActions}>
-                                        <button 
-                                            className={styles.actionButton}
-                                            title="Ver documento"
-                                            onClick={() => handleViewDocument(documento)}
-                                        >
-                                            <Eye size={18} color="#059669" />
-                                            <span>Ver</span>
-                                        </button>
-                                        <button 
-                                            className={styles.actionButton}
-                                            title="Descargar documento"
-                                            onClick={() => handleDownloadDocument(documento)}
-                                        >
-                                            <Download size={18} color="#7C3AED" />
-                                            <span>Descargar</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        {loadingDocuments ? (
+                            <div className={styles.loadingContainer}>
+                                <div className={styles.spinner}></div>
+                                <p>Cargando documentos...</p>
+                            </div>
+                        ) : documentos.length > 0 ? (
+                            <div className={styles.documentosContainer}>
+                                {/* Agrupar documentos por tipo */}
+                                {(() => {
+                                    // Agrupar documentos por tipo
+                                    const documentosPorTipo = {
+                                        authorization: documentos.filter(doc => doc.tipo === 'authorization'),
+                                        test: documentos.filter(doc => doc.tipo === 'test'),
+                                        medical_history: documentos.filter(doc => doc.tipo === 'medical_history')
+                                    };
+                                    
+                                    // Mapeo de tipos a nombres en español
+                                    const tiposNombres = {
+                                        authorization: 'Autorizaciones',
+                                        test: 'Tests',
+                                        medical_history: 'Historia Médica'
+                                    };
+                                    
+                                    // Renderizar cada grupo
+                                    return Object.entries(documentosPorTipo).map(([tipo, docs]) => {
+                                        if (docs.length === 0) return null;
+                                        
+                                        return (
+                                            <div key={tipo} className={styles.documentGroup}>
+                                                <h4 className={styles.groupTitle}>{tiposNombres[tipo]} ({docs.length})</h4>
+                                                <div className={styles.documentosGrid}>
+                                                    {docs.map(documento => (
+                                                        <div className={styles.documentCard} key={documento.id}>
+                                                            <div className={styles.documentHeader}>
+                                                                <div className={styles.documentIcon}>
+                                                                    {getFileIcon(documento)}
+                                                                </div>
+                                                                <div className={styles.documentTitle}>
+                                                                    <h5>{documento.titulo}</h5>
+                                                                    <div className={styles.documentMeta}>
+                                                                        <span className={styles.documentType}>{documento.tipo}</span>
+                                                                        <div 
+                                                                            className={styles.documentStatus}
+                                                                            style={{
+                                                                                backgroundColor: documento.status_id ? getDocumentStatus(documento.status_id).bgColor : '#F9FAFB',
+                                                                                color: documento.status_id ? getDocumentStatus(documento.status_id).color : '#6B7280',
+                                                                                border: `1px solid ${documento.status_id ? getDocumentStatus(documento.status_id).color : '#E5E7EB'}`,
+                                                                                padding: '2px 8px',
+                                                                                borderRadius: '4px',
+                                                                                fontSize: '0.75rem',
+                                                                                fontWeight: '500',
+                                                                                display: 'inline-block',
+                                                                                marginLeft: '8px',
+                                                                                opacity: '0.9'
+                                                                            }}
+                                                                        >
+                                                                            {documento.status_id ? getDocumentStatus(documento.status_id).text : 'Sin estado'}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className={styles.documentInfo}>
+                                                                <p><strong>Creado:</strong> {documento.fechaCreacion}</p>
+                                                                <p><strong>Actualizado:</strong> {documento.fechaActualizacion}</p>
+                                                                {documento.expires_in && (
+                                                                    <p><strong>Expira en:</strong> {documento.expires_in}</p>
+                                                                )}
+                                                            </div>
+                                                            <div className={styles.documentActions}>
+                                                                <button 
+                                                                    className={styles.actionButton}
+                                                                    title="Ver documento"
+                                                                    onClick={() => handleViewDocument(documento)}
+                                                                >
+                                                                    <Eye size={18} color="#0891B2" />
+                                                                    <span>Ver</span>
+                                                                </button>
+                                                                
+                                                                {/* Mostrar botón de descarga solo para formatos que no sean PDF */}
+                                                                {!isPdfDocument(documento) && (
+                                                                    <button 
+                                                                        className={styles.actionButton}
+                                                                        title="Descargar documento"
+                                                                        onClick={() => handleDownloadDocument(documento)}
+                                                                    >
+                                                                        <Download size={18} color="#7C3AED" />
+                                                                        <span>Descargar</span>
+                                                                    </button>
+                                                                )}
+                                                                
+                                                                <button 
+                                                                    className={styles.actionButton}
+                                                                    title="Eliminar documento"
+                                                                    onClick={() => handleDeleteDocument(documento.id)}
+                                                                >
+                                                                    <Trash2 size={18} color="#E11D48" />
+                                                                    <span>Eliminar</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                                })()} 
+                            </div>
+                        ) : (
+                            <div className={styles.noDocuments}>
+                                <p>No hay documentos disponibles para este paciente.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -424,15 +681,92 @@ const HistorialPaciente = () => {
                             <button onClick={handleClosePreview} className={styles.closeButton}>×</button>
                         </div>
                         <div className={styles.previewContent}>
-                            <div className={styles.documentPreview}>
-                                <div className={styles.previewPlaceholder}>
-                                    <FileText size={64} color="#219EBC" />
-                                    <p>Vista previa del documento: {previewDocument.titulo}</p>
-                                    <p className={styles.previewNote}>
-                                        (Esta es una simulación de vista previa, en una aplicación real aquí se mostraría el contenido del documento)
-                                    </p>
+                            {previewDocument.signed_url ? (
+                                // Determinar si es un PDF para mostrar en iframe o mostrar placeholder para otros formatos
+                                (() => {
+                                    // Verificar si la URL o el título contiene indicación del tipo de archivo
+                                    const isPdf = previewDocument.signed_url.toLowerCase().includes('.pdf') || 
+                                                 (previewDocument.tituloOriginal && previewDocument.tituloOriginal.toLowerCase().endsWith('.pdf'));
+                                    
+                                    // Determinar el tipo de archivo para mostrar el icono adecuado
+                                    let fileType = 'otro';
+                                    let fileIcon = <FileText size={64} color="#219EBC" />;
+                                    let fileTypeText = 'documento';
+                                    
+                                    if (isPdf) {
+                                        // Para PDF, mostrar en iframe
+                                        return (
+                                            <iframe 
+                                                src={previewDocument.signed_url} 
+                                                title={previewDocument.titulo}
+                                                className={styles.documentIframe}
+                                                width="100%"
+                                                height="500px"
+                                            />
+                                        );
+                                    } else if (previewDocument.signed_url.toLowerCase().includes('.doc') || 
+                                              previewDocument.signed_url.toLowerCase().includes('.docx') || 
+                                              (previewDocument.tituloOriginal && 
+                                               (previewDocument.tituloOriginal.toLowerCase().endsWith('.doc') || 
+                                                previewDocument.tituloOriginal.toLowerCase().endsWith('.docx')))) {
+                                        // Para Word
+                                        fileType = 'word';
+                                        fileIcon = <FileText size={64} color="#2B5797" />;
+                                        fileTypeText = 'documento Word';
+                                    } else if (previewDocument.signed_url.toLowerCase().includes('.xls') || 
+                                              previewDocument.signed_url.toLowerCase().includes('.xlsx') || 
+                                              (previewDocument.tituloOriginal && 
+                                               (previewDocument.tituloOriginal.toLowerCase().endsWith('.xls') || 
+                                                previewDocument.tituloOriginal.toLowerCase().endsWith('.xlsx')))) {
+                                        // Para Excel
+                                        fileType = 'excel';
+                                        fileIcon = <FileText size={64} color="#217346" />;
+                                        fileTypeText = 'hoja de cálculo Excel';
+                                    } else if (previewDocument.signed_url.toLowerCase().includes('.jpg') || 
+                                              previewDocument.signed_url.toLowerCase().includes('.jpeg') || 
+                                              previewDocument.signed_url.toLowerCase().includes('.png') || 
+                                              previewDocument.signed_url.toLowerCase().includes('.gif') || 
+                                              (previewDocument.tituloOriginal && 
+                                               (previewDocument.tituloOriginal.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i)))) {
+                                        // Para imágenes, podríamos mostrarlas directamente
+                                        return (
+                                            <div className={styles.imagePreview}>
+                                                <img 
+                                                    src={previewDocument.signed_url} 
+                                                    alt={previewDocument.titulo}
+                                                    style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+                                                />
+                                            </div>
+                                        );
+                                    }
+                                    
+                                    // Para otros formatos, mostrar placeholder
+                                    return (
+                                        <div className={styles.documentPreview}>
+                                            <div className={styles.previewPlaceholder}>
+                                                {fileIcon}
+                                                <p>Vista previa del {fileTypeText}: <strong>{previewDocument.titulo}</strong></p>
+                                                <p className={styles.previewNote}>
+                                                    No se puede mostrar una vista previa para este tipo de archivo.
+                                                </p>
+                                                <p className={styles.previewTip}>
+                                                    Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })()
+                            ) : (
+                                <div className={styles.documentPreview}>
+                                    <div className={styles.previewPlaceholder}>
+                                        <FileText size={64} color="#219EBC" />
+                                        <p>Vista previa del documento: {previewDocument.titulo}</p>
+                                        <p className={styles.previewNote}>
+                                            (No se puede mostrar la vista previa del documento)
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                         <div className={styles.previewActions}>
                             <button
@@ -441,16 +775,20 @@ const HistorialPaciente = () => {
                             >
                                 Cerrar
                             </button>
-                            <button
-                                className={styles.downloadPreviewButton}
-                                onClick={() => {
-                                    handleDownloadDocument(previewDocument);
-                                    handleClosePreview();
-                                }}
-                            >
-                                <Download size={16} color="#7C3AED" />
-                                Descargar
-                            </button>
+                            
+                            {/* Mostrar botón de descarga solo para documentos que no sean PDF */}
+                            {!isPdfDocument(previewDocument) && (
+                                <button
+                                    className={styles.downloadPreviewButton}
+                                    onClick={() => {
+                                        handleDownloadDocument(previewDocument);
+                                        handleClosePreview();
+                                    }}
+                                >
+                                    <Download size={16} color="#7C3AED" />
+                                    Descargar
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -476,6 +814,42 @@ const HistorialPaciente = () => {
                                     placeholder="Nombre del documento"
                                     required
                                 />
+                            </div>
+                            
+                            <div className={styles.formField}>
+                                <label htmlFor="document_type">Tipo de documento *</label>
+                                <select
+                                    id="document_type"
+                                    name="document_type"
+                                    value={newDocument.document_type}
+                                    onChange={handleDocumentInputChange}
+                                    required
+                                    className={styles.selectField}
+                                >
+                                    {documentTypes.map(type => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className={styles.formField}>
+                                <label htmlFor="status_id">Estado del documento *</label>
+                                <select
+                                    id="status_id"
+                                    name="status_id"
+                                    value={newDocument.status_id}
+                                    onChange={handleDocumentInputChange}
+                                    required
+                                    className={styles.selectField}
+                                >
+                                    {documentStatuses.map(status => (
+                                        <option key={status.value} value={status.value}>
+                                            {status.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className={styles.formField}>

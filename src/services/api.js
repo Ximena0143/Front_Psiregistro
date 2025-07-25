@@ -17,7 +17,12 @@ let sessionExpiredMessageShown = false;
 // Función para manejar errores de autenticación
 const handleAuthError = (error) => {
   // Si el error es 401 (Unauthorized) o 403 (Forbidden) y no hemos mostrado el mensaje aún
-  if ((error.status === 401 || error.status === 403) && !sessionExpiredMessageShown) {
+  // Y no estamos en una ruta pública (landing page, login, register)
+  const isPublicRoute = window.location.pathname === '/' || 
+                       window.location.pathname.includes('/login') || 
+                       window.location.pathname.includes('/register');
+  
+  if ((error.status === 401 || error.status === 403) && !sessionExpiredMessageShown && !isPublicRoute) {
     // Importar SweetAlert2 dinámicamente para evitar problemas de dependencia circular
     import('sweetalert2').then((Swal) => {
       Swal.default.fire({
@@ -119,13 +124,20 @@ export const post = async (endpoint, data = {}, options = {}) => {
     let config = {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json, text/plain, */*',
         ...options.headers
       },
-      body: JSON.stringify(data),
       ...options
     };
+    
+    // Manejar FormData de manera especial (no establecer Content-Type ni usar JSON.stringify)
+    if (data instanceof FormData) {
+      config.body = data;
+    } else {
+      // Para datos normales JSON
+      config.headers['Content-Type'] = 'application/json';
+      config.body = JSON.stringify(data);
+    }
     
     // Aplicar interceptor si existe
     if (interceptors.request) {
