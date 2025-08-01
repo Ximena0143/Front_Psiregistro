@@ -163,7 +163,7 @@ export const forceDeletePatient = async (id) => {
  */
 export const getIdentificationTypes = async () => {
   try {
-    const response = await api.get('/patient/identification-types');
+    const response = await api.get('/identification-type/index');
     return response.data;
   } catch (error) {
     console.error('Error al obtener tipos de identificación:', error);

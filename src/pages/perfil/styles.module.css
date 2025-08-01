@@ -210,22 +210,22 @@
     }
 }
 
-.formField {
+.formGroup {
     display: flex;
     flex-direction: column;
     flex: 1;
     gap: 10px;
 }
 
-.formField label {
+.formGroup label {
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
     font-size: 15px;
     color: #333;
 }
 
-.formField input,
-.formField select {
+.formGroup input,
+.formGroup select {
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     padding: 12px 16px;
@@ -236,7 +236,7 @@
     height: 46px;
 }
 
-.formField textarea {
+.formGroup textarea {
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     padding: 12px 16px;
@@ -250,17 +250,17 @@
     line-height: 1.5;
 }
 
-.formField input:focus,
-.formField select:focus,
-.formField textarea:focus {
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
     outline: none;
     border-color: #FB8500;
     box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.1);
 }
 
-.formField input:disabled,
-.formField select:disabled,
-.formField textarea:disabled {
+.formGroup input:disabled,
+.formGroup select:disabled,
+.formGroup textarea:disabled {
     background-color: #f8f9fa;
     color: #4B5563;
     border-color: #E6EDF0;
@@ -380,19 +380,19 @@
         height: 120px;
     }
     
-    .formField label {
+    .formGroup label {
         font-size: 14px;
     }
     
-    .formField input,
-    .formField select,
-    .formField textarea {
+    .formGroup input,
+    .formGroup select,
+    .formGroup textarea {
         font-size: 14px;
         padding: 10px 14px;
     }
     
-    .formField input,
-    .formField select {
+    .formGroup input,
+    .formGroup select {
         height: 42px;
     }
     
@@ -405,4 +405,18 @@
         width: 100%;
         margin-top: 10px;
     }
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fullWidth {
+    width: 100%;
 }
