@@ -272,6 +272,13 @@ export const getPatientDocuments = async (patientId) => {
     }
   } catch (error) {
     console.error('Error al obtener documentos del paciente:', error);
+    // Si es un error 404 (documentos no encontrados), devolver array vacío
+    const is404 = (error.status === 404) || (error.response && error.response.status === 404);
+    const isNotFoundMsg = error.message && error.message.toLowerCase().includes('documents not found');
+    if (is404 || isNotFoundMsg) {
+      console.warn('No se encontraron documentos para el paciente con ID:', patientId);
+      return [];
+    }
     throw error;
   }
 };

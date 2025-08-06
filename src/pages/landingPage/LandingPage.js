@@ -93,7 +93,7 @@ const LandingPage = () => {
                 <section id="Inicio">
                     <div className={styles.container_inicio}>
                         <div className={styles.item1_inicio}>
-                            <p className={styles.subtitulo}>Empresa de salud integral de psicólogos</p>
+                            <p className={styles.subtitulo}>Empresa De Salud Integral De Psicólogos</p>
                             <h3>Tu centro de salud psicológica de confianza</h3>
                         </div>
                         <div className={styles.item2_inicio}>
