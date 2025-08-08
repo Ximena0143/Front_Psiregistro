@@ -21,6 +21,11 @@ const isPdfDocument = (documento) => {
         return true;
     }
     
+    // Verificar por el título
+    if (documento.titulo && documento.titulo.toLowerCase().includes('pdf')) {
+        return true;
+    }
+    
     return false;
 };
 
@@ -42,20 +47,36 @@ const getDocumentStatus = (statusId) => {
 
 // Función para obtener el icono según la extensión del archivo
 const getFileIcon = (documento) => {
+    // Si no hay documento o URL, devolver icono por defecto
     if (!documento || !documento.signed_url) return <FileText size={24} color="#0891B2" />;
     
     const url = documento.signed_url.toLowerCase();
+    const tituloOriginal = (documento.tituloOriginal || '').toLowerCase();
     
-    if (url.includes('.pdf')) {
+    // Verificar por extensiones en la URL o en el título original
+    if (url.includes('.pdf') || tituloOriginal.endsWith('.pdf')) {
         return <FileText size={24} color="#E11D48" />; // Rojo para PDF
-    } else if (url.includes('.doc') || url.includes('.docx')) {
+    } else if (url.includes('.doc') || url.includes('.docx') || 
+               tituloOriginal.endsWith('.doc') || tituloOriginal.endsWith('.docx')) {
         return <FileText size={24} color="#2563EB" />; // Azul para Word
-    } else if (url.includes('.xls') || url.includes('.xlsx')) {
+    } else if (url.includes('.xls') || url.includes('.xlsx') || 
+               tituloOriginal.endsWith('.xls') || tituloOriginal.endsWith('.xlsx')) {
         return <FileText size={24} color="#059669" />; // Verde para Excel
-    } else if (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png')) {
+    } else if (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png') ||
+               tituloOriginal.endsWith('.jpg') || tituloOriginal.endsWith('.jpeg') || 
+               tituloOriginal.endsWith('.png')) {
         return <FileText size={24} color="#7C3AED" />; // Morado para imágenes
     } else {
-        return <FileText size={24} color="#0891B2" />; // Color por defecto
+        // Determinar por tipo de documento si está disponible
+        if (documento.tipo === 'medical_history') {
+            return <FileText size={24} color="#E11D48" />; // Rojo para historia médica
+        } else if (documento.tipo === 'authorization') {
+            return <FileText size={24} color="#2563EB" />; // Azul para autorizaciones
+        } else if (documento.tipo === 'test') {
+            return <FileText size={24} color="#059669" />; // Verde para pruebas
+        } else {
+            return <FileText size={24} color="#0891B2" />; // Color por defecto
+        }
     }
 };
 
@@ -68,6 +89,8 @@ const HistorialPaciente = () => {
     const [showPreview, setShowPreview] = useState(false);
     const [previewDocument, setPreviewDocument] = useState(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
+    
+    // Ya no necesitamos los estados para el visor PDF avanzado
     const [newDocument, setNewDocument] = useState({
         titulo: '',
         archivo: null,
@@ -246,7 +269,7 @@ const HistorialPaciente = () => {
                     fechaActualizacion: new Date().toISOString().split('T')[0],
                     estado: doc.status_id === 1 ? 'Completado' : 'En proceso',
                     icono: 'FileText',
-                    signed_url: doc.signed_url,
+                    signed_url: doc.document_path, // Usar document_path que es el campo que viene del backend
                     expires_in: doc.expires_in,
                     status_id: doc.status_id // Añadimos el status_id para mostrarlo en la UI
                 };
@@ -280,10 +303,19 @@ const HistorialPaciente = () => {
     };
     
     const handleDownloadDocument = (documento) => {
-        if (documento.signed_url) {
-            // Abrir el documento directamente en una nueva pestaña sin mostrar anuncio
-            window.open(documento.signed_url, '_blank');
+        // Verificar que documento y signed_url existan
+        if (documento && documento.signed_url) {
+            console.log('Intentando descargar documento:', documento.titulo, 'URL:', documento.signed_url);
+            // Crear un elemento a invisible para forzar la descarga
+            const link = document.createElement('a');
+            link.href = documento.signed_url;
+            link.target = '_blank';
+            link.download = documento.tituloOriginal || documento.titulo || 'documento';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         } else {
+            console.error('Error en descarga - URL no disponible:', documento);
             Swal.fire({
                 title: 'Error',
                 text: 'No se puede descargar el documento. URL no disponible.',
@@ -672,7 +704,7 @@ const HistorialPaciente = () => {
                 </div>
             </div>
 
-            {/* Modal de vista previa */}
+            {/* Modal de Previsualización */}
             {showPreview && previewDocument && (
                 <div className={styles.previewOverlay}>
                     <div className={styles.previewContainer}>
@@ -682,59 +714,64 @@ const HistorialPaciente = () => {
                         </div>
                         <div className={styles.previewContent}>
                             {previewDocument.signed_url ? (
-                                // Determinar si es un PDF para mostrar en iframe o mostrar placeholder para otros formatos
+                                // Determinar el tipo de archivo para mostrar la vista previa adecuada
                                 (() => {
                                     // Verificar si la URL o el título contiene indicación del tipo de archivo
-                                    const isPdf = previewDocument.signed_url.toLowerCase().includes('.pdf') || 
-                                                 (previewDocument.tituloOriginal && previewDocument.tituloOriginal.toLowerCase().endsWith('.pdf'));
-                                    
-                                    // Determinar el tipo de archivo para mostrar el icono adecuado
-                                    let fileType = 'otro';
+                                    const isPdf = isPdfDocument(previewDocument);
+                                    let fileType = 'desconocido';
                                     let fileIcon = <FileText size={64} color="#219EBC" />;
                                     let fileTypeText = 'documento';
                                     
+                                    // Para PDFs, usar iframe que muestra directamente el documento
                                     if (isPdf) {
-                                        // Para PDF, mostrar en iframe
+                                        console.log("Mostrando PDF en iframe:", previewDocument.signed_url);
                                         return (
-                                            <iframe 
-                                                src={previewDocument.signed_url} 
-                                                title={previewDocument.titulo}
-                                                className={styles.documentIframe}
-                                                width="100%"
-                                                height="500px"
-                                            />
+                                            <div className={styles.pdfViewer}>
+                                                <iframe
+                                                    src={previewDocument.signed_url}
+                                                    title={previewDocument.titulo || "Vista previa de PDF"}
+                                                    className={styles.pdfIframe}
+                                                    width="100%"
+                                                    height="600px"
+                                                    frameBorder="0"
+                                                    allowFullScreen
+                                                />
+                                            </div>
                                         );
-                                    } else if (previewDocument.signed_url.toLowerCase().includes('.doc') || 
-                                              previewDocument.signed_url.toLowerCase().includes('.docx') || 
-                                              (previewDocument.tituloOriginal && 
-                                               (previewDocument.tituloOriginal.toLowerCase().endsWith('.doc') || 
-                                                previewDocument.tituloOriginal.toLowerCase().endsWith('.docx')))) {
-                                        // Para Word
+                                    }
+                                    
+                                    // Para documentos de Word, mostrar icono de Word
+                                    if (previewDocument.signed_url.toLowerCase().includes('.doc') || 
+                                        previewDocument.signed_url.toLowerCase().includes('.docx') ||
+                                        (previewDocument.tituloOriginal && 
+                                         (previewDocument.tituloOriginal.toLowerCase().endsWith('.doc') || 
+                                          previewDocument.tituloOriginal.toLowerCase().endsWith('.docx')))) {
                                         fileType = 'word';
-                                        fileIcon = <FileText size={64} color="#2B5797" />;
+                                        fileIcon = <FileText size={64} color="#2563EB" />;
                                         fileTypeText = 'documento Word';
-                                    } else if (previewDocument.signed_url.toLowerCase().includes('.xls') || 
-                                              previewDocument.signed_url.toLowerCase().includes('.xlsx') || 
-                                              (previewDocument.tituloOriginal && 
-                                               (previewDocument.tituloOriginal.toLowerCase().endsWith('.xls') || 
-                                                previewDocument.tituloOriginal.toLowerCase().endsWith('.xlsx')))) {
-                                        // Para Excel
+                                    }
+                                    
+                                    // Para hojas de cálculo Excel
+                                    else if (previewDocument.signed_url.toLowerCase().includes('.xls') || 
+                                             previewDocument.signed_url.toLowerCase().includes('.xlsx') ||
+                                             (previewDocument.tituloOriginal && 
+                                              (previewDocument.tituloOriginal.toLowerCase().endsWith('.xls') || 
+                                               previewDocument.tituloOriginal.toLowerCase().endsWith('.xlsx')))) {
                                         fileType = 'excel';
-                                        fileIcon = <FileText size={64} color="#217346" />;
-                                        fileTypeText = 'hoja de cálculo Excel';
-                                    } else if (previewDocument.signed_url.toLowerCase().includes('.jpg') || 
-                                              previewDocument.signed_url.toLowerCase().includes('.jpeg') || 
-                                              previewDocument.signed_url.toLowerCase().includes('.png') || 
-                                              previewDocument.signed_url.toLowerCase().includes('.gif') || 
-                                              (previewDocument.tituloOriginal && 
-                                               (previewDocument.tituloOriginal.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i)))) {
-                                        // Para imágenes, podríamos mostrarlas directamente
+                                        fileIcon = <FileText size={64} color="#059669" />;
+                                        fileTypeText = 'hoja de cálculo';
+                                    }
+                                    
+                                    // Para imágenes
+                                    else if (previewDocument.signed_url.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i) ||
+                                             (previewDocument.tituloOriginal && 
+                                              previewDocument.tituloOriginal.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i))) {
                                         return (
-                                            <div className={styles.imagePreview}>
+                                            <div className={styles.documentPreview}>
                                                 <img 
                                                     src={previewDocument.signed_url} 
-                                                    alt={previewDocument.titulo}
-                                                    style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+                                                    alt={previewDocument.titulo || 'Vista previa'} 
+                                                    className={styles.previewImage}
                                                 />
                                             </div>
                                         );
