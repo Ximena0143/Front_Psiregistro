@@ -80,7 +80,8 @@ const Psicologos = () => {
                         especializacion: especializacion,
                         fechaCreacion: createdAt,
                         correo: user.email || 'N/A',
-                        profileDescription: user.profile_description || 'Sin descripción'
+                        profileDescription: user.profile_description || 'Sin descripción',
+                        rol: Array.isArray(user.roles) && user.roles.length > 0 ? user.roles.map(r => r.role).join(', ') : 'No asignado'
                     };
                     
                     console.log('Usuario formateado:', formattedUser);
@@ -101,7 +102,8 @@ const Psicologos = () => {
                     especializacion: 'Estructura de respuesta',
                     fechaCreacion: new Date().toLocaleDateString(),
                     correo: JSON.stringify(response || {}).substring(0, 50) + '...',
-                    profileDescription: 'Esto es para depurar la estructura de datos'
+                    profileDescription: 'Esto es para depurar la estructura de datos',
+                    rol: 'No asignado'
                 }]);
             }
         } catch (err) {
@@ -130,6 +132,7 @@ const Psicologos = () => {
             html: `
                 <div style="text-align: left; margin: 20px 0; font-family: 'DM Sans', sans-serif;">
                     <p><strong>Nombre:</strong> ${psicologo.nombre}</p>
+                    <p><strong>Rol:</strong> ${psicologo.rol}</p>
                     <p><strong>Especialización:</strong> ${psicologo.especializacion}</p>
                     <p><strong>Correo:</strong> ${psicologo.correo}</p>
                     <p><strong>Fecha de Creación:</strong> ${psicologo.fechaCreacion}</p>
