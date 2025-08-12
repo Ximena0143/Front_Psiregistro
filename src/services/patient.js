@@ -330,6 +330,44 @@ export const deletePatientDocument = async (documentId) => {
   }
 };
 
+/**
+ * Actualiza un documento existente de un paciente
+ * @param {number} documentId - ID del documento a actualizar
+ * @param {number} patientId - ID del paciente
+ * @param {string} title - Título actualizado del documento
+ * @param {string} documentType - Tipo de documento (authorization, test, medical_history)
+ * @param {number} statusId - Estado del documento (1: finalized, 2: under review, 3: pending, 4: archived)
+ * @param {File} document - Archivo nuevo (opcional)
+ * @returns {Promise} - Promesa con la respuesta del servidor
+ */
+export const updatePatientDocument = async (documentId, patientId, title, documentType, statusId, document = null) => {
+  try {
+    // Crear un objeto FormData para enviar el archivo y los datos
+    const formData = new FormData();
+    formData.append('patient_id', patientId);
+    formData.append('tittle', title); // Nota: el backend usa 'tittle' en lugar de 'title'
+    formData.append('document_type', documentType);
+    formData.append('status_id', statusId);
+    
+    // Solo agregar el archivo si se proporciona uno nuevo
+    if (document) {
+      formData.append('document', document);
+    }
+    
+    // Realizar la petición PUT
+    const response = await api.put(`/document/update/${documentId}`, formData, {
+      headers: {
+        // No es necesario establecer Content-Type para FormData, el navegador lo configura automáticamente
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar documento del paciente:', error);
+    throw error;
+  }
+};
+
 // Exportar todas las funciones como un objeto para facilitar su importación
 const patientService = {
   getPatients,
@@ -343,7 +381,8 @@ const patientService = {
   getPatientById,
   getPatientDocuments,
   uploadPatientDocument,
-  deletePatientDocument
+  deletePatientDocument,
+  updatePatientDocument
 };
 
 export default patientService;
