@@ -6,6 +6,8 @@ import Header from '../../../components/layout/Header/Header';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 import patientService from '../../../services/patient';
+import ListaRecordatorios from '../recordatorios/ListaRecordatorios';
+import FormularioRecordatorio from '../recordatorios/FormularioRecordatorio';
 
 // Función auxiliar para detectar si un documento es PDF
 const isPdfDocument = (documento) => {
@@ -89,6 +91,10 @@ const HistorialPaciente = () => {
     const [showPreview, setShowPreview] = useState(false);
     const [previewDocument, setPreviewDocument] = useState(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
+    
+    // Estados para recordatorios
+    const [showReminderForm, setShowReminderForm] = useState(false);
+    const [reminderToEdit, setReminderToEdit] = useState(null);
     
     // Ya no necesitamos los estados para el visor PDF avanzado
     const [newDocument, setNewDocument] = useState({
@@ -636,6 +642,37 @@ const HistorialPaciente = () => {
         }
     };
 
+    // Manejadores para recordatorios
+    const handleAddReminder = () => {
+        setReminderToEdit(null);
+        setShowReminderForm(true);
+    };
+    
+    const handleEditReminder = (reminder) => {
+        setReminderToEdit(reminder);
+        setShowReminderForm(true);
+    };
+    
+    const handleCloseReminderForm = () => {
+        setShowReminderForm(false);
+        setReminderToEdit(null);
+    };
+    
+    const handleReminderSuccess = () => {
+        // Después de guardar un recordatorio correctamente
+        setShowReminderForm(false);
+        setReminderToEdit(null);
+        
+        // Mostrar notificación de éxito
+        Swal.fire({
+            icon: 'success',
+            title: 'Operación completada',
+            text: 'El recordatorio ha sido guardado correctamente',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    };
+    
     // Renderizado condicional mientras se cargan los datos
     if (loading) {
         return (
@@ -838,6 +875,24 @@ const HistorialPaciente = () => {
                             </div>
                         )}
                     </div>
+                    
+                    {/* Sección de recordatorios */}
+                    <section className={styles.section}>
+                        {showReminderForm ? (
+                            <FormularioRecordatorio
+                                patientId={id}
+                                reminderToEdit={reminderToEdit}
+                                onClose={handleCloseReminderForm}
+                                onSuccess={handleReminderSuccess}
+                            />
+                        ) : (
+                            <ListaRecordatorios 
+                                patientId={id} 
+                                onAddNew={handleAddReminder} 
+                                onEditReminder={handleEditReminder} 
+                            />
+                        )}
+                    </section>
                 </div>
             </div>
 
@@ -943,7 +998,7 @@ const HistorialPaciente = () => {
                             )}
                         </div>
                         <div className={styles.previewActions}>
-                            <button
+                            <button 
                                 className={styles.closePreviewButton}
                                 onClick={handleClosePreview}
                             >

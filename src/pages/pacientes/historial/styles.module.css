@@ -726,3 +726,101 @@
         width: 95%;
     }
 }
+
+/* Estilos para secciones */
+.section {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sectionHeader h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Estilos para botones */
+.btnPrimary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #FB8500;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btnPrimary:hover {
+    background-color: #e67a00;
+    transform: translateY(-2px);
+}
+
+.btnSmall {
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+/* Contenedor para estado vacío */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    text-align: center;
+    color: #6c757d;
+}
+
+.emptyState svg {
+    color: #d1d5db;
+    margin-bottom: 16px;
+}
+
+.emptyState p {
+    margin-bottom: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+}
+
+/* Estilos específicos para sección de recordatorios */
+.reminderSection {
+    padding: 10px 0;
+}
+
+.reminderSectionHeader {
+    margin-bottom: 15px;
+}
+
+/* Media queries para responsive design */
+@media (max-width: 768px) {
+    .sectionHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .btnPrimary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .section {
+        padding: 15px;
+    }
+}
