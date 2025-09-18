@@ -265,18 +265,42 @@ const HistorialPaciente = () => {
                     .replace(/^Test-/i, '')
                     .replace(/^Medical-history-/i, '');
                 
-                // Eliminar códigos numéricos al final (como 12345678911)
-                tituloAmigable = tituloAmigable.replace(/-\d+(\.\w+)?$/, '');
+                // Convertir guiones en espacios
+                tituloAmigable = tituloAmigable.replace(/-/g, ' ');
                 
-                // Eliminar extensión de archivo
-                tituloAmigable = tituloAmigable.replace(/\.[^.]+$/, '');
+                // Eliminar extensión de archivo manteniendo el resto del contenido
+                tituloAmigable = tituloAmigable.replace(/\.\w+$/, '');
                 
-                // Reemplazar guiones por espacios y capitalizar palabras
+                // Capitalizar palabras
                 tituloAmigable = tituloAmigable
-                    .replace(/-/g, ' ')
                     .split(' ')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
+                
+                // Mapear el estado textual a su correspondiente ID si no viene del backend
+                let statusId = doc.status_id;
+                if (!statusId && doc.estado) {
+                    // Mapear el estado textual a un ID
+                    switch (doc.estado.toLowerCase()) {
+                        case 'completado':
+                        case 'finalizado':
+                            statusId = 1;
+                            break;
+                        case 'en revisión':
+                        case 'en revision':
+                            statusId = 2;
+                            break;
+                        case 'pendiente':
+                        case 'en proceso':
+                            statusId = 3;
+                            break;
+                        case 'archivado':
+                            statusId = 4;
+                            break;
+                        default:
+                            statusId = 3; // Default a 'Pendiente' si no se reconoce
+                    }
+                }
                 
                 return {
                     id: doc.id,
@@ -285,11 +309,11 @@ const HistorialPaciente = () => {
                     tipo: doc.document_type || 'Documento',
                     fechaCreacion: new Date().toISOString().split('T')[0], // Usamos fecha actual ya que no viene en la respuesta
                     fechaActualizacion: new Date().toISOString().split('T')[0],
-                    estado: doc.status_id === 1 ? 'Completado' : 'En proceso',
+                    estado: doc.estado || (statusId === 1 ? 'Completado' : 'En proceso'),
                     icono: 'FileText',
                     signed_url: doc.document_path, // Usar document_path que es el campo que viene del backend
                     expires_in: doc.expires_in,
-                    status_id: doc.status_id // Añadimos el status_id para mostrarlo en la UI
+                    status_id: statusId // Usamos el status_id asignado
                 };
             });
             
@@ -791,25 +815,22 @@ const HistorialPaciente = () => {
                                                                     {getFileIcon(documento)}
                                                                 </div>
                                                                 <div className={styles.documentTitle}>
-                                                                    <h5>{documento.titulo}</h5>
+                                                                    <h5 title={documento.titulo}>{documento.titulo}</h5>
                                                                     <div className={styles.documentMeta}>
-                                                                        <span className={styles.documentType}>{documento.tipo}</span>
+                                                                        <span className={styles.documentType}>
+                                                                            {documento.tipo === 'medical_history' ? 'Historia Médica' :
+                                                                             documento.tipo === 'authorization' ? 'Autorización' :
+                                                                             documento.tipo === 'test' ? 'Test' : documento.tipo}
+                                                                        </span>
                                                                         <div 
                                                                             className={styles.documentStatus}
                                                                             style={{
-                                                                                backgroundColor: documento.status_id ? getDocumentStatus(documento.status_id).bgColor : '#F9FAFB',
-                                                                                color: documento.status_id ? getDocumentStatus(documento.status_id).color : '#6B7280',
-                                                                                border: `1px solid ${documento.status_id ? getDocumentStatus(documento.status_id).color : '#E5E7EB'}`,
-                                                                                padding: '2px 8px',
-                                                                                borderRadius: '4px',
-                                                                                fontSize: '0.75rem',
-                                                                                fontWeight: '500',
-                                                                                display: 'inline-block',
-                                                                                marginLeft: '8px',
-                                                                                opacity: '0.9'
+                                                                                backgroundColor: getDocumentStatus(documento.status_id).bgColor,
+                                                                                color: getDocumentStatus(documento.status_id).color,
+                                                                                border: `1px solid ${getDocumentStatus(documento.status_id).color}`
                                                                             }}
                                                                         >
-                                                                            {documento.status_id ? getDocumentStatus(documento.status_id).text : 'Sin estado'}
+                                                                            {getDocumentStatus(documento.status_id).text}
                                                                         </div>
                                                                     </div>
                                                                 </div>
