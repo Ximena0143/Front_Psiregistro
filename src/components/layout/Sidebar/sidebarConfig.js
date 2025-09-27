@@ -19,7 +19,7 @@ export const sidebarItems = [
         icon: FaImage
     },
     {
-        title: 'Documentos',
+        title: 'Plantillas',
         path: '/test',
         icon: FaFileAlt
     },
