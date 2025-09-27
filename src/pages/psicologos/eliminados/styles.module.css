@@ -1,0 +1,167 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.content {
+    flex: 1;
+    padding: 60px;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+}
+
+.contentHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.titleContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.backIcon {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.backIcon:hover {
+    transform: translateX(-3px);
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.tableContainer {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.loadingContainer,
+.errorContainer,
+.emptyContainer {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.retryButton {
+    background-color: #4F46E5;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+    background-color: #4338CA;
+}
+
+/* Estilos para los iconos de acción */
+.actionIcons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.actionIcon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s;
+}
+
+.actionIcon:hover {
+    transform: scale(1.2);
+}
+
+.restoreIcon {
+    color: #34C759;
+}
+
+.deleteIcon {
+    color: #FF3737;
+}
+
+/* Estilos para los botones de acción (mantener compatibilidad) */
+.restoreButton,
+.deleteButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.restoreButton:hover {
+    background-color: rgba(52, 199, 89, 0.1);
+}
+
+.deleteButton:hover {
+    background-color: rgba(255, 55, 55, 0.1);
+}
+
+.restoreButton:disabled,
+.deleteButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+}
+
+.table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.actionsCell {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}

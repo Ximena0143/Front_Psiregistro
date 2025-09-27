@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
@@ -6,17 +6,121 @@ import Sidebar from '../../components/layout/Sidebar/Sidebar';
 import { Eye, Trash2 } from 'lucide-react';
 import DataTable from '../../components/common/DataTable/DataTable';
 import Swal from 'sweetalert2';
+import userService from '../../services/user';
 
 const Psicologos = () => {
     const navigate = useNavigate();
     
-    const [psicologos, setPsicologos] = useState([
-        { nombre: "María Fernanda Ruiz", cedula: "1122334455", especializacion: "Psicología Clínica", fechaCreacion: "2022-11-05", correo: "maria.ruiz@psicologos.com" },
-        { nombre: "Carlos Andrés Pérez", cedula: "2233445566", especializacion: "Neuropsicología", fechaCreacion: "2023-01-17", correo: "carlos.perez@psicologos.com" },
-        { nombre: "Ana Sofía Gómez", cedula: "3344556677", especializacion: "Psicología Infantil", fechaCreacion: "2023-02-21", correo: "ana.gomez@psicologos.com" },
-        { nombre: "Jorge Luis Torres", cedula: "4455667788", especializacion: "Psicología Organizacional", fechaCreacion: "2023-03-12", correo: "jorge.torres@psicologos.com" },
-        { nombre: "Valentina López", cedula: "5566778899", especializacion: "Psicología Familiar", fechaCreacion: "2023-04-03", correo: "valentina.lopez@psicologos.com" },
-    ]);
+    const [psicologos, setPsicologos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Cargar la lista de psicólogos al montar el componente
+    useEffect(() => {
+        fetchPsicologos();
+    }, []);
+
+    // Función para obtener los psicólogos del backend
+    const fetchPsicologos = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await userService.getUsers();
+            console.log('Respuesta de getUsers:', response);
+            
+            // Depuración: Mostrar la estructura completa de la respuesta
+            console.log('Estructura completa de la respuesta:', JSON.stringify(response, null, 2));
+            
+            // Verificar si hay datos y mostrar información de depuración
+            if (response && response.data) {
+                console.log('Cantidad de usuarios recibidos:', response.data.length);
+                
+                // Si hay datos, mostrar el primer elemento para depuración
+                if (Array.isArray(response.data) && response.data.length > 0) {
+                    const firstUser = response.data[0];
+                    console.log('Primer usuario (detalle):', firstUser);
+                    console.log('ID del primer usuario:', firstUser.id);
+                    console.log('Email del primer usuario:', firstUser.email);
+                    console.log('Human del primer usuario:', firstUser.human);
+                    console.log('Specialization del primer usuario:', firstUser.specialization);
+                }
+            }
+            
+            if (response && response.data && Array.isArray(response.data)) {
+                // Transformar los datos al formato que espera el componente
+                const formattedData = response.data.map(user => {
+                    // Verificar si existe human y sus propiedades
+                    const human = user.human || {};
+                    const firstName = human.first_name || '';
+                    const middleName = human.middle_name || '';
+                    const lastName = human.last_name || '';
+                    const secondLastName = human.second_last_name || '';
+                    
+                    // Construir el nombre completo
+                    const fullName = `${firstName} ${middleName} ${lastName} ${secondLastName}`.trim();
+                    
+                    // Formatear la fecha de creación
+                    let createdAt = 'N/A';
+                    if (user.created_at) {
+                        const date = new Date(user.created_at);
+                        createdAt = date.toLocaleDateString();
+                    }
+                    
+                    // Obtener la especialización del objeto specialization
+                    let especializacion = 'No especificada';
+                    if (user.specialization && user.specialization.name) {
+                        especializacion = user.specialization.name;
+                    }
+                    
+                    // Crear objeto con datos formateados
+                    const formattedUser = {
+                        id: user.id || `temp-${Math.random().toString(36).substring(7)}`,
+                        nombre: fullName || user.email || 'Usuario sin nombre',
+                        cedula: human.document_number || 'N/A',
+                        especializacion: especializacion,
+                        fechaCreacion: createdAt,
+                        correo: user.email || 'N/A',
+                        profileDescription: user.profile_description || 'Sin descripción',
+                        rol: Array.isArray(user.roles) && user.roles.length > 0 ? user.roles.map(r => r.role).join(', ') : 'No asignado'
+                    };
+                    
+                    console.log('Usuario formateado:', formattedUser);
+                    return formattedUser;
+                });
+                
+                console.log('Datos formateados para mostrar:', formattedData);
+                setPsicologos(formattedData);
+            } else {
+                setPsicologos([]);
+                console.warn('No se recibieron datos de usuarios del servidor');
+                
+                // Agregar un elemento de depuración si no hay datos
+                setPsicologos([{
+                    id: 'debug-1',
+                    nombre: 'DATOS DE DEPURACIÓN',
+                    cedula: 'Ver consola para detalles',
+                    especializacion: 'Estructura de respuesta',
+                    fechaCreacion: new Date().toLocaleDateString(),
+                    correo: JSON.stringify(response || {}).substring(0, 50) + '...',
+                    profileDescription: 'Esto es para depurar la estructura de datos',
+                    rol: 'No asignado'
+                }]);
+            }
+        } catch (err) {
+            console.error('Error al cargar psicólogos:', err);
+            setError('No se pudieron cargar los psicólogos. Por favor, intente de nuevo más tarde.');
+            
+            // Mostrar mensaje de error
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudieron cargar los psicólogos. Por favor, intente de nuevo más tarde.',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleNavigateToAdd = () => {
         navigate('/psicologos/agregar');
@@ -28,9 +132,11 @@ const Psicologos = () => {
             html: `
                 <div style="text-align: left; margin: 20px 0; font-family: 'DM Sans', sans-serif;">
                     <p><strong>Nombre:</strong> ${psicologo.nombre}</p>
+                    <p><strong>Rol:</strong> ${psicologo.rol}</p>
                     <p><strong>Especialización:</strong> ${psicologo.especializacion}</p>
                     <p><strong>Correo:</strong> ${psicologo.correo}</p>
                     <p><strong>Fecha de Creación:</strong> ${psicologo.fechaCreacion}</p>
+                    <p><strong>Descripción del Perfil:</strong> ${psicologo.profileDescription}</p>
                 </div>
             `,
             confirmButtonText: 'Cerrar',
@@ -45,6 +151,17 @@ const Psicologos = () => {
     };
 
     const handleDelete = (psicologo) => {
+        // Verificar si el ID es temporal
+        if (psicologo.id.toString().startsWith('temp-')) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se puede eliminar este psicólogo porque aún no ha sido guardado en la base de datos.',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+            return;
+        }
+        
         Swal.fire({
             title: '¿Estás seguro?',
             text: `¿Deseas eliminar al psicólogo ${psicologo.nombre}?`,
@@ -54,20 +171,33 @@ const Psicologos = () => {
             cancelButtonColor: '#d33',
             confirmButtonText: 'Sí, continuar',
             cancelButtonText: 'Cancelar'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                // Filtrar el psicólogo del array local
-                const newPsicologos = psicologos.filter(p => p.correo !== psicologo.correo);
-                setPsicologos(newPsicologos);
-                
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'El psicólogo ha sido eliminado correctamente.',
-                    icon: 'success',
-                    confirmButtonColor: '#FB8500',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                try {
+                    await userService.deleteUser(psicologo.id);
+                    
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'El psicólogo ha sido eliminado correctamente.',
+                        icon: 'success',
+                        confirmButtonColor: '#FB8500',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // Actualizar la lista de psicólogos desde el backend
+                    fetchPsicologos();
+                } catch (error) {
+                    console.error('Error al eliminar psicólogo:', error);
+                    
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo eliminar el psicólogo. Por favor, intente de nuevo.',
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    });
+                }
             }
         });
     };
@@ -86,13 +216,13 @@ const Psicologos = () => {
                 <div className={styles.actionIcons}>
                     <div className={styles.iconWrapper} title="Ver perfil">
                         <Eye
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.viewIcon}`}
                             onClick={() => handleViewProfile(row)}
                         />
                     </div>
                     <div className={styles.iconWrapper} title="Eliminar psicólogo">
                         <Trash2
-                            className={styles.actionIcon}
+                            className={`${styles.actionIcon} ${styles.deleteIcon}`}
                             onClick={() => handleDelete(row)}
                         />
                     </div>
@@ -119,11 +249,27 @@ const Psicologos = () => {
                         </div>
                     </div>
                     <div className={styles.tableContainer}>
-                        <DataTable
-                            columns={columns}
-                            data={psicologos}
-                            searchPlaceholder="Buscar psicólogos..."
-                        />
+                        {loading ? (
+                            <div className={styles.loadingContainer}>
+                                <p>Cargando psicólogos...</p>
+                            </div>
+                        ) : error ? (
+                            <div className={styles.errorContainer}>
+                                <p>{error}</p>
+                                <button 
+                                    className={styles.retryButton}
+                                    onClick={fetchPsicologos}
+                                >
+                                    Intentar de nuevo
+                                </button>
+                            </div>
+                        ) : (
+                            <DataTable
+                                columns={columns}
+                                data={psicologos}
+                                searchPlaceholder="Buscar psicólogos..."
+                            />
+                        )}
                     </div>
                 </div>
             </div>

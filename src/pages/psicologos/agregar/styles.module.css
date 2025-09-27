@@ -12,8 +12,10 @@
 }
 
 .content {
+    flex: 1 1;
     padding: 60px;
-    width: 75%;
+    overflow-y: auto;
+    background-color: #f5f5f5;
 }
 
 .contentHeader {
@@ -113,11 +115,79 @@
     height: 46px;
 }
 
+.formField textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    border: 1px solid #E6EDF0;
+    border-radius: 6px;
+    background-color: white;
+    transition: all 0.2s ease;
+    min-height: 120px;
+    resize: vertical; /* Solo permite redimensionar verticalmente */
+    width: 100%;
+    line-height: 1.5;
+}
+
 .formField input:focus,
 .formField select:focus {
     outline: none;
     border-color: #FB8500;
     box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.1);
+}
+
+.formField textarea:focus {
+    outline: none;
+    border-color: #FB8500;
+    box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.1);
+}
+
+.inputError {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1) !important;
+}
+
+.errorMessage {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Estilos para el contenedor de input de contraseña */
+.passwordInputContainer {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+.passwordInputContainer input {
+    width: 100%;
+    padding-right: 40px; /* Espacio para el botón */
+}
+
+.passwordToggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6B7280;
+    padding: 5px;
+    transition: color 0.2s ease;
+}
+
+.passwordToggle:hover {
+    color: #FB8500;
+}
+
+.passwordToggle:focus {
+    outline: none;
 }
 
 .buttonContainer {
@@ -161,16 +231,4 @@
 .clearButton:hover {
     background: #E6EDF0;
     transform: translateY(-2px);
-}
-
-.inputError {
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1) !important;
-}
-
-.errorMessage {
-    color: #dc3545;
-    font-size: 13px;
-    margin-top: 5px;
-    font-family: 'DM Sans', sans-serif;
 }

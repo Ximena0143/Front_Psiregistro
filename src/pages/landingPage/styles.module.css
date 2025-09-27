@@ -230,6 +230,8 @@ h1{
 .image1_publi{
   height: 100%;
   border-radius: 8px;
+  object-fit: cover;
+  width: 100%;
 }
 
 .container_descripcion_publi{
@@ -453,7 +455,6 @@ h1{
 /*-----------Fin Contacto-----------*/
 
 /*-----------Footer-----------*/
-
 .container_footer{
   margin-left: auto;
   margin-right: auto;
@@ -527,7 +528,10 @@ h1{
   color: rgb(255, 255, 255);
   font-size: 15px;
   font-family: 'DM Sans', serif;
+  text-align: center;
+  padding: 0 15px;
 }
+
 .nav_links_footer {
   list-style: none;
   display: flex;
@@ -536,58 +540,494 @@ h1{
   padding: 0;
   align-items: center;
 }
+
 .nav_links_footer li a {
   text-decoration: none;
   padding: 10px 15px; 
 }
+
 /*-----------Fin Footer-----------*/
 
-/*-----------Responsivo-----------*/
+/*-----------Botón Scroll Top-----------*/
+.scrollTopButton {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #FB8500;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
 
-/* Mobile (Pantallas de hasta 768px) */
+.scrollTopButton:hover {
+  background-color: #e67a00;
+  transform: translateY(-3px);
+}
+
+.showScrollButton {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Media queries para el botón de scroll */
 @media (max-width: 768px) {
-  .container_header {
-    flex-direction: column;
-    height: auto;
-    padding: 20px 0;
-  }
-
-  .nav_header {
-    display: none; /* Ocultamos el menú por defecto */
-    flex-direction: column;
-    text-align: center;
-    width: 100%;
-    padding: 20px 0;
-  }
-
-  .nav_links {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .menu_toggle {
-    display: block;
-    cursor: pointer;
-    font-size: 30px;
-    color: #243A76;
-  }
-
-  .nav_header.show {
-    display: flex; /* Mostramos el menú si tiene la clase .show */
+  .scrollTopButton {
+    width: 45px;
+    height: 45px;
+    bottom: 20px;
+    right: 20px;
   }
 }
 
-/* Tablet (Pantallas entre 768px y 1024px) */
-@media (max-width: 1024px) {
-  .container_inicio, .container_nosotros {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 20px;
+@media (max-width: 576px) {
+  .scrollTopButton {
+    width: 40px;
+    height: 40px;
+    bottom: 15px;
+    right: 15px;
+  }
+}
+
+/*-----------Responsivo-----------*/
+
+/* Mobile (Pantallas de hasta 576px) */
+@media (max-width: 576px) {
+  .scrollTopButton {
+    width: 40px;
+    height: 40px;
+    bottom: 15px;
+    right: 15px;
   }
 
-  .item1_inicio, .item3_inicio, .item1_nosotros, .item2_nosotros {
+  /* Ajustes generales para móvil */
+  h1 {
+    width: 100%;
+    font-size: 28px;
+    padding: 0 15px;
+  }
+
+  h3 {
+    width: 100%;
+    font-size: 24px;
+    padding: 0 15px;
+  }
+
+  h4 {
+    font-size: 22px;
+  }
+
+  /* Sección Inicio */
+  .container_inicio {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .item1_inicio, .item2_inicio, .item3_inicio {
     width: 100%;
     height: auto;
+    padding: 30px 0;
+  }
+
+  .item1_inicio {
+    background: linear-gradient(to bottom, #FB8500 50%, transparent 50%);
+    padding-bottom: 50px;
+  }
+
+  .subtitulo {
+    width: 90%;
+    text-align: center;
+  }
+
+  /* Sección Nosotros */
+  .container_nosotros {
+    flex-direction: column;
+  }
+
+  .item1_nosotros, .item2_nosotros {
+    width: 100%;
+    height: auto;
+    padding: 30px 15px;
+  }
+
+  .mision {
+    width: 100%;
+  }
+
+  /* Sección Descripción */
+  .item1_descripcion {
+    width: 100%;
+    height: auto;
+    padding: 50px 15px;
+  }
+
+  /* Sección Publicaciones */
+  .container_publicacion {
+    flex-direction: column;
+  }
+
+  .item1_publicacion, .item2_publicacion {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 30px 15px;
+  }
+
+  .parrafo_publicacion {
+    margin-left: 15px;
+    width: 90%;
+    font-size: 22px;
+  }
+
+  .titulo_publi2 {
+    width: 100%;
+    font-size: 22px;
+  }
+
+  .container_imagen_publi2 {
+    height: auto; 
+  }
+  
+  .image1_publi {
+    height: auto; 
+    max-height: 250px; 
+  }
+
+  /* Sección Servicios */
+  .container_servicios {
+    flex-direction: column;
+  }
+
+  .item1_servicios, .item2_servicios {
+    width: 100%;
+    height: auto;
+    margin: 20px 0;
+    padding: 0 15px;
+  }
+
+  .descripcion_servi {
+    width: 100%;
+  }
+
+  .item2_servicios .image1_publi {
+    height: auto;
+    max-height: 200px;
+  }
+
+  /* Sección Psicólogos */
+  .container_info_psicologos {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .item1_psicologos {
+    width: 90%;
+    height: auto;
+    padding: 20px 0;
+    align-items: center;
+    text-align: center;
+  }
+
+  .descripcion_psicologos {
+    width: 90%;
+    text-align: center;
+  }
+
+  /* Sección Contacto */
+  .container_contacto {
+    flex-direction: column;
+  }
+
+  .item1_contacto, .item2_contacto {
+    width: 100%;
+    height: auto;
+    margin: 20px 0;
+  }
+
+  .card {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .image1_c {
+    width: 90%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* Footer */
+  .container_footer {
+    flex-direction: column;
+    padding: 20px 0;
+  }
+
+  .item1_footer {
+    flex-direction: column;
+    height: auto;
+    padding: 15px 0;
+  }
+
+  .descripcion_footer, .descripcion2_footer {
+    width: 100%;
+    text-align: center;
+    padding: 15px;
+  }
+  
+  .somos {
+    text-align: center;
+    margin-left: 0;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .compania {
+    margin-bottom: 10px;
+  }
+
+  .nav_links_footer {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+  }
+  
+  .nav_links_footer li {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .nav_links_footer li a {
+    padding: 5px;
+  }
+  
+  .boton_footer {
+    font-size: 16px;
+  }
+  
+  .item2_footer {
+    text-align: center;
+    padding: 10px 15px;
+    font-size: 14px;
+    height: auto;
+  }
+}
+
+/* Tablet (Pantallas entre 577px y 768px) */
+@media (min-width: 577px) and (max-width: 768px) {
+  /* Ajustes generales para tablet */
+  h1 {
+    width: 90%;
+    font-size: 36px;
+  }
+
+  h3 {
+    width: 90%;
+    font-size: 32px;
+  }
+
+  /* Sección Inicio */
+  .container_inicio {
+    flex-direction: column;
+  }
+
+  .item1_inicio, .item2_inicio, .item3_inicio {
+    width: 100%;
+    height: auto;
+    padding: 40px 0;
+  }
+
+  /* Sección Nosotros */
+  .container_nosotros {
+    flex-direction: column;
+  }
+
+  .item1_nosotros, .item2_nosotros {
+    width: 100%;
+    height: auto;
+    padding: 40px 20px;
+  }
+
+  .mision {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  /* Sección Publicaciones */
+  .container_publicacion {
+    flex-direction: column;
+  }
+
+  .item1_publicacion {
+    width: 90%;
+    margin: 20px auto;
+  }
+
+  .item2_publicacion {
+    width: 90%;
+    margin: 20px auto;
+  }
+  
+  .container_imagen_publi2 {
+    height: auto;
+  }
+  
+  .image1_publi {
+    height: auto;
+    max-height: 350px;
+  }
+
+  /* Sección Servicios */
+  .container_servicios {
+    flex-direction: column;
+  }
+
+  .item1_servicios, .item2_servicios {
+    width: 90%;
+    margin: 20px auto;
+  }
+  
+  .item2_servicios .image1_publi {
+    height: auto;
+    max-height: 300px;
+  }
+
+  /* Sección Psicólogos */
+  .container_info_psicologos {
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+
+  .item1_psicologos {
+    width: 45%;
+    margin-bottom: 30px;
+  }
+
+  /* Sección Contacto */
+  .container_contacto {
+    flex-direction: column;
+  }
+
+  .item1_contacto, .item2_contacto {
+    width: 90%;
+    margin: 20px auto;
+  }
+
+  /* Footer */
+  .container_footer {
+    padding: 15px 0;
+  }
+  
+  .item1_footer {
+    flex-direction: column;
+    height: auto;
+    padding: 15px 0;
+  }
+  
+  .descripcion_footer, .descripcion2_footer {
+    width: 90%;
+    text-align: center;
+    padding: 10px 0;
+  }
+  
+  .somos {
+    text-align: center;
+    margin-left: 0;
+    margin-bottom: 10px;
+  }
+  
+  .nav_links_footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .item2_footer {
+    text-align: center;
+  }
+}
+
+/* Pantallas medianas (Pantallas entre 769px y 992px) */
+@media (min-width: 769px) and (max-width: 992px) {
+  .container_inicio, .container_nosotros, .container_publicacion, .container_servicios, .container_contacto {
+    max-width: 900px;
+  }
+
+  /* Ajustes para sección Inicio */
+  .item1_inicio {
+    width: 30%;
+  }
+
+  .item2_inicio {
+    width: 35%;
+  }
+
+  .item3_inicio {
+    width: 35%;
+  }
+
+  /* Ajustes para sección Nosotros */
+  .item1_nosotros {
+    width: 55%;
+  }
+
+  .item2_nosotros {
+    width: 45%;
+  }
+
+  .mision {
+    width: 90%;
+  }
+
+  /* Ajustes para sección Descripción */
+  h1 {
+    width: 90%;
+    font-size: 42px;
+  }
+
+  /* Ajustes para sección Publicaciones */
+  .item1_publicacion {
+    width: 30%;
+  }
+
+  .item2_publicacion {
+    width: 70%;
+  }
+
+  .titulo_publi2 {
+    width: 100%;
+  }
+
+  /* Ajustes para sección Servicios */
+  .descripcion_servi {
+    width: 90%;
+  }
+
+  /* Ajustes para sección Psicólogos */
+  .descripcion_psicologos {
+    width: 90%;
+  }
+}
+
+/* Pantallas grandes (Pantallas entre 993px y 1200px) */
+@media (min-width: 993px) and (max-width: 1200px) {
+  .container_inicio, .container_nosotros, .container_publicacion, .container_servicios, .container_contacto, .container_psicologos, .container_descripcion, .container_footer {
+    max-width: 960px;
+  }
+}
+
+/* Pantallas extra grandes (Pantallas mayores a 1200px) */
+@media (min-width: 1201px) {
+  .container_inicio, .container_nosotros, .container_publicacion, .container_servicios, .container_contacto, .container_psicologos, .container_descripcion, .container_footer {
+    max-width: 1200px;
   }
 }

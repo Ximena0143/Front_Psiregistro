@@ -123,9 +123,6 @@ const TestPsi = () => {
 
     // Guardar nuevo test
     const handleSaveTest = () => {
-        // Aquí iría la lógica real para guardar el test en el servidor
-        console.log('Guardando test:', newTest);
-        
         // Añadimos el test nuevo a la lista (simulación)
         const fechaActual = new Date();
         const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -157,9 +154,6 @@ const TestPsi = () => {
 
     // Asignar test a paciente
     const handleAssignTest = () => {
-        // Aquí iría la lógica real para asignar el test al paciente
-        console.log('Asignando test:', currentTest, 'a paciente:', assignData.pacienteEmail);
-        
         // Mostrar alerta de éxito
         Swal.fire({
             title: '¡Éxito!',
@@ -176,8 +170,6 @@ const TestPsi = () => {
 
     // Descargar test (simulación)
     const handleDownloadTest = (test) => {
-        console.log('Descargando test:', test);
-        
         // Mostrar alerta de éxito
         Swal.fire({
             title: '¡Éxito!',
@@ -196,10 +188,10 @@ const TestPsi = () => {
                 <Sidebar />
                 <div className={styles.content}>
                     <div className={styles.contentHeader}>
-                        <h3>Test Psicológicos</h3>
+                        <h3>Documentos plantilla</h3>
                         <div className={styles.actions}>
                             <button className={styles.addButton} onClick={handleOpenUploadModal}>
-                                Subir test
+                                Subir documento
                             </button>
                         </div>
                     </div>
@@ -399,7 +391,7 @@ const TestPsi = () => {
                                 disabled={!assignData.pacienteEmail}
                             >
                                 <Send size={16} />
-                                Enviar test
+                                Asignar test
                             </button>
                         </div>
                     </div>

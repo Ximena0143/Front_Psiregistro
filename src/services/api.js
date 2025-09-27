@@ -11,6 +11,47 @@ const interceptors = {
   response: null
 };
 
+// Variable para controlar si ya se mostró el mensaje de sesión expirada
+let sessionExpiredMessageShown = false;
+
+// Función para manejar errores de autenticación
+const handleAuthError = (error) => {
+  // Si el error es 401 (Unauthorized) o 403 (Forbidden) y no hemos mostrado el mensaje aún
+  // Y no estamos en una ruta pública (landing page, login, register)
+  const isPublicRoute = window.location.pathname === '/' || 
+                       window.location.pathname.includes('/login') || 
+                       window.location.pathname.includes('/register');
+  
+  if ((error.status === 401 || error.status === 403) && !sessionExpiredMessageShown && !isPublicRoute) {
+    // Importar SweetAlert2 dinámicamente para evitar problemas de dependencia circular
+    import('sweetalert2').then((Swal) => {
+      Swal.default.fire({
+        title: 'Sesión expirada',
+        text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+        icon: 'warning',
+        confirmButtonText: 'Iniciar sesión',
+        allowOutsideClick: false
+      }).then(() => {
+        // Marcar que ya se mostró el mensaje
+        sessionExpiredMessageShown = false;
+        
+        // Limpiar el almacenamiento local
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        
+        // Redirigir a la página de login
+        window.location.href = '/login';
+      });
+      
+      // Marcar que ya mostramos el mensaje para evitar múltiples alertas
+      sessionExpiredMessageShown = true;
+    });
+  }
+  
+  // Propagar el error para que pueda ser manejado por la función que hizo la petición
+  throw error;
+};
+
 /**
  * Realiza una petición GET a la API
  * @param {string} endpoint - El endpoint a consultar (sin la URL base)
@@ -43,6 +84,10 @@ export const get = async (endpoint, options = {}) => {
       const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -62,7 +107,6 @@ export const get = async (endpoint, options = {}) => {
       }
     }
   } catch (error) {
-    console.error('Error en petición GET:', error);
     throw error;
   }
 };
@@ -80,19 +124,20 @@ export const post = async (endpoint, data = {}, options = {}) => {
     let config = {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json, text/plain, */*',
         ...options.headers
       },
-      body: JSON.stringify(data),
       ...options
     };
     
-    // Debug de la petición que estamos a punto de hacer
-    console.log(`Iniciando petición POST a ${API_BASE_URL}${endpoint}`, {
-      headers: config.headers,
-      data: data
-    });
+    // Manejar FormData de manera especial (no establecer Content-Type ni usar JSON.stringify)
+    if (data instanceof FormData) {
+      config.body = data;
+    } else {
+      // Para datos normales JSON
+      config.headers['Content-Type'] = 'application/json';
+      config.body = JSON.stringify(data);
+    }
     
     // Aplicar interceptor si existe
     if (interceptors.request) {
@@ -102,14 +147,6 @@ export const post = async (endpoint, data = {}, options = {}) => {
     // Realizar la petición
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     
-    // Debug de la respuesta recibida
-    console.log(`Respuesta recibida de ${endpoint}:`, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: Object.fromEntries([...response.headers]),
-      ok: response.ok
-    });
-    
     // Si la respuesta no es exitosa
     if (!response.ok) {
       // Intentar leer el cuerpo de la respuesta de error
@@ -118,7 +155,6 @@ export const post = async (endpoint, data = {}, options = {}) => {
       try {
         // Primero intentamos obtener el texto de la respuesta
         errorText = await response.text();
-        console.log('Texto de error:', errorText);
         
         // Luego intentamos parsearlo como JSON si es posible
         try {
@@ -130,7 +166,6 @@ export const post = async (endpoint, data = {}, options = {}) => {
       } catch (readError) {
         // Si no podemos leer la respuesta, usamos un mensaje genérico
         errorData = { message: `Error HTTP: ${response.status}` };
-        console.error('Error al leer la respuesta de error:', readError);
       }
       
       // Crear un error personalizado con toda la información disponible
@@ -139,6 +174,10 @@ export const post = async (endpoint, data = {}, options = {}) => {
       error.statusText = response.statusText;
       error.data = errorData;
       error.url = `${API_BASE_URL}${endpoint}`;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -163,10 +202,8 @@ export const post = async (endpoint, data = {}, options = {}) => {
       }
     }
     
-    console.log('Datos de respuesta procesados:', responseData);
     return responseData;
   } catch (error) {
-    console.error('Error en petición POST:', error);
     throw error;
   }
 };
@@ -205,6 +242,10 @@ export const put = async (endpoint, data = {}, options = {}) => {
       const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -224,7 +265,6 @@ export const put = async (endpoint, data = {}, options = {}) => {
       }
     }
   } catch (error) {
-    console.error('Error en petición PUT:', error);
     throw error;
   }
 };
@@ -261,6 +301,10 @@ export const del = async (endpoint, options = {}) => {
       const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
       throw error;
     }
     
@@ -280,7 +324,67 @@ export const del = async (endpoint, options = {}) => {
       }
     }
   } catch (error) {
-    console.error('Error en petición DELETE:', error);
+    throw error;
+  }
+};
+
+/**
+ * Realiza una petición PATCH a la API
+ * @param {string} endpoint - El endpoint a consultar (sin la URL base)
+ * @param {Object} data - Datos a enviar en el cuerpo de la petición
+ * @param {Object} options - Opciones adicionales para la petición fetch
+ * @returns {Promise} - Promesa con la respuesta en formato JSON
+ */
+export const patch = async (endpoint, data = {}, options = {}) => {
+  try {
+    // Aplicar interceptor de petición si existe
+    let config = {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      body: JSON.stringify(data),
+      ...options
+    };
+    
+    if (interceptors.request) {
+      config = interceptors.request(config);
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    
+    if (!response.ok) {
+      // Intentar obtener detalles del error en formato JSON si están disponibles
+      const errorData = await response.json().catch(() => ({ message: `Error HTTP: ${response.status}` }));
+      
+      // Crear un error personalizado con más información
+      const error = new Error(errorData.message || `Error HTTP: ${response.status}`);
+      error.status = response.status;
+      error.data = errorData;
+      
+      // Manejar errores de autenticación
+      handleAuthError(error);
+      
+      throw error;
+    }
+    
+    // Manejar respuestas que podrían ser string o json
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    } else {
+      // Podría ser un texto plano (como un token JWT)
+      const text = await response.text();
+      try {
+        // Intentar parsearlo como JSON por si acaso
+        return JSON.parse(text);
+      } catch {
+        // Si no es JSON, devolver el texto tal cual
+        return text;
+      }
+    }
+  } catch (error) {
     throw error;
   }
 };
@@ -290,6 +394,7 @@ const apiService = {
   get,
   post,
   put,
+  patch,
   del,
   BASE_URL: API_BASE_URL,
   // Agregamos la propiedad interceptors para permitir configurarlos desde otros servicios
@@ -300,6 +405,14 @@ const apiService = {
   get interceptors() {
     return interceptors;
   }
+};
+
+// Agregar un interceptor de respuesta para detectar errores de autenticación
+interceptors.response = async (response) => {
+  if (!response.ok && (response.status === 401 || response.status === 403)) {
+    handleAuthError(response);
+  }
+  return response;
 };
 
 export default apiService;

@@ -1,15 +1,17 @@
-import { FaUserFriends, FaFileAlt, FaImage, FaClipboard, FaUserMd } from "react-icons/fa";
+import { FaUserFriends, FaImage, FaFileAlt, FaUserMd, FaTrashRestore, FaGraduationCap } from "react-icons/fa";
 
 export const sidebarItems = [
     {
         title: 'Pacientes',
         path: '/dashboard',
-        icon: FaUserFriends
-    },
-    {
-        title: 'Documentos',
-        path: '/documentos',
-        icon: FaFileAlt
+        icon: FaUserFriends,
+        subItems: [
+            {
+                title: 'Pacientes Eliminados',
+                path: '/pacientes/eliminados',
+                icon: FaTrashRestore
+            }
+        ]
     },
     {
         title: 'Publicaciones',
@@ -17,13 +19,25 @@ export const sidebarItems = [
         icon: FaImage
     },
     {
-        title: 'Test',
+        title: 'Documentos',
         path: '/test',
-        icon: FaClipboard
+        icon: FaFileAlt
     },
     {
         title: 'Psicologos',
         path: '/psicologos',
-        icon: FaUserMd
+        icon: FaUserMd,
+        subItems: [
+            {
+                title: 'Psicólogos Eliminados',
+                path: '/psicologos/eliminados',
+                icon: FaTrashRestore
+            },
+            {
+                title: 'Especializaciones',
+                path: '/especializaciones',
+                icon: FaGraduationCap
+            }
+        ]
     }
 ];

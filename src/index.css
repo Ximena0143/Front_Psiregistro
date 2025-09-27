@@ -26,3 +26,39 @@ html {
 .App {
   height: 100%;
 }
+
+/* Estilos personalizados para SweetAlert2 */
+.swal-overlay-login {
+  position: fixed !important;
+  z-index: 1000 !important;
+}
+
+.swal-modal-login {
+  font-family: 'DM Sans', serif !important;
+}
+
+/* Asegurar que SweetAlert no modifique el layout */
+body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown),
+html.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {
+  height: 100% !important;
+  overflow-y: visible !important;
+  padding-right: 0 !important;
+}
+
+/* Estilos para botones de SweetAlert */
+.font-dm-sans {
+  font-family: 'DM Sans', serif !important;
+}
+
+/* Asegurar que el backdrop no cause desplazamiento */
+.swal2-container {
+  padding: 0 !important;
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 576px) {
+  .swal-modal-login {
+    width: 90% !important;
+    max-width: 320px !important;
+  }
+}

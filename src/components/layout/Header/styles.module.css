@@ -167,6 +167,13 @@
   cursor: pointer;
 }
 
+.welcome_text {
+  font-family: 'Libre Baskerville', serif;
+  color: #ffffff;
+  font-size: 20px;
+  margin: 0;
+}
+
 .user {
   display: flex;
   align-items: center;
@@ -230,4 +237,160 @@
 
 .dropdown a:hover {
   text-decoration: none;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 992px) {
+  .header {
+    padding: 0 1rem;
+  }
+  
+  .logo {
+    gap: 30px;
+  }
+  
+  .header[data-variant="dashboard"] .logo {
+    gap: 20px;
+  }
+  
+  .nav_links {
+    gap: 20px;
+  }
+  
+  .welcome_text {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    height: 80px;
+  }
+  
+  .header[data-variant="dashboard"] {
+    height: 70px;
+  }
+  
+  .logo p {
+    font-size: 20px;
+  }
+  
+  .header[data-variant="dashboard"] .logo p {
+    font-size: 18px;
+  }
+  
+  .welcome_text {
+    display: none;
+  }
+  
+  /* Menú hamburguesa */
+  .menu_toggle {
+    display: flex;
+    cursor: pointer;
+    z-index: 100;
+    color: #243A76;
+    font-size: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nav_header {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 70%;
+    height: 100vh;
+    background-color: #ffffff;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    z-index: 90;
+  }
+  
+  .nav_header.show {
+    right: 0;
+  }
+  
+  .nav_links {
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+  }
+  
+  .nav_links li {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .nav_links li a {
+    width: 100%;
+    display: block;
+  }
+  
+  .boton_header, .boton_header_sesion {
+    width: 100%;
+    padding: 10px 0;
+  }
+  
+  .boton_header_sesion {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    height: 70px;
+    padding: 0 0.75rem;
+  }
+  
+  .header[data-variant="dashboard"] {
+    height: 60px;
+  }
+  
+  .logo img {
+    width: 50px;
+  }
+  
+  .header[data-variant="dashboard"] .logo img {
+    width: 35px;
+  }
+  
+  .logo p {
+    font-size: 18px;
+  }
+  
+  .header[data-variant="dashboard"] .logo p {
+    font-size: 16px;
+  }
+  
+  .name_user {
+    display: none;
+  }
+  
+  .nav_header {
+    width: 85%;
+  }
+  
+  .boton_header {
+    font-size: 16px;
+  }
+  
+  .boton_header_sesion {
+    font-size: 16px;
+  }
+}
+
+/* Ocultar menú hamburguesa en pantallas grandes y mostrarlo en pequeñas */
+.menu_toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menu_toggle {
+    display: flex;
+  }
 }

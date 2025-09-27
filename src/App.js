@@ -12,7 +12,10 @@ import Perfil from './pages/perfil/Perfil';
 import AgregarPaciente from './pages/pacientes/agregar/AgregarPaciente';
 import EditarPaciente from './pages/pacientes/editar/EditarPaciente';
 import HistorialPaciente from './pages/pacientes/historial/HistorialPaciente';
+import PacientesEliminados from './pages/pacientes/eliminados/PacientesEliminados';
 import AgregarPsicologo from './pages/psicologos/agregar/AgregarPsicologo';
+import PsicologosEliminados from './pages/psicologos/eliminados/PsicologosEliminados';
+import Especializaciones from './pages/especializaciones/Especializaciones';
 import TestConnectionPage from './pages/test-connection/TestConnectionPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -64,6 +67,16 @@ function App() {
               <AgregarPsicologo />
             </ProtectedRoute>
           } />
+          <Route path="/psicologos/eliminados" element={
+            <ProtectedRoute>
+              <PsicologosEliminados />
+            </ProtectedRoute>
+          } />
+          <Route path="/especializaciones" element={
+            <ProtectedRoute>
+              <Especializaciones />
+            </ProtectedRoute>
+          } />
           <Route path="/pacientes/agregar" element={
             <ProtectedRoute>
               <AgregarPaciente />
@@ -77,6 +90,11 @@ function App() {
           <Route path="/pacientes/historial/:id" element={
             <ProtectedRoute>
               <HistorialPaciente />
+            </ProtectedRoute>
+          } />
+          <Route path="/pacientes/eliminados" element={
+            <ProtectedRoute>
+              <PacientesEliminados />
             </ProtectedRoute>
           } />
         </Routes>

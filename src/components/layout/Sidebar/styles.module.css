@@ -14,6 +14,9 @@
 .sidebar li {
     cursor: pointer;
     height: 55px;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .sidebar a {
@@ -21,15 +24,19 @@
     color: black;
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 10px 15px 10px 20px;
     border-radius: 5px;
     transition: background 0.3s ease;
-    gap: 15px;
+    gap: 10px;
     height: 100%;
+    flex-grow: 1;
 }
 
 .sidebar p {
     font-family: 'DM Sans', serif;
+    flex-grow: 1;
+    margin: 0;
+    text-align: left;
 }
 
 .sidebar .active {
@@ -38,6 +45,110 @@
     border-radius: 5px;
 }
 
+/* Cuando el elemento padre está activo, cambiar el color de la flecha a blanco */
+li:has(.active) .expandIcon {
+    color: white;
+}
+
 .icon_menu {
     font-size: 20px;
+    min-width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.expandIcon {
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+}
+
+.expandIcon:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+}
+
+.subMenu {
+    margin-top: 0 !important;
+    padding-left: 20px !important;
+}
+
+.subItem {
+    height: 45px !important;
+}
+
+.subItem a {
+    font-size: 0.9em;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 180px;
+    }
+
+    .sidebar p {
+        font-size: 14px;
+    }
+
+    .sidebar li {
+        height: 50px;
+    }
+}
+
+/* Para dispositivos móviles, implementamos un sidebar colapsable */
+@media (max-width: 576px) {
+    .sidebar {
+        position: fixed;
+        left: -230px;
+        top: 60px;
+        height: calc(100% - 60px);
+        z-index: 100;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+}
+
+/* Estilos para el botón toggle */
+.toggleButton {
+    display: none; /* Por defecto oculto en pantallas grandes */
+    position: fixed;
+    top: 70px;
+    left: 10px;
+    z-index: 101;
+    background: #219EBC;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Solo mostrar el botón toggle en pantallas pequeñas */
+@media (max-width: 576px) {
+    .toggleButton {
+        display: flex;
+    }
 }

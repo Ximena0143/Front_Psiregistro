@@ -130,7 +130,7 @@ tr:nth-child(even) {
 }
 
 .addButton:hover {
-    background: #FB8500;
+    background-color: #e67a00;
 }
 
 .actionIcons {
@@ -143,6 +143,17 @@ tr:nth-child(even) {
 .iconWrapper {
     position: relative;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.iconWrapper:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .iconWrapper[title] {
@@ -166,18 +177,31 @@ tr:nth-child(even) {
 }
 
 .actionIcon {
-    width: 20px;
-    height: 20px;
-    color: #4B5563;
+    width: 18px;
+    height: 18px;
     transition: all 0.2s ease;
 }
 
+.viewIcon {
+    color: #059669; /* Verde esmeralda para ver/visualizar */
+}
+
+.deleteIcon {
+    color: #DC2626; /* Rojo para eliminar */
+}
+
+.downloadIcon {
+    color: #7C3AED; /* Púrpura para descargar */
+}
+
+.uploadIcon {
+    color: #0891B2; /* Cian para subir */
+}
+
 .actionIcon:hover {
-    color: #FB8500;
     transform: scale(1.1);
 }
 
-/* Estilos para el botón de cerrar */
 .closeButton {
     background: none;
     border: none;
@@ -192,7 +216,6 @@ tr:nth-child(even) {
     color: #FB8500;
 }
 
-/* Estilos para el modal de subir documento */
 .uploadModal {
     position: fixed;
     top: 0;
@@ -316,7 +339,6 @@ tr:nth-child(even) {
     border-top: 1px solid #E6EDF0;
 }
 
-/* Estilos para la vista previa de documentos */
 .previewContent {
     padding: 20px;
     max-height: 500px;
