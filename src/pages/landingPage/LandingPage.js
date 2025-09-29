@@ -37,54 +37,41 @@ const LandingPage = () => {
 
     // Función para manejar el desplazamiento suave a las secciones con offset
     useEffect(() => {
-        // Seleccionar todos los enlaces internos que comienzan con #
-        const links = document.querySelectorAll('a[href^="#"]');
+        // Seleccionar solo los enlaces internos de secciones, pero no los de rutas tipo #/login
+        const links = document.querySelectorAll('a[href^="#"]:not([href^="#/"])');
         
-        // Función para manejar el clic en los enlaces
         const handleClick = (e) => {
             e.preventDefault();
             const href = e.currentTarget.getAttribute('href');
             
-            // Si el enlace es #, volver al inicio
             if (href === '#') {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
             
-            // Obtener el elemento objetivo
             const targetElement = document.querySelector(href);
-            
             if (targetElement) {
-                // Calcular la posición del elemento
                 const headerHeight = document.querySelector(`.${styles.header}`) ? 
                     document.querySelector(`.${styles.header}`).offsetHeight : 100;
-                
-                // Obtener la posición del elemento relativa al documento
                 const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
                 
-                // Desplazarse a la posición con offset
                 window.scrollTo({
-                    top: elementPosition - headerHeight - 20, // 20px extra de margen
+                    top: elementPosition - headerHeight - 20,
                     behavior: 'smooth'
                 });
             }
         };
         
-        // Añadir evento de clic a cada enlace
         links.forEach(link => {
             link.addEventListener('click', handleClick);
         });
         
-        // Limpiar los eventos cuando el componente se desmonte
         return () => {
             links.forEach(link => {
                 link.removeEventListener('click', handleClick);
             });
         };
-    }, []);
+    }, []);    
 
     return (
         <div className={styles.container}>

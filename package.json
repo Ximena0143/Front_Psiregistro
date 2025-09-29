@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "homepage": "https://ximena0143.github.io/Front_Psiregistro",
   "name": "psiregistro",
   "version": "0.1.0",
