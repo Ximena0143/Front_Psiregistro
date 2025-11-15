@@ -3,7 +3,7 @@
  */
 
 // URL base para todas las peticiones API
-const API_BASE_URL = 'https://like-tarah-psiregistro-818a63b5.koyeb.app';
+const API_BASE_URL = 'https://localhost:8000/api';
 
 // Interceptores para modificar las peticiones y respuestas
 const interceptors = {
