@@ -216,7 +216,7 @@ const LandingPage = () => {
                             </div>
                         </div>
                         <div className={styles.item2_contacto}>
-                            <img className={styles.image1_c} src="/Images/Imagen1c.jpg" alt="Imagen1 contacto" />
+                            <img className={styles.image1_c} src="/Images/Imagen1C.jpg" alt="Imagen1 contacto" />
                         </div>
                     </div>
 

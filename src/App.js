@@ -3,7 +3,7 @@ import './App.css';
 import LandingPage from './pages/landingPage/LandingPage';
 import Login from "./pages/login/Login";
 import SignUp from "./pages/signup/SignUp";
-import Documentos from "./pages/documentos/Documentos";
+import Documentos from "./pages/documentos/documentos";
 import Psicologos from "./pages/psicologos/Psicologos";
 import Publicaciones from "./pages/publicaciones/Publicaciones";
 import TestPsi from "./pages/test_psi/TestPsi";

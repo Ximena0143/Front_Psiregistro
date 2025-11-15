@@ -61,7 +61,8 @@ const AgregarPaciente = () => {
     };
 
     const validateIdentificacion = (numero) => {
-        return /^\d{6,11}$/.test(numero);
+        // Permite letras, números, guiones y entre 3 y 30 caracteres
+        return /^[a-zA-Z0-9\-]{3,30}$/.test(numero);
     };
 
     const validateNombre = (nombre) => {
