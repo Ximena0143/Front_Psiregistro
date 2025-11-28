@@ -563,6 +563,47 @@
     text-align: center;
 }
 
+/* Estilos para el contenedor de información del documento */
+.documentInfoContainer {
+    margin-top: 20px;
+    width: 100%;
+    border-radius: 8px;
+    background-color: rgba(251, 133, 0, 0.05);
+    border: 1px solid rgba(251, 133, 0, 0.2);
+    padding: 15px;
+}
+
+/* Estilos para el mensaje de información de PDF */
+.pdfInfoMessage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdfInfoMessage p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #243A76;
+    margin: 0;
+    text-align: center;
+    line-height: 1.5;
+    position: relative;
+    padding-left: 28px;
+}
+
+.pdfInfoMessage p::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FB8500' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3Cline x1='16' y1='13' x2='8' y2='13'%3E%3C/line%3E%3Cline x1='16' y1='17' x2='8' y2='17'%3E%3C/line%3E%3Cpolyline points='10 9 9 9 8 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
 .viewDocumentButton {
     display: flex;
     align-items: center;

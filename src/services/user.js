@@ -176,6 +176,27 @@ export const forceDeleteUser = async (id) => {
   }
 };
 
+/**
+ * Actualiza la foto de perfil de un usuario
+ * @param {File} photoFile - Archivo de imagen para la foto de perfil
+ * @returns {Promise} - Promesa con los datos de la foto actualizada
+ */
+export const updateProfilePhoto = async (photoFile) => {
+  try {
+    // Crear FormData para enviar el archivo
+    const formData = new FormData();
+    formData.append('profile_photo', photoFile);
+    formData.append('_method', 'PATCH'); 
+    
+    // Realizar la petición PATCH al backend
+    const response = await api.post('/update-profile-photo', formData);
+    return response;
+  } catch (error) {
+    console.error('Error al actualizar la foto de perfil:', error);
+    throw error;
+  }
+};
+
 const userService = {
   getUsers,
   getDeletedUsers,
@@ -184,7 +205,8 @@ const userService = {
   deleteUser,
   restoreUser,
   forceDeleteUser,
-  getUserById
+  getUserById,
+  updateProfilePhoto
 };
 
 export default userService;

@@ -670,6 +670,64 @@
     overflow: auto;
 }
 
+.pdfBackupAction {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.pdfExternalLinkButton {
+    background-color: #0891B2;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.pdfExternalLinkButton:hover {
+    background-color: #0e7490;
+    text-decoration: none;
+    color: white;
+}
+
+.pdfIframe {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    /* Fix para que el iframe ocupe todo el espacio disponible */
+    min-height: 600px;
+}
+
+.pdfBackupAction {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.pdfExternalLinkButton {
+    background-color: #0891B2;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.pdfExternalLinkButton:hover {
+    background-color: #0e7490;
+    text-decoration: none;
+    color: white;
+}
+
 .pdfControls {
     display: flex;
     flex-direction: column;

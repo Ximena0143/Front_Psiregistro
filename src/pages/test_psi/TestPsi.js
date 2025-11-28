@@ -359,6 +359,24 @@ const TestPsi = () => {
         }
     };
 
+    // Función para determinar si un documento es PDF
+    const isPdfDocument = (documentUrl) => {
+        if (!documentUrl) return false;
+        
+        // Verificar si la URL termina o contiene .pdf
+        if (documentUrl.toLowerCase().includes('.pdf')) {
+            return true;
+        }
+        
+        // Verificar si es una URL de AWS S3 que contiene parámetros para PDF
+        if (documentUrl.includes('X-Amz-') && 
+            (documentUrl.includes('/pdf') || documentUrl.includes('Content-Type=application%2Fpdf'))) {
+            return true;
+        }
+        
+        return false;
+    };
+
     // Función para ver el documento directamente
     const handleViewDocument = (documentUrl) => {
         if (!documentUrl) {
@@ -371,7 +389,25 @@ const TestPsi = () => {
             return;
         }
         
-        // Mostrar notificación de que se está abriendo el documento
+        // Verificar si el documento es un PDF
+        if (isPdfDocument(documentUrl)) {
+            // Mostrar un mensaje para los PDF en lugar de intentar abrirlos
+            Swal.fire({
+                title: 'Documento PDF',
+                html: `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <p>No se puede mostrar una vista previa para este documento PDF.</p>
+                        <p style="margin-top: 10px;">Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.</p>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonColor: '#FB8500',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+        
+        // Para otros tipos de documentos, mostrar notificación
         const toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -458,7 +494,7 @@ const TestPsi = () => {
                         </div>
                         <div className={styles.modalContent}>
                             <div className={styles.formField}>
-                                <label htmlFor="nombre">Nombre del test *</label>
+                                <label htmlFor="nombre">Nombre de la plantilla *</label>
                                 <input
                                     id="nombre"
                                     name="nombre"
@@ -470,7 +506,7 @@ const TestPsi = () => {
                             </div>
 
                             <div className={styles.formField}>
-                                <label>Archivo del test *</label>
+                                <label>Archivo de la plantilla *</label>
                                 <div 
                                     className={styles.fileUploadArea}
                                     onClick={handleUploadAreaClick}
@@ -537,16 +573,12 @@ const TestPsi = () => {
                                         <span className={styles.infoLabel}>Fecha de creación:</span>
                                         <span>{currentTest.fechaCreacion}</span>
                                     </div>
-                                    {/* Vista previa del documento */}
-                                    {currentTest.archivo && (
-                                    <div className={styles.documentPreviewContainer}>
-                                        <button 
-                                            className={styles.viewDocumentButton}
-                                            onClick={() => handleViewDocument(currentTest.archivo)}
-                                        >
-                                            <Eye size={20} />
-                                            Ver documento
-                                        </button>
+                                    {/* Información sobre el documento */}
+                                    {currentTest.archivo && isPdfDocument(currentTest.archivo) && (
+                                    <div className={styles.documentInfoContainer}>
+                                        <div className={styles.pdfInfoMessage}>
+                                            <p>Este documento es un PDF. Utiliza el botón "Descargar plantilla" para guardar y abrir el archivo en tu dispositivo.</p>
+                                        </div>
                                     </div>
                                     )}
                                 </div>
@@ -570,7 +602,7 @@ const TestPsi = () => {
                                 {isLoading ? 'Descargando...' : (
                                     <>
                                         <Download size={16} />
-                                        Descargar test
+                                        Descargar plantilla
                                     </>
                                 )}
                             </button>

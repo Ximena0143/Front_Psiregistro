@@ -14,12 +14,26 @@ const isPdfDocument = (documento) => {
     if (!documento) return false;
     
     // Verificar por la URL
-    if (documento.signed_url && documento.signed_url.toLowerCase().includes('.pdf')) {
-        return true;
+    if (documento.signed_url) {
+        // Check if URL contains .pdf
+        if (documento.signed_url.toLowerCase().includes('.pdf')) {
+            return true;
+        }
+        
+        // Check if URL contains specific AWS S3 parameters for PDFs
+        if (documento.signed_url.includes('X-Amz-') && 
+            (documento.signed_url.includes('/pdf') || documento.signed_url.includes('Content-Type=application%2Fpdf'))) {
+            return true;
+        }
     }
     
     // Verificar por el nombre original del archivo
     if (documento.tituloOriginal && documento.tituloOriginal.toLowerCase().endsWith('.pdf')) {
+        return true;
+    }
+    
+    // Verificar por el tipo MIME o content type si está disponible
+    if (documento.contentType && documento.contentType.toLowerCase().includes('pdf')) {
         return true;
     }
     
@@ -311,7 +325,8 @@ const HistorialPaciente = () => {
                     fechaActualizacion: new Date().toISOString().split('T')[0],
                     estado: doc.estado || (statusId === 1 ? 'Completado' : 'En proceso'),
                     icono: 'FileText',
-                    signed_url: doc.document_path, // Usar document_path que es el campo que viene del backend
+                    signed_url: doc.document_url || doc.document_path, // Usar document_url para descargas, con fallback a document_path
+                    document_path: doc.document_path, // Mantener document_path para otros propósitos
                     expires_in: doc.expires_in,
                     status_id: statusId // Usamos el status_id asignado
                 };
@@ -345,12 +360,14 @@ const HistorialPaciente = () => {
     };
     
     const handleDownloadDocument = (documento) => {
-        // Verificar que documento y signed_url existan
-        if (documento && documento.signed_url) {
-            console.log('Intentando descargar documento:', documento.titulo, 'URL:', documento.signed_url);
+        // Verificar si tenemos una URL de descarga disponible
+        const downloadUrl = documento.document_url || documento.signed_url;
+        
+        if (documento && downloadUrl) {
+            console.log('Intentando descargar documento:', documento.titulo, 'URL:', downloadUrl);
             // Crear un elemento a invisible para forzar la descarga
             const link = document.createElement('a');
-            link.href = documento.signed_url;
+            link.href = downloadUrl;
             link.target = '_blank';
             link.download = documento.tituloOriginal || documento.titulo || 'documento';
             document.body.appendChild(link);
@@ -843,26 +860,29 @@ const HistorialPaciente = () => {
                                                                 )}
                                                             </div>
                                                             <div className={styles.documentActions}>
-                                                                <button 
-                                                                    className={styles.actionButton}
-                                                                    title="Ver documento"
-                                                                    onClick={() => handleViewDocument(documento)}
-                                                                >
-                                                                    <Eye size={18} color="#0891B2" />
-                                                                    <span>Ver</span>
-                                                                </button>
-                                                                
-                                                                {/* Mostrar botón de descarga solo para formatos que no sean PDF */}
+                                                                {/* Botón Ver solo para documentos que NO son PDF */}
                                                                 {!isPdfDocument(documento) && (
                                                                     <button 
                                                                         className={styles.actionButton}
-                                                                        title="Descargar documento"
-                                                                        onClick={() => handleDownloadDocument(documento)}
+                                                                        title="Ver documento"
+                                                                        onClick={() => handleViewDocument(documento)}
                                                                     >
-                                                                        <Download size={18} color="#7C3AED" />
-                                                                        <span>Descargar</span>
+                                                                        <Eye size={18} color="#0891B2" />
+                                                                        <span>Ver</span>
                                                                     </button>
                                                                 )}
+                                                                
+                                                                {/* Botón de descarga/ver para todos los documentos */}
+                                                                <button 
+                                                                    className={styles.actionButton}
+                                                                    title={isPdfDocument(documento) ? "Ver documento" : "Descargar documento"}
+                                                                    onClick={() => handleDownloadDocument(documento)}
+                                                                >
+                                                                    {isPdfDocument(documento) ? 
+                                                                        <Eye size={18} color="#7C3AED" /> : 
+                                                                        <Download size={18} color="#7C3AED" />}
+                                                                    <span>{isPdfDocument(documento) ? "Ver" : "Descargar"}</span>
+                                                                </button>
                                                                 
                                                                 <button 
                                                                     className={styles.actionButton}
@@ -935,20 +955,20 @@ const HistorialPaciente = () => {
                                     let fileIcon = <FileText size={64} color="#219EBC" />;
                                     let fileTypeText = 'documento';
                                     
-                                    // Para PDFs, usar iframe que muestra directamente el documento
+                                    // Para PDFs, mostrar mensaje para descargar
                                     if (isPdf) {
-                                        console.log("Mostrando PDF en iframe:", previewDocument.signed_url);
                                         return (
-                                            <div className={styles.pdfViewer}>
-                                                <iframe
-                                                    src={previewDocument.signed_url}
-                                                    title={previewDocument.titulo || "Vista previa de PDF"}
-                                                    className={styles.pdfIframe}
-                                                    width="100%"
-                                                    height="600px"
-                                                    frameBorder="0"
-                                                    allowFullScreen
-                                                />
+                                            <div className={styles.documentPreview}>
+                                                <div className={styles.previewPlaceholder}>
+                                                    <FileText size={64} color="#E11D48" />
+                                                    <p>Documento PDF: <strong>{previewDocument.titulo}</strong></p>
+                                                    <p className={styles.previewNote}>
+                                                        No se puede mostrar una vista previa para este documento PDF.
+                                                    </p>
+                                                    <p className={styles.previewTip}>
+                                                        Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.
+                                                    </p>
+                                                </div>
                                             </div>
                                         );
                                     }
@@ -972,8 +992,116 @@ const HistorialPaciente = () => {
                                                previewDocument.tituloOriginal.toLowerCase().endsWith('.xlsx')))) {
                                         fileType = 'excel';
                                         fileIcon = <FileText size={64} color="#059669" />;
-                                        fileTypeText = 'hoja de cálculo';
+                                        fileTypeText = 'hoja de Excel';
                                     }
+                                    
+                                    // Para imágenes
+                                    else if (previewDocument.signed_url.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i) ||
+                                             (previewDocument.tituloOriginal && 
+                                              previewDocument.tituloOriginal.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i))) {
+                                        return (
+                                            <div className={styles.documentPreview}>
+                                                <img 
+                                                    src={previewDocument.signed_url} 
+                                                    alt={previewDocument.titulo || 'Vista previa'} 
+                                                    className={styles.previewImage}
+                                                />
+                                            </div>
+                                        );
+                                    }
+                                    
+                                    // Para otros formatos, mostrar placeholder
+                                    return (
+                                        <div className={styles.documentPreview}>
+                                            <div className={styles.previewPlaceholder}>
+                                                {fileIcon}
+                                                <p>Vista previa del {fileTypeText}: <strong>{previewDocument.titulo}</strong></p>
+                                                <p className={styles.previewNote}>
+                                                    No se puede mostrar una vista previa para este tipo de archivo.
+                                                </p>
+                                                <p className={styles.previewTip}>
+                                                    Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })()
+                            ) : (
+                                <div className={styles.documentPreview}>
+                                    <div className={styles.previewPlaceholder}>
+                                        <FileText size={64} color="#219EBC" />
+                                        <p>Vista previa del documento: {previewDocument.titulo}</p>
+                                        <p className={styles.previewNote}>
+                                            (No se puede mostrar la vista previa del documento)
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className={styles.previewActions}>
+                            <button 
+                                className={styles.closePreviewButton}
+                                onClick={handleClosePreview}
+                            >
+                                Cerrar
+                            </button>
+                            
+                            {/* Botón de descarga para todos los documentos */}
+                            <button
+                                className={styles.downloadPreviewButton}
+                                onClick={() => {
+                                    handleDownloadDocument(previewDocument);
+                                    handleClosePreview();
+                                }}
+                            >
+                                <Download size={16} color="#7C3AED" />
+                                Descargar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        {/* Modal de Previsualización */}
+        {showPreview && previewDocument && (
+            <div className={styles.previewOverlay}>
+                <div className={styles.previewContainer}>
+                    <div className={styles.previewHeader}>
+                        <h4>{previewDocument.titulo}</h4>
+                        <button onClick={handleClosePreview} className={styles.closeButton}>×</button>
+                    </div>
+                    <div className={styles.previewContent}>
+                        {previewDocument.signed_url ? (
+                            // Determinar el tipo de archivo para mostrar la vista previa adecuada
+                            (() => {
+                                // Verificar si la URL o el título contiene indicación del tipo de archivo
+                                const isPdf = isPdfDocument(previewDocument);
+                                let fileType = 'desconocido';
+                                let fileIcon = <FileText size={64} color="#219EBC" />;
+                                let fileTypeText = 'documento';
+                                
+                                // Para PDFs, mostrar mensaje para descargar
+                                if (isPdf) {
+                                    // Para PDFs, usar el icono correcto
+                                    fileType = 'pdf';
+                                    fileIcon = <FileText size={64} color="#E11D48" />;
+                                    fileTypeText = 'PDF';
+                                    
+                                    return (
+                                        <div className={styles.documentPreview}>
+                                            <div className={styles.previewPlaceholder}>
+                                                <FileText size={64} color="#E11D48" />
+                                                <p>Documento PDF: <strong>{previewDocument.titulo}</strong></p>
+                                                <p className={styles.previewNote}>
+                                                    No se puede mostrar una vista previa para este documento PDF.
+                                                </p>
+                                                <p className={styles.previewTip}>
+                                                    Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                }
                                     
                                     // Para imágenes
                                     else if (previewDocument.signed_url.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i) ||
