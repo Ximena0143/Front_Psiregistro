@@ -73,6 +73,9 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
     border: 1px solid #E6EDF0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .testCard:hover {
@@ -80,11 +83,12 @@
 }
 
 .testCard h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 16px 0;
     color: #243A76;
     font-size: 26px;
     font-weight: 500;
     font-family: 'DM Sans', sans-serif;
+    text-align: center;
 }
 
 .testCard p {
@@ -100,22 +104,40 @@
     flex-wrap: wrap;
     gap: 15px;
     margin-bottom: 15px;
+    flex: 1;
 }
 
 .metaItem {
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     color: #4B5563;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
 }
 
 .metaLabel {
     font-weight: 600;
     color: #243A76;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.metaValue {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #4B5563;
+    display: block;
 }
 
 .cardActions {
     display: flex;
     gap: 10px;
+    margin-top: auto;
+    justify-content: space-between;
 }
 
 .viewButton, .assignButton, .downloadButton, .assignModalButton {

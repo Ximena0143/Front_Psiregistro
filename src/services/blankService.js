@@ -134,19 +134,6 @@ export const uploadBlank = async (data, file) => {
   }
 };
 
-/**
- * Obtiene la URL de descarga de una plantilla
- * @param {number} id - ID de la plantilla
- * @returns {Promise} - URL de descarga
- */
-export const downloadBlank = async (id) => {
-  try {
-    const response = await api.get(`/blank/download/${id}`);
-    return response.data?.data?.URL || null;
-  } catch (error) {
-    throw error;
-  }
-};
 
 /**
  * Elimina una plantilla
@@ -201,7 +188,6 @@ export const sendBlank = async (blankId, emails, message = '') => {
 const blankService = {
   getBlanksByUser,
   uploadBlank,
-  downloadBlank,
   deleteBlank,
   sendBlank
 };

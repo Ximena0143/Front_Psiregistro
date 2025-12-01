@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
 import Sidebar from '../../components/layout/Sidebar/Sidebar';
-import { X, Upload, Download, Eye, UserRound, Send } from 'lucide-react';
+import { X, Upload, Eye, UserRound, Send } from 'lucide-react';
 import Swal from 'sweetalert2';
 import blankService from '../../services/blankService';
 import authService from '../../services/auth';
@@ -47,13 +47,14 @@ const TestPsi = () => {
                         
                         if (Array.isArray(blanksData)) {
                             // Transformar los datos al formato que espera el componente
-                            const formattedTests = blanksData.map(blank => ({
-                                id: blank.id,
-                                nombre: blank.tittle || 'Test sin nombre',
-                                archivo: blank.path || '',
-                                fechaCreacion: formatDate(blank.created_at) || 'Fecha desconocida',
-                                formato: getFormatFromUrl(blank.path) || 'PDF'
-                            }));
+                            const formattedTests = blanksData.map(blank => {
+                                return {
+                                    id: blank.id,
+                                    nombre: blank.tittle || 'Test sin nombre',
+                                    archivo: blank.path || '',
+                                    formato: getFormatFromUrl(blank.path) || 'PDF'
+                                };
+                            });
                             
                             console.log('Datos formateados:', formattedTests);
                             setTests(formattedTests);
@@ -101,15 +102,7 @@ const TestPsi = () => {
         fetchTests();
     }, []);
     
-    // Función para formatear la fecha desde el backend
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        
-        const date = new Date(dateString);
-        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        
-        return `${date.getDate()} ${months[date.getMonth()]}, ${date.getFullYear()}`;
-    };
+    // La función formatDate ha sido eliminada ya que no se necesita
     
     // Función para obtener el formato del archivo a partir de la URL
     const getFormatFromUrl = (url) => {
@@ -253,7 +246,6 @@ const TestPsi = () => {
                 const nuevoTest = {
                     id: responseData.id || Math.floor(Math.random() * 10000), // ID temporal si no hay ID
                     nombre: responseData.tittle || newTest.nombre,
-                    fechaCreacion: formatDate(responseData.created_at) || formatDate(new Date()),
                     formato: getFormatFromUrl(responseData.path) || selectedFileName.split('.').pop().toUpperCase(),
                     archivo: responseData.path || ''
                 };
@@ -349,65 +341,7 @@ const TestPsi = () => {
         }
     };
 
-    // Descargar plantilla
-    const handleDownloadTest = async (test) => {
-        setIsLoading(true);
-        
-        try {
-            // Obtener la URL de descarga del backend
-            const downloadUrl = await blankService.downloadBlank(test.id);
-            
-            if (downloadUrl) {
-                // Crear un enlace temporal para descargar el archivo
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.setAttribute('download', test.nombre || 'test');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Mostrar alerta de éxito
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: `El archivo del test "${test.nombre}" se ha descargado correctamente`,
-                    icon: 'success',
-                    confirmButtonColor: '#FB8500',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } else {
-                throw new Error('No se pudo obtener la URL de descarga');
-            }
-        } catch (error) {
-            console.error('Error al descargar el test:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo descargar el archivo. Por favor, intenta de nuevo más tarde.',
-                confirmButtonColor: '#FB8500'
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
-    // Función para determinar si un documento es PDF
-    const isPdfDocument = (documentUrl) => {
-        if (!documentUrl) return false;
-        
-        // Verificar si la URL termina o contiene .pdf
-        if (documentUrl.toLowerCase().includes('.pdf')) {
-            return true;
-        }
-        
-        // Verificar si es una URL de AWS S3 que contiene parámetros para PDF
-        if (documentUrl.includes('X-Amz-') && 
-            (documentUrl.includes('/pdf') || documentUrl.includes('Content-Type=application%2Fpdf'))) {
-            return true;
-        }
-        
-        return false;
-    };
 
     // Función para ver el documento directamente
     const handleViewDocument = (documentUrl) => {
@@ -421,25 +355,7 @@ const TestPsi = () => {
             return;
         }
         
-        // Verificar si el documento es un PDF
-        if (isPdfDocument(documentUrl)) {
-            // Mostrar un mensaje para los PDF en lugar de intentar abrirlos
-            Swal.fire({
-                title: 'Documento PDF',
-                html: `
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <p>No se puede mostrar una vista previa para este documento PDF.</p>
-                        <p style="margin-top: 10px;">Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.</p>
-                    </div>
-                `,
-                icon: 'info',
-                confirmButtonColor: '#FB8500',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
-        
-        // Para otros tipos de documentos, mostrar notificación
+        // Notificar al usuario que se está abriendo el documento
         const toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -486,9 +402,10 @@ const TestPsi = () => {
                                 <div key={test.id} className={styles.testCard}>
                                     <h3>{test.nombre}</h3>
                                     <div className={styles.testMeta}>
-                                        <span className={styles.metaItem}>
-                                            <span className={styles.metaLabel}>Formato:</span> {test.formato}
-                                        </span>
+                                        <div className={styles.metaItem} style={{ margin: '0 auto' }}>
+                                            <span className={styles.metaLabel}>Formato:</span> 
+                                            <span className={styles.metaValue}>{test.formato}</span>
+                                        </div>
                                     </div>
                                     <div className={styles.cardActions}>
                                         <button className={styles.viewButton} onClick={() => handleOpenDetailsModal(test)}>
@@ -596,23 +513,10 @@ const TestPsi = () => {
                                 <h3 className={styles.testDetailTitle}>{currentTest.nombre}</h3>
 
                                 <div className={styles.testDetailInfo}>
-                                    <div className={styles.infoItem}>
-                                        <span className={styles.infoLabel}>Formato:</span>
-                                        <span>{currentTest.formato}</span>
+                                    <div className={styles.metaItem} style={{ margin: '0 auto', minWidth: '200px' }}>
+                                        <span className={styles.metaLabel}>Formato:</span>
+                                        <span className={styles.metaValue}>{currentTest.formato}</span>
                                     </div>
-
-                                    <div className={styles.infoItem}>
-                                        <span className={styles.infoLabel}>Fecha de creación:</span>
-                                        <span>{currentTest.fechaCreacion}</span>
-                                    </div>
-                                    {/* Información sobre el documento */}
-                                    {currentTest.archivo && isPdfDocument(currentTest.archivo) && (
-                                    <div className={styles.documentInfoContainer}>
-                                        <div className={styles.pdfInfoMessage}>
-                                            <p>Este documento es un PDF. Utiliza el botón "Descargar plantilla" para guardar y abrir el archivo en tu dispositivo.</p>
-                                        </div>
-                                    </div>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -622,21 +526,6 @@ const TestPsi = () => {
                                 onClick={handleCloseDetailsModal}
                             >
                                 Cerrar
-                            </button>
-                            <button 
-                                className={styles.downloadButton}
-                                onClick={() => {
-                                    handleDownloadTest(currentTest);
-                                    handleCloseDetailsModal();
-                                }}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? 'Descargando...' : (
-                                    <>
-                                        <Download size={16} />
-                                        Descargar plantilla
-                                    </>
-                                )}
                             </button>
                         </div>
                     </div>
