@@ -302,19 +302,51 @@ const TestPsi = () => {
     };
 
     // Asignar test a paciente
-    const handleAssignTest = () => {
-        // Mostrar alerta de éxito
-        Swal.fire({
-            title: '¡Éxito!',
-            text: `El test "${currentTest.nombre}" ha sido asignado a ${assignData.pacienteEmail} correctamente`,
-            icon: 'success',
-            confirmButtonColor: '#FB8500',
-            timer: 2000,
-            showConfirmButton: false
-        });
+    const handleAssignTest = async () => {
+        setIsLoading(true);
         
-        // Cerrar el modal
-        handleCloseAssignModal();
+        try {
+            // Preparar los datos para enviar el test
+            const emails = [assignData.pacienteEmail];
+            const message = assignData.mensaje || '';
+            
+            // Llamar al servicio para enviar el test
+            const response = await blankService.sendBlank(currentTest.id, emails, message);
+            console.log('Send blank response:', response);
+            
+            // Mostrar alerta de éxito
+            Swal.fire({
+                title: '¡Éxito!',
+                text: `El test "${currentTest.nombre}" ha sido enviado a ${assignData.pacienteEmail} correctamente`,
+                icon: 'success',
+                confirmButtonColor: '#FB8500',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            // Cerrar el modal
+            handleCloseAssignModal();
+        } catch (error) {
+            console.error('Error al enviar el test:', error);
+            
+            let errorMessage = 'No se pudo enviar el test. Por favor, intenta de nuevo más tarde.';
+            
+            // Intentar obtener un mensaje de error más específico si está disponible
+            if (error.response && error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+                confirmButtonColor: '#FB8500'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Descargar plantilla

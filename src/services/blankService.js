@@ -2,7 +2,7 @@
  * Servicio para gestionar las plantillas de test psicológicos
  */
 import api from './api';
-import { getToken } from './auth';
+import authService, { getToken } from './auth';
 
 /**
  * Obtiene todas las plantillas del usuario
@@ -162,11 +162,48 @@ export const deleteBlank = async (id) => {
   }
 };
 
+/**
+ * Envía una plantilla a los correos electrónicos especificados
+ * @param {number} blankId - ID de la plantilla
+ * @param {Array<string>} emails - Lista de correos electrónicos
+ * @param {string} message - Mensaje para incluir en el correo (opcional)
+ * @returns {Promise} - Respuesta del envío
+ */
+export const sendBlank = async (blankId, emails, message = '') => {
+  try {
+    console.log('Sending blank to emails:', emails);
+    
+    const requestData = {
+      blank_id: blankId,
+      emails: emails
+    };
+    
+    // Si hay un mensaje, lo incluimos en la solicitud
+    if (message && message.trim() !== '') {
+      requestData.message = message;
+    }
+    
+    const response = await api.post('/blank/send-blank', requestData, {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+    
+    console.log('Send blank response:', response);
+    return response;
+  } catch (error) {
+    console.error('Error sending blank:', error);
+    throw error;
+  }
+};
+
 const blankService = {
   getBlanksByUser,
   uploadBlank,
   downloadBlank,
-  deleteBlank
+  deleteBlank,
+  sendBlank
 };
 
 export default blankService;
