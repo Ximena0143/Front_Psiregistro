@@ -2,6 +2,7 @@ import { HashRouter as Router, Route, Routes } from "react-router-dom";
 import './App.css';
 import LandingPage from './pages/landingPage/LandingPage';
 import Login from "./pages/login/Login";
+import ForgotPassword from "./pages/login/ForgotPassword";
 import SignUp from "./pages/signup/SignUp";
 import Documentos from "./pages/documentos/documentos";
 import Psicologos from "./pages/psicologos/Psicologos";
@@ -28,6 +29,7 @@ function App() {
           {/* Rutas públicas */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/test-connection" element={<TestConnectionPage />} />
           

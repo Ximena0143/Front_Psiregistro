@@ -310,6 +310,20 @@ api.interceptors = {
   }
 };
 
+/**
+ * Envía solicitud para recuperar contraseña
+ * @param {Object} data - Contiene el email del usuario
+ * @returns {Promise} - Resultado de la solicitud
+ */
+export const forgotPassword = async (data) => {
+  try {
+    const response = await api.post('/password/forget', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const authService = {
   login,
   logout,
@@ -320,7 +334,8 @@ const authService = {
   hasRole,
   isAdmin,
   isDoctor,
-  me
+  me,
+  forgotPassword
 };
 
 export default authService;

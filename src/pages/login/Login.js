@@ -269,24 +269,8 @@ export default function Login() {
   };
 
   const handleForgotPassword = () => {
-    Swal.fire({
-      title: '¡Éxito!',
-      text: `Se ha enviado un correo de recuperación de contraseña a ${email}`,
-      icon: 'success',
-      confirmButtonColor: '#FB8500',
-      customClass: {
-        confirmButton: 'font-dm-sans',
-        title: 'font-dm-sans',
-        popup: 'font-dm-sans swal-modal-login',
-        container: 'swal-overlay-login'
-      },
-      timer: 2000,
-      timerProgressBar: true,
-      showConfirmButton: false,
-      backdrop: true,
-      heightAuto: false, // Evita que SweetAlert modifique la altura del documento
-      position: 'center' // Posición centrada
-    });
+    // Navegar a la página de recuperación de contraseña
+    navigate('/forgot-password');
   };
 
   return (
