@@ -4,6 +4,39 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Script para redireccionar URLs incorrectas cuando se usa HashRouter
+// Esto corrige enlaces como http://localhost:3000/reset-password?token=XXX
+// o con doble slash http://localhost:3000//reset-password?token=XXX
+// convirtiéndolos a http://localhost:3000/#/reset-password?token=XXX
+(function() {
+  // Rutas que debemos corregir (sin el slash inicial)
+  const routesToFix = ['reset-password', 'forgot-password'];
+  
+  // Verificar si tenemos un doble slash o una ruta sin hash
+  if (!window.location.hash) {
+    // Normalizar la ruta eliminando posibles slashes duplicados
+    let pathname = window.location.pathname;
+    while (pathname.includes('//')) {
+      pathname = pathname.replace('//', '/');
+    }
+    
+    // Si después de normalizar, la ruta no es solo '/'
+    if (pathname !== '/') {
+      const path = pathname.substring(1); // Quitar el slash inicial
+      const search = window.location.search;
+      
+      // Verificar si estamos en una ruta que necesita corrección
+      for (const route of routesToFix) {
+        if (path.startsWith(route)) {
+          console.log(`Redirigiendo desde ${window.location.pathname} a la URL en formato HashRouter: /#/${path}${search}`);
+          window.location.replace(`/#/${path}${search}`);
+          break;
+        }
+      }
+    }
+  }
+})();
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

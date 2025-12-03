@@ -324,6 +324,20 @@ export const forgotPassword = async (data) => {
   }
 };
 
+/**
+ * Resetea la contraseña del usuario usando el token
+ * @param {Object} data - Contiene email, token, password y password_confirmation
+ * @returns {Promise} - Resultado de la solicitud
+ */
+export const resetPassword = async (data) => {
+  try {
+    const response = await api.post('/password/reset', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const authService = {
   login,
   logout,
@@ -335,7 +349,8 @@ const authService = {
   isAdmin,
   isDoctor,
   me,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 };
 
 export default authService;
