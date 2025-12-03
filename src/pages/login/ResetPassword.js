@@ -327,11 +327,11 @@ export default function ResetPassword() {
           <img className={styles.image_login} src="/Images/Imagen1N.jpg" alt="Imagen de fondo" />
         </div>
       </div>
-      <div className={styles.card}>
+      <div className={`${styles.card} ${styles.reset_password_card}`}>
         <p className={styles.titulo_inicio}>Establecer Nueva Contraseña</p>
         <p className={styles.subtitulo_recuperar}>Por favor, introduce tu correo electrónico y una nueva contraseña</p>
-        <form onSubmit={handleSubmit} className={styles.form_inicio}>
-          <div className={styles.container_input}>
+        <form onSubmit={handleSubmit} className={`${styles.form_inicio} ${styles.reset_password_form}`}>
+          <div className={`${styles.container_input} ${styles.reset_password_container_input}`}>
             <input
               id="email"
               className={styles.input_field}
@@ -342,9 +342,9 @@ export default function ResetPassword() {
             />
             <label htmlFor="email" className={styles.input_label}>Correo</label>
             <span className={styles.input_highlight}></span>
-            {emailError && <p className={styles.error_text}>{emailError}</p>}
+            {emailError && <p className={`${styles.error_text} ${styles.reset_password_error_text}`}>{emailError}</p>}
           </div>
-          <div className={styles.container_input}>
+          <div className={`${styles.container_input} ${styles.reset_password_container_input}`}>
             <input
               id="password"
               className={styles.input_field}
@@ -358,9 +358,9 @@ export default function ResetPassword() {
             <div className={styles.eye_icon} onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <Eye size={20} color="#007bff" /> : <EyeOff size={20} color="#007bff" />}
             </div>
-            {passwordError && <p className={styles.error_text}>{passwordError}</p>}
+            {passwordError && <p className={`${styles.error_text} ${styles.reset_password_error_text}`}>{passwordError}</p>}
           </div>
-          <div className={styles.container_input}>
+          <div className={`${styles.container_input} ${styles.reset_password_container_input}`}>
             <input
               id="confirm-password"
               className={styles.input_field}
@@ -374,18 +374,18 @@ export default function ResetPassword() {
             <div className={styles.eye_icon} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
               {showConfirmPassword ? <Eye size={20} color="#007bff" /> : <EyeOff size={20} color="#007bff" />}
             </div>
-            {confirmError && <p className={styles.error_text}>{confirmError}</p>}
+            {confirmError && <p className={`${styles.error_text} ${styles.reset_password_error_text}`}>{confirmError}</p>}
           </div>
-          <div className={styles.botones}>
+          <div className={`${styles.botones} ${styles.reset_password_botones}`}>
             <button 
-              className={styles.boton_inicio} 
+              className={`${styles.boton_inicio} ${styles.reset_password_button}`} 
               type="submit" 
               disabled={loading}
             >
               {loading ? 'Procesando...' : 'Cambiar Contraseña'}
             </button>
             <button 
-              className={styles.boton_volver} 
+              className={`${styles.boton_volver} ${styles.reset_password_volver}`} 
               type="button" 
               onClick={handleBackToLogin}
             >

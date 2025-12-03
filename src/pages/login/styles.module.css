@@ -20,6 +20,8 @@ html {
   justify-content: center;
   flex-direction: column;
   overflow-x: hidden;
+  overflow-y: auto; /* Permitir scroll vertical */
+  min-height: 100vh; /* Usar viewport height para asegurar altura completa */
 }
 
 /*-----------Fondo-----------*/
@@ -27,9 +29,15 @@ html {
   width: 100%;
   height: 100%;
   display: flex;
-  position: absolute;
+  position: fixed; /* Fijamos el fondo para que no se mueva con el scroll */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: -1;
   flex-direction: column;
+  overflow: hidden; /* Evitar que el contenido se desborde */
+  min-height: 100%; /* Asegurar que cubre toda la altura */
 }
 
 .color_login{
@@ -94,14 +102,33 @@ html {
   z-index: 1; 
   margin-top: 200px;
 }
-  
+
+/* Estilo específico para la tarjeta de reseteo de contraseña */
+.reset_password_card {
+  width: 420px; /* Ancho mayor para acomodar más contenido */
+  min-height: 580px; /* Aumentamos la altura mínima para incluir los botones */
+  padding: 40px 30px;
+  margin-top: 120px; /* Menos margen superior para que no se corte el fondo */
+  margin-bottom: 40px;
+  justify-content: flex-start; /* Alinea el contenido al inicio en lugar de distribuirlo */
+  gap: 10px; /* Espacio entre elementos internos */
+}
+
 .titulo_inicio {
   font-size: 25px;
   margin-bottom: 20px;
   color: #000000;
   font-family: 'DM Sans', serif;
 }
-  
+
+/* Formulario específico para reset password */
+.reset_password_form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .form_inicio {
   display: flex;
   flex-direction: column;
@@ -199,6 +226,12 @@ html {
   align-items: center;
 }
 
+/* Botones específicos para reset password */
+.reset_password_botones {
+  margin-top: 20px;
+  padding-bottom: 15px;
+}
+
 .card button {
   padding: 13px 10px;
   cursor: pointer;
@@ -265,6 +298,37 @@ html {
   .card {
     margin-top: 170px; 
   }
+  
+  .reset_password_card {
+    width: 370px;
+    padding: 30px 25px;
+    margin-top: 100px;
+    min-height: 600px;
+  }
+}
+
+/* Estilos para botón principal más ancho en reset password */
+.reset_password_button {
+  width: 220px !important;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+/* Estilo para el botón de volver en reset password */
+.reset_password_volver {
+  max-width: 220px !important;
+  margin-top: 5px;
+}
+
+/* Ajuste para la altura del container de inputs en reset password */
+.reset_password_container_input {
+  margin: 8px 0;
+  min-height: 70px;
+}
+
+/* Ajuste para el error text en reset password */
+.reset_password_error_text {
+  bottom: -18px;
 }
 
 @media (max-width: 768px) {
@@ -289,6 +353,12 @@ html {
     width: 340px;
     padding: 30px;
     margin-top: 140px; 
+  }
+  
+  .reset_password_card {
+    width: 320px;
+    padding: 25px 20px;
+    margin-top: 120px;
   }
 }
 
@@ -322,6 +392,15 @@ html {
     padding: 25px 20px;
     margin-bottom: 40px; 
     margin-top: 110px; 
+  }
+  
+  .reset_password_card {
+    width: 95%;
+    max-width: 350px;
+    padding: 25px 20px;
+    margin-bottom: 50px;
+    margin-top: 90px;
+    min-height: 620px;
   }
   
   .titulo_inicio {
