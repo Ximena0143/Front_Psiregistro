@@ -209,17 +209,37 @@ const Publicaciones = () => {
             const postsData = await postService.getPosts();
             
             // Transformar los datos de la API al formato utilizado por el componente
-            const formattedPosts = postsData.map(post => ({
-                id: post.id,
-                titulo: post.tittle,
-                descripcion: post.description,
-                fecha: new Date(post.created_at).toLocaleDateString('es-ES', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                }),
-                imagen: post.signed_url || '/Images/placeholder.jpg'
-            }));
+            const formattedPosts = postsData.map(post => {
+                // Formatear el título para hacerlo más legible
+                // 1. Eliminar la extensión del archivo
+                // 2. Reemplazar guiones por espacios
+                // 3. Capitalizar la primera letra de cada palabra
+                let formattedTitle = post.tittle;
+                
+                // Eliminar la extensión del archivo (.jpg, .png, etc.)
+                formattedTitle = formattedTitle.replace(/\.[^\.]+$/, '');
+                
+                // Reemplazar guiones por espacios
+                formattedTitle = formattedTitle.replace(/-/g, ' ');
+                
+                // Capitalizar la primera letra de cada palabra
+                formattedTitle = formattedTitle
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                
+                return {
+                    id: post.id,
+                    titulo: formattedTitle,
+                    descripcion: post.description,
+                    fecha: new Date(post.created_at).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    }),
+                    imagen: post.signed_url || '/Images/placeholder.jpg'
+                };
+            });
             
             setPublicaciones(formattedPosts);
         } catch (error) {
