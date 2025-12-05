@@ -3,7 +3,7 @@
  */
 
 // URL base para todas las peticiones API
-const API_BASE_URL = 'https://psiregistroback-hdhbacacaabud9gz.chilecentral-01.azurewebsites.net';
+const API_BASE_URL = 'https://psiregistroback-hdhbacacaabud9gz.chilecentral-01.azurewebsites.net/api';
 
 // Interceptores para modificar las peticiones y respuestas
 const interceptors = {
@@ -67,6 +67,7 @@ export const get = async (endpoint, options = {}) => {
         'Content-Type': 'application/json',
         ...options.headers
       },
+      credentials: 'include',
       ...options
     };
     
@@ -127,6 +128,7 @@ export const post = async (endpoint, data = {}, options = {}) => {
         'Accept': 'application/json, text/plain, */*',
         ...options.headers
       },
+      credentials: 'include',
       ...options
     };
     
@@ -229,6 +231,7 @@ export const put = async (endpoint, data = {}, options = {}) => {
         'Content-Type': 'application/json',
         ...options.headers
       },
+      credentials: 'include',
       body: JSON.stringify(data),
       ...options
     };
@@ -282,13 +285,13 @@ export const put = async (endpoint, data = {}, options = {}) => {
  */
 export const del = async (endpoint, options = {}) => {
   try {
-    // Aplicar interceptor de petición si existe
     let config = {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         ...options.headers
       },
+      credentials: 'include',
       ...options
     };
     
@@ -335,6 +338,7 @@ export const del = async (endpoint, options = {}) => {
 
 /**
  * Realiza una petición PATCH a la API
+ * Realiza una petición PATCH a la API
  * @param {string} endpoint - El endpoint a consultar (sin la URL base)
  * @param {Object} data - Datos a enviar en el cuerpo de la petición
  * @param {Object} options - Opciones adicionales para la petición fetch
@@ -349,6 +353,7 @@ export const patch = async (endpoint, data = {}, options = {}) => {
         'Content-Type': 'application/json',
         ...options.headers
       },
+      credentials: 'include',
       body: JSON.stringify(data),
       ...options
     };
