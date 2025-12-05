@@ -64,10 +64,9 @@ export const createReminder = async (reminderData) => {
       errorMessage = error.response.data.message || errorMessage;
     }
     
-    throw {
-      message: errorMessage,
-      originalError: error
-    };
+    const err = new Error(errorMessage);
+    err.originalError = error;
+    throw err;
   }
 };
 
@@ -89,10 +88,9 @@ export const updateReminder = async (id, reminderData) => {
       errorMessage = error.response.data.message || errorMessage;
     }
     
-    throw {
-      message: errorMessage,
-      originalError: error
-    };
+    const err = new Error(errorMessage);
+    err.originalError = error;
+    throw err;
   }
 };
 
@@ -111,10 +109,12 @@ export const deleteReminder = async (id) => {
   }
 };
 
-export default {
+const reminderService = {
   getPatientReminders,
   getReminder,
   createReminder,
   updateReminder,
   deleteReminder
 };
+
+export default reminderService;

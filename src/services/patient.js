@@ -96,10 +96,9 @@ export const updatePatient = async (id, patientData) => {
       console.error('Mensaje de error del servidor:', errorMessage);
     }
     
-    throw {
-      message: errorMessage,
-      originalError: error
-    };
+    const err = new Error(errorMessage);
+    err.originalError = error;
+    throw err;
   }
 };
 
