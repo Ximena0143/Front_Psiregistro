@@ -157,25 +157,7 @@ export const getIdentificationTypes = async () => {
     return response.data;
   } catch (error) {
     console.error('Error al obtener tipos de identificación:', error);
-    // Si no existe el endpoint, devolvemos los tipos de identificación hardcodeados
-    return {
-      data: [
-        { id: 1, name: 'Cedula de ciudadania' },
-        { id: 2, name: 'Registro civil' },
-        { id: 3, name: 'Tarjeta de identidad' },
-        { id: 4, name: 'Cedula extranjera' },
-        { id: 5, name: 'NUIP' },
-        { id: 6, name: 'Pasaporte' },
-        { id: 7, name: 'Adulto sin identificar' },
-        { id: 8, name: 'Menor sin identificar' },
-        { id: 9, name: 'Permiso especial de permanencia' },
-        { id: 10, name: 'Certificado nacido vivo' },
-        { id: 11, name: 'Salvo conducto Asilado o Refugiado' },
-        { id: 12, name: 'Tarjeta Extranjeria' },
-        { id: 13, name: 'Carnet Diplomatico' },
-        { id: 14, name: 'Permiso por Protección Temporal' }
-      ]
-    };
+    throw new Error(error.message);
   }
 };
 

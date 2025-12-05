@@ -14,7 +14,6 @@ const PsicologosEliminados = () => {
     const [psychologists, setPsychologists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [actionInProgress, setActionInProgress] = useState(false);
 
     useEffect(() => {
         fetchDeletedPsychologists();
@@ -87,8 +86,6 @@ const PsicologosEliminados = () => {
 
     const handleRestore = async (id) => {
         try {
-            setActionInProgress(true);
-            
             // Confirmación antes de restaurar
             const result = await Swal.fire({
                 title: '¿Restaurar psicólogo?',
@@ -131,15 +128,11 @@ const PsicologosEliminados = () => {
                 confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#FB8500'
             });
-        } finally {
-            setActionInProgress(false);
         }
     };
 
     const handleForceDelete = async (id) => {
         try {
-            setActionInProgress(true);
-            
             // Confirmación antes de eliminar permanentemente
             const result = await Swal.fire({
                 title: '¿Eliminar permanentemente?',
@@ -182,8 +175,6 @@ const PsicologosEliminados = () => {
                 confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#FB8500'
             });
-        } finally {
-            setActionInProgress(false);
         }
     };
 

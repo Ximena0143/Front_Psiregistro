@@ -11,9 +11,6 @@ const Sidebar = () => {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     
     useEffect(() => {
-        // Obtener información del usuario actual
-        const currentUser = authService.getCurrentUser();
-        
         // Verificar si el usuario es admin
         const isAdmin = authService.isAdmin();
         

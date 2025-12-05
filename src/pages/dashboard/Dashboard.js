@@ -144,7 +144,7 @@ const Dashboard = () => {
                     setLoading(true);
                     
                     // Llamar al servicio para eliminar el paciente (soft delete)
-                    const response = await patientService.deletePatient(paciente.id);
+                    await patientService.deletePatient(paciente.id);
                     
                     // Actualizar la lista de pacientes en el estado
                     setPatients(patients.filter(p => p.id !== paciente.id));

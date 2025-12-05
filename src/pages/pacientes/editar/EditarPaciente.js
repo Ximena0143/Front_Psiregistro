@@ -204,7 +204,7 @@ const EditarPaciente = () => {
                 };
                 
                 // Llamar al servicio para actualizar el paciente
-                const response = await patientService.updatePatient(id, patientData);
+                await patientService.updatePatient(id, patientData);
                 
                 // Mostrar alerta de confirmación
                 Swal.fire({

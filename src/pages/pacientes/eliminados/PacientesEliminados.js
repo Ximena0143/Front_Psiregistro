@@ -13,7 +13,6 @@ const PacientesEliminados = () => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [actionInProgress, setActionInProgress] = useState(false);
 
     useEffect(() => {
         fetchDeletedPatients();
@@ -89,8 +88,6 @@ const PacientesEliminados = () => {
 
     const handleRestore = async (id) => {
         try {
-            setActionInProgress(true);
-            
             // Confirmación antes de restaurar
             const result = await Swal.fire({
                 title: '¿Restaurar paciente?',
@@ -133,15 +130,11 @@ const PacientesEliminados = () => {
                 confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#FB8500'
             });
-        } finally {
-            setActionInProgress(false);
         }
     };
 
     const handleForceDelete = async (id) => {
         try {
-            setActionInProgress(true);
-            
             // Confirmación antes de eliminar permanentemente
             const result = await Swal.fire({
                 title: '¿Eliminar permanentemente?',
@@ -184,8 +177,6 @@ const PacientesEliminados = () => {
                 confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#FB8500'
             });
-        } finally {
-            setActionInProgress(false);
         }
     };
 

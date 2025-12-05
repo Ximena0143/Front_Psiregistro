@@ -176,7 +176,7 @@ const Perfil = () => {
             
             try {
                 // Llamar al servicio para actualizar el usuario
-                const updateResponse = await userService.updateUser(userData.id, updateData);
+                await userService.updateUser(userData.id, updateData);
                 
                 Swal.fire({
                     title: 'Éxito',

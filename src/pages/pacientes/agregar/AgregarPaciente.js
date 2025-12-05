@@ -169,7 +169,7 @@ const AgregarPaciente = () => {
                 };
                 
                 // Llamar al servicio para registrar el paciente
-                const response = await patientService.registerPatient(patientData);
+                await patientService.registerPatient(patientData);
                 
                 // Mostrar alerta de confirmación
                 Swal.fire({

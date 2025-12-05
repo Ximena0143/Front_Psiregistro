@@ -589,7 +589,7 @@ const HistorialPaciente = () => {
                 : newDocument.status_id;
                 
             // Llamar al servicio para subir el documento
-            const response = await patientService.uploadPatientDocument(
+            await patientService.uploadPatientDocument(
                 paciente.id,
                 newDocument.archivo,
                 newDocument.titulo,
@@ -909,7 +909,6 @@ const HistorialPaciente = () => {
                                 (() => {
                                     // Verificar si la URL o el título contiene indicación del tipo de archivo
                                     const isPdf = isPdfDocument(previewDocument);
-                                    let fileType = 'desconocido';
                                     let fileIcon = <FileText size={64} color="#219EBC" />;
                                     let fileTypeText = 'documento';
                                     
@@ -936,7 +935,6 @@ const HistorialPaciente = () => {
                                         (previewDocument.tituloOriginal && 
                                          (previewDocument.tituloOriginal.toLowerCase().endsWith('.doc') || 
                                           previewDocument.tituloOriginal.toLowerCase().endsWith('.docx')))) {
-                                        fileType = 'word';
                                         fileIcon = <FileText size={64} color="#2563EB" />;
                                         fileTypeText = 'documento Word';
                                     }
@@ -947,7 +945,6 @@ const HistorialPaciente = () => {
                                              (previewDocument.tituloOriginal && 
                                               (previewDocument.tituloOriginal.toLowerCase().endsWith('.xls') || 
                                                previewDocument.tituloOriginal.toLowerCase().endsWith('.xlsx')))) {
-                                        fileType = 'excel';
                                         fileIcon = <FileText size={64} color="#059669" />;
                                         fileTypeText = 'hoja de cálculo';
                                     }
