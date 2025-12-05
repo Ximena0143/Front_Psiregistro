@@ -42,7 +42,7 @@ export const getSpecializations = async () => {
     return { data: processedSpecializations };
   } catch (error) {
     console.error('Error al obtener especializaciones:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -57,7 +57,7 @@ export const createSpecialization = async (specializationData) => {
     return response;
   } catch (error) {
     console.error('Error al crear especialización:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -73,7 +73,7 @@ export const updateSpecialization = async (id, specializationData) => {
     return response;
   } catch (error) {
     console.error('Error al actualizar especialización:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -88,7 +88,7 @@ export const deleteSpecialization = async (id) => {
     return response;
   } catch (error) {
     console.error('Error al eliminar especialización:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 

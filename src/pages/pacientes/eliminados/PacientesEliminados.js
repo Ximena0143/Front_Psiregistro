@@ -26,7 +26,6 @@ const PacientesEliminados = () => {
             
             // Llamar al servicio para obtener pacientes eliminados
             const response = await getDeletedPatients();
-            console.log('Respuesta de pacientes eliminados (completa):', response);
             
             let deletedPatientsData = [];
             
@@ -41,11 +40,8 @@ const PacientesEliminados = () => {
                 }
             }
             
-            console.log('Datos de pacientes eliminados procesados:', deletedPatientsData);
-            
             // Inspeccionar el primer paciente para ver su estructura exacta
             if (deletedPatientsData && deletedPatientsData.length > 0) {
-                console.log('Ejemplo de estructura de un paciente eliminado:', JSON.stringify(deletedPatientsData[0], null, 2));
                 
                 // Transformar los datos al formato que espera el componente
                 const formattedData = deletedPatientsData.map(patient => {

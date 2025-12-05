@@ -45,7 +45,6 @@ const AgregarPsicologo = () => {
             const response = await api.get('/specialization/index');
             
             if (response && response.data && Array.isArray(response.data)) {
-                console.log('Especializaciones cargadas del backend:', response.data);
                 
                 // Asignar IDs a las especializaciones que no los tienen
                 const especializacionesConId = response.data.map((esp, index) => {
@@ -55,7 +54,6 @@ const AgregarPsicologo = () => {
                     return esp;
                 });
                 
-                console.log('Especializaciones con IDs asignados:', especializacionesConId);
                 setEspecializaciones(especializacionesConId);
             } else {
                 console.warn('No se recibieron datos de especializaciones válidos');
@@ -104,7 +102,6 @@ const AgregarPsicologo = () => {
             const especializacion = specializaciones.find(esp => esp.id === parseInt(value) || esp.id === value);
             
             if (especializacion) {
-                console.log('Especialización seleccionada:', especializacion);
                 setFormData({
                     ...formData,
                     [name]: especializacion.id
@@ -224,18 +221,6 @@ const AgregarPsicologo = () => {
                 // Transformar el role_id en un array de roles para el backend
                 userData.roles = [parseInt(userData.role_id)];
                 
-                // Depurar el valor de specialization_id
-                console.log('Valor de specialization_id antes de convertir:', {
-                    valor: userData.specialization_id,
-                    tipo: typeof userData.specialization_id,
-                    esVacio: userData.specialization_id === '',
-                    esUndefined: userData.specialization_id === undefined,
-                    esNulo: userData.specialization_id === null,
-                    convertidoANumero: Number(userData.specialization_id),
-                    esNaN: isNaN(Number(userData.specialization_id)),
-                    especialización_seleccionada: specializaciones.find(esp => esp.id === userData.specialization_id)
-                });
-                
                 // Convertir specialization_id a entero solo si existe un valor
                 if (userData.specialization_id) {
                     // Asegurarse de que sea un número válido
@@ -251,19 +236,6 @@ const AgregarPsicologo = () => {
                 
                 // Eliminar role_id ya que no es parte del modelo esperado por el backend
                 delete userData.role_id;
-                
-                // Log detallado para depuración
-                console.log("Datos a enviar (detallado):", {
-                    ...userData,
-                    specialization_id_type: typeof userData.specialization_id,
-                    specialization_id_value: userData.specialization_id,
-                    specialization_id_raw: formData.specialization_id,
-                    specialization_id_parsed: parseInt(formData.specialization_id),
-                    has_specialization_id: 'specialization_id' in userData,
-                    especialización_seleccionada: specializaciones.find(esp => esp.id === formData.specialization_id)
-                });
-                
-                console.log("Datos a enviar:", userData);
                 
                 await userService.registerUser(userData);
                 

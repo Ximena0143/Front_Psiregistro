@@ -75,12 +75,10 @@ export default function Login() {
     if (!emailError && !passwordError && email && password) {
       try {
         setLoading(true);
-        console.log('Iniciando proceso de login');
         
         // Verificar si ya hay un token guardado de alguna sesión anterior
         const existingToken = localStorage.getItem('auth_token');
         if (existingToken) {
-          console.log('Ya existe un token en localStorage, limpiando...');
           localStorage.removeItem('auth_token');
           localStorage.removeItem('auth_user');
         }
@@ -101,7 +99,6 @@ export default function Login() {
           const tokenAfterError = localStorage.getItem('auth_token');
           
           if (tokenAfterError) {
-            console.log('Se encontró un token a pesar del error, procediendo como login exitoso');
             loginSuccess = true;
             response = {
               token: tokenAfterError,
@@ -117,11 +114,6 @@ export default function Login() {
         if (loginSuccess) {
           // Extraer información del usuario para mostrar un mensaje personalizado
           const userName = response?.user ? (response.user.name || response.user.email) : email;
-          
-          console.log('Login exitoso:', { 
-            usuario: userName,
-            tokenObtenido: !!response?.token || !!localStorage.getItem('auth_token')
-          });
           
           // Mostrar mensaje de éxito
           Swal.fire({
@@ -159,7 +151,6 @@ export default function Login() {
         // ¿Hay un token a pesar del error? Si es así, permitimos continuar
         const tokenDespuesDeError = localStorage.getItem('auth_token');
         if (tokenDespuesDeError) {
-          console.log('Se encontró un token a pesar del error general, intentando proceder');
           
           Swal.fire({
             title: 'Advertencia',

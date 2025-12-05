@@ -112,7 +112,6 @@ const Publicaciones = () => {
     // Guardar nueva publicación
     const handleSavePublicacion = () => {
         // Aquí iría la lógica real para guardar la publicación en el servidor
-        console.log('Guardando publicación:', newPublicacion);
         
         // Añadimos la publicación nueva a la lista (simulación)
         const nuevaPublicacion = {
@@ -142,7 +141,6 @@ const Publicaciones = () => {
     // Actualizar publicación existente
     const handleUpdatePublicacion = () => {
         // Aquí iría la lógica real para actualizar la publicación en el servidor
-        console.log('Actualizando publicación:', newPublicacion);
         
         // Actualizamos la publicación en la lista (simulación)
         const publicacionesActualizadas = publicaciones.map(pub => {
@@ -188,7 +186,6 @@ const Publicaciones = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 // Aquí iría la lógica real para eliminar la publicación del servidor
-                console.log('Eliminando publicación:', publicacion);
                 
                 // Eliminamos la publicación de la lista (simulación)
                 const publicacionesFiltradas = publicaciones.filter(pub => pub.id !== publicacion.id);

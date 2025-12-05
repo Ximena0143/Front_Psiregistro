@@ -15,12 +15,6 @@ export default function SignUp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Correo:", email);
-    console.log("Contraseña:", password);
-    console.log("Primer Nombre:", firstName);
-    console.log("Segundo Nombre:", secondName);
-    console.log("Primer Apellido:", lastName);
-    console.log("Segundo Apellido:", secondLastName);
     navigate("/dashboard");
     // Aquí conectamos la API para crear la cuenta
   };

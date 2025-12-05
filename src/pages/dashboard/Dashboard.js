@@ -25,11 +25,9 @@ const Dashboard = () => {
             setLoading(true);
             setError(null);
             const patientsData = await patientService.getPatients();
-            console.log('Datos de pacientes recibidos:', patientsData);
             
             // Inspeccionar el primer paciente para ver su estructura exacta
             if (patientsData && patientsData.length > 0) {
-                console.log('Ejemplo de estructura de un paciente:', JSON.stringify(patientsData[0], null, 2));
                 
                 // Transformar los datos al formato que espera el componente
                 const formattedData = patientsData.map((patient, index) => {
@@ -37,7 +35,6 @@ const Dashboard = () => {
                     const id = patient.id || '';
                     const isValidId = Boolean(id && id !== '' && id !== 'null' && id !== 'undefined');
                     
-                    console.log(`Paciente ${index} - ID: ${id} - Es válido: ${isValidId}`);
                     
                     // Formatear el nombre completo
                     let fullName = 'Sin nombre';
@@ -77,11 +74,9 @@ const Dashboard = () => {
                         editable: isValidId // Explícitamente establecer editable basado en isValidId
                     };
                     
-                    console.log(`Paciente formateado ${index}:`, formattedPatient);
                     return formattedPatient;
                 });
                 
-                console.log('Datos formateados para mostrar:', formattedData);
                 setPatients(formattedData);
             } else {
                 setPatients([]);
@@ -100,14 +95,12 @@ const Dashboard = () => {
     };
 
     const handleEditarPaciente = (id) => {
-        console.log('Intentando editar paciente con ID:', id);
         
         // Convertir el ID a string para asegurar que podamos usar métodos de string
         const idStr = String(id);
         
         // Solo navegar si el ID es válido
         if (id && idStr !== '' && !idStr.startsWith('no-id-')) {
-            console.log('Navegando a editar paciente con ID:', id);
             navigate(`/pacientes/editar/${id}`);
         } else {
             console.warn('Intento de editar paciente con ID inválido:', id);
@@ -151,9 +144,7 @@ const Dashboard = () => {
                     setLoading(true);
                     
                     // Llamar al servicio para eliminar el paciente (soft delete)
-                    console.log(`Eliminando paciente con ID: ${paciente.id}`);
                     const response = await patientService.deletePatient(paciente.id);
-                    console.log('Respuesta de eliminación:', response);
                     
                     // Actualizar la lista de pacientes en el estado
                     setPatients(patients.filter(p => p.id !== paciente.id));
@@ -202,9 +193,6 @@ const Dashboard = () => {
                         <Edit2
                             className={`${styles.actionIcon} ${styles.editIcon} ${!row.editable ? styles.disabledIcon : ''}`}
                             onClick={() => {
-                                console.log("Fila completa:", row);
-                                console.log("ID del paciente al hacer clic:", row.id);
-                                console.log("¿Es editable?:", row.editable);
                                 
                                 if (row.editable === true) {
                                     handleEditarPaciente(row.id);

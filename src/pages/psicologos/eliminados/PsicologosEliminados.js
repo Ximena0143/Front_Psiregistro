@@ -27,7 +27,6 @@ const PsicologosEliminados = () => {
             
             // Llamar al servicio para obtener psicólogos eliminados
             const response = await userService.getDeletedUsers();
-            console.log('Respuesta de psicólogos eliminados (completa):', response);
             
             let deletedPsychologistsData = [];
             
@@ -42,11 +41,8 @@ const PsicologosEliminados = () => {
                 }
             }
             
-            console.log('Datos de psicólogos eliminados procesados:', deletedPsychologistsData);
-            
             // Inspeccionar el primer psicólogo para ver su estructura exacta
             if (deletedPsychologistsData && deletedPsychologistsData.length > 0) {
-                console.log('Ejemplo de estructura de un psicólogo eliminado:', JSON.stringify(deletedPsychologistsData[0], null, 2));
                 
                 // Transformar los datos al formato que espera el componente
                 const formattedData = deletedPsychologistsData.map(psychologist => {

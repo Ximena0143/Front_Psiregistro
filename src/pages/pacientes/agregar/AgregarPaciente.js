@@ -29,7 +29,6 @@ const AgregarPaciente = () => {
         const fetchIdentificationTypes = async () => {
             try {
                 const response = await patientService.getIdentificationTypes();
-                console.log('Respuesta de tipos de identificación:', response);
                 
                 // Manejar diferentes estructuras de respuesta posibles
                 if (response && response.data) {
@@ -169,11 +168,8 @@ const AgregarPaciente = () => {
                     identification_number: formData.numeroIdentificacion
                 };
                 
-                console.log('Datos a enviar:', patientData);
-                
                 // Llamar al servicio para registrar el paciente
                 const response = await patientService.registerPatient(patientData);
-                console.log('Respuesta del servidor:', response);
                 
                 // Mostrar alerta de confirmación
                 Swal.fire({

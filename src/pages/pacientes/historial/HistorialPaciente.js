@@ -165,9 +165,7 @@ const HistorialPaciente = () => {
                 }
                 
                 // Obtener los datos del paciente por ID
-                console.log('Obteniendo datos del paciente con ID:', id);
                 const response = await patientService.getPatientById(id);
-                console.log('Respuesta del paciente:', response);
                 
                 // Verificar que la respuesta contenga datos
                 if (!response || (!response.patient && !response.human)) {
@@ -184,7 +182,6 @@ const HistorialPaciente = () => {
                 // Verificar si el tipo de identificación está directamente en el objeto patient
                 if (patient.identification_type) {
                     tipoIdentificacionNombre = patient.identification_type;
-                    console.log('Tipo de identificación encontrado en patient:', tipoIdentificacionNombre);
                 } else {
                     // Si no está directamente, intentar con el ID y la lista de tipos
                     const tipoIdentificacionId = human.document_type_id || patient.document_type_id;
@@ -193,12 +190,10 @@ const HistorialPaciente = () => {
                         const tipoEncontrado = tiposIdentificacion.find(tipo => tipo.id === tipoIdentificacionId);
                         if (tipoEncontrado) {
                             tipoIdentificacionNombre = tipoEncontrado.name;
-                            console.log('Tipo de identificación encontrado por ID:', tipoIdentificacionNombre);
                         }
                     } else if (human.document_type) {
                         // Si ya tenemos el nombre del tipo directamente en human
                         tipoIdentificacionNombre = human.document_type;
-                        console.log('Tipo de identificación encontrado en human:', tipoIdentificacionNombre);
                     }
                 }
                 
@@ -252,7 +247,6 @@ const HistorialPaciente = () => {
         try {
             setLoadingDocuments(true);
             const documentosData = await patientService.getPatientDocuments(patientId);
-            console.log('Documentos obtenidos:', documentosData);
             
             // Transformar los documentos al formato que espera el componente
             const documentosFormateados = documentosData.map(doc => {
@@ -317,7 +311,6 @@ const HistorialPaciente = () => {
                 };
             });
             
-            console.log('Documentos formateados con status_id:', documentosFormateados);
             setDocumentos(documentosFormateados);
         } catch (error) {
             console.error('Error al cargar documentos del paciente:', error);
@@ -347,7 +340,6 @@ const HistorialPaciente = () => {
     const handleDownloadDocument = (documento) => {
         // Verificar que documento y signed_url existan
         if (documento && documento.signed_url) {
-            console.log('Intentando descargar documento:', documento.titulo, 'URL:', documento.signed_url);
             // Crear un elemento a invisible para forzar la descarga
             const link = document.createElement('a');
             link.href = documento.signed_url;
@@ -591,19 +583,6 @@ const HistorialPaciente = () => {
                 }
             });
             
-            // Log detallado de los datos que se van a enviar
-            console.log('Datos del documento a subir:', {
-                patientId: paciente.id,
-                document: {
-                    name: newDocument.archivo?.name,
-                    type: newDocument.archivo?.type,
-                    size: newDocument.archivo?.size
-                },
-                title: newDocument.titulo,
-                documentType: newDocument.document_type,
-                statusId: newDocument.status_id
-            });
-            
             // Convertir status_id a número si es string
             const statusId = typeof newDocument.status_id === 'string' 
                 ? parseInt(newDocument.status_id, 10) 
@@ -618,7 +597,6 @@ const HistorialPaciente = () => {
                 statusId
             );
             
-            console.log('Respuesta de subida:', response);
             
             // Cerrar el indicador de carga
             Swal.close();
@@ -937,7 +915,6 @@ const HistorialPaciente = () => {
                                     
                                     // Para PDFs, usar iframe que muestra directamente el documento
                                     if (isPdf) {
-                                        console.log("Mostrando PDF en iframe:", previewDocument.signed_url);
                                         return (
                                             <div className={styles.pdfViewer}>
                                                 <iframe

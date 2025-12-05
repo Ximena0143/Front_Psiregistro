@@ -85,7 +85,6 @@ const Documentos = () => {
     
     const handleDownloadDocument = (documento) => {
         // Aquí iría la lógica real para descargar el documento
-        console.log('Descargando documento:', documento);
         
         // Mostrar alerta de éxito
         Swal.fire({
@@ -124,7 +123,6 @@ const Documentos = () => {
 
     const handleUploadDocument = () => {
         // Aquí iría la lógica real para subir el documento al servidor
-        console.log('Subiendo documento:', newDocument);
         
         // Añadimos el documento nuevo a la lista (simulación)
         const fechaActual = new Date().toISOString().split('T')[0];
@@ -168,7 +166,6 @@ const Documentos = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 // Aquí iría la lógica real para eliminar el documento del servidor
-                console.log('Eliminando documento:', documento);
                 
                 // Eliminamos el documento de la lista (simulación)
                 const documentosFiltrados = documentos.filter(doc => doc !== documento);

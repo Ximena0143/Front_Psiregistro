@@ -34,17 +34,11 @@ const TestPsi = () => {
             setIsLoading(true);
             try {
                 // Depurar obtención del usuario
-                console.log('Obteniendo el usuario actual');
                 const currentUser = authService.getCurrentUser();
-                console.log('Usuario actual:', currentUser);
                 
                 if (currentUser && currentUser.id) {
-                    console.log('ID de usuario:', currentUser.id);
-                    
                     try {
                         const blanksData = await blankService.getBlanksByUser(currentUser.id);
-                        console.log('Datos recibidos de blanksData:', blanksData);
-                        
                         if (Array.isArray(blanksData)) {
                             // Transformar los datos al formato que espera el componente
                             const formattedTests = blanksData.map(blank => ({
@@ -55,7 +49,6 @@ const TestPsi = () => {
                                 formato: getFormatFromUrl(blank.path) || 'PDF'
                             }));
                             
-                            console.log('Datos formateados:', formattedTests);
                             setTests(formattedTests);
                         } else {
                             console.error('blanksData no es un array:', blanksData);
@@ -72,11 +65,6 @@ const TestPsi = () => {
                     }
                 } else {
                     console.warn('No se encontró el ID del usuario o datos de usuario');
-                    // Si no hay ID pero sí hay usuario, usamos el correo electrónico para identificar
-                    if (currentUser && currentUser.email) {
-                        console.log('Intentando usar el correo electrónico para obtener el ID');
-                        // Aquí podrías implementar una lógica para obtener el ID por email si fuera necesario
-                    }
                     
                     Swal.fire({
                         icon: 'warning',
@@ -208,9 +196,6 @@ const TestPsi = () => {
         setIsLoading(true);
         
         try {
-            console.log('Archivo seleccionado:', newTest.archivo);
-            console.log('Nombre del test:', newTest.nombre);
-            
             // Preparar los datos para el backend
             const formData = {
                 name: newTest.nombre
@@ -218,7 +203,6 @@ const TestPsi = () => {
             
             // Enviar el archivo al backend
             const response = await blankService.uploadBlank(formData, newTest.archivo);
-            console.log('Respuesta completa del servidor:', response);
             
             // Extraer los datos de la respuesta, manejo flexible de diferentes estructuras
             let responseData = null;
@@ -226,28 +210,22 @@ const TestPsi = () => {
             if (response) {
                 // Caso 1: Si tenemos response.data directo
                 if (response.data) {
-                    console.log('Usando response.data');
                     responseData = response.data;
                 } 
                 // Caso 2: Si la respuesta misma es el objeto de datos
                 else if (typeof response === 'object' && Object.keys(response).includes('id')) {
-                    console.log('Usando response directo');
                     responseData = response;
                 }
                 // Caso 3: Si tenemos datos anidados en response.data.data
                 else if (response.data && response.data.data) {
-                    console.log('Usando response.data.data');
                     responseData = response.data.data;
                 }
                 // Caso 4: Si response tiene 'message' y 'data' (formato común en Laravel)
                 else if (response.message && response.data) {
-                    console.log('Usando response.data desde formato Laravel');
                     responseData = response.data;
                 }
             }
-            
-            console.log('Datos extraídos de la respuesta:', responseData);
-            
+
             if (responseData) {
                 // Obtener la información del test recién creado
                 const nuevoTest = {
@@ -258,7 +236,6 @@ const TestPsi = () => {
                     archivo: responseData.path || ''
                 };
                 
-                console.log('Nuevo test formateado:', nuevoTest);
                 
                 // Actualizar el estado con el nuevo test
                 setTests([nuevoTest, ...tests]);
