@@ -4,10 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-// Script para redireccionar URLs incorrectas cuando se usa HashRouter
-// Esto corrige enlaces como http://localhost:3000/reset-password?token=XXX
-// o con doble slash http://localhost:3000//reset-password?token=XXX
-// convirtiéndolos a http://localhost:3000/#/reset-password?token=XXX
+
 (function() {
   // Rutas que debemos corregir (sin el slash inicial)
   const routesToFix = ['reset-password', 'forgot-password'];

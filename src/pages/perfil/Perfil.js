@@ -55,20 +55,7 @@ const Perfil = () => {
         
         // Actualizar la imagen de perfil si existe
         if (userData.profile_photo_path) {
-            // Comprobar si ya es una URL completa
-            if (userData.profile_photo_path.startsWith('http')) {
-                setProfileImage(userData.profile_photo_path);
-            } else {
-                // Construir URL de S3 para la imagen de perfil
-                const s3BaseUrl = 'https://psiregistro.s3.us-west-1.amazonaws.com/';
-                const fullImageUrl = s3BaseUrl + userData.profile_photo_path;
-                console.log('Construyendo URL de S3 para la imagen del perfil:', fullImageUrl);
-                setProfileImage(fullImageUrl);
-                
-                // Guardar la ruta para futuras referencias
-                localStorage.setItem('user_photo_path', userData.profile_photo_path);
-                localStorage.setItem('s3_base_url', s3BaseUrl);
-            }
+            setProfileImage(userData.profile_photo_path);
         }
     };
 
@@ -117,8 +104,34 @@ const Perfil = () => {
         }
     };
 
+    // Método para obtener la URL firmada de la foto de perfil directamente del backend
+    const getProfilePhotoUrl = async () => {
+        try {
+            console.log('Intentando obtener la URL firmada de la foto de perfil');
+            const response = await api.get('/user/get-profile-photo');
+            console.log('Respuesta completa del endpoint get-profile-photo:', response);
+            
+            // Verificamos si tenemos la estructura esperada en la respuesta
+            if (response && response.data && response.data.URL) {
+                console.log('URL firmada de la foto obtenida:', response.data.URL);
+                // Actualizar el estado con la URL firmada
+                setProfileImage(response.data.URL);
+                return response.data.URL;
+            } else {
+                console.error('Respuesta inválida al obtener URL de foto');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error al obtener URL de foto de perfil:', error);
+            return null;
+        }
+    };
+    
     useEffect(() => {
-        // Llamamos a fetchUserData cuando se monta el componente
+        // Intentar cargar la URL firmada de la foto de perfil directamente
+        getProfilePhotoUrl();
+        
+        // También cargar los datos completos del usuario
         fetchUserData();
     }, []);
 
@@ -214,20 +227,21 @@ const Perfil = () => {
                     // Actualizar el estado con los datos más recientes
                     const updatedUserData = updateResponse.data;
                     
-                    // Actualizar la UI y guardar la ruta de la foto si existe
+                    // Si se actualizaron los datos con éxito, obtener la URL firmada de la foto
                     if (updatedUserData.profile_photo_path && 
                         updatedUserData.profile_photo_path !== 'default.jpg') {
-                        // Guardar en localStorage para persistencia
-                        localStorage.setItem('user_photo_path', updatedUserData.profile_photo_path);
                         
-                        // Actualizar la UI con la nueva foto
-                        if (!updatedUserData.profile_photo_path.startsWith('http')) {
-                            const baseUrl = 'http://localhost:8000/storage/';
-                            setProfileImage(baseUrl + updatedUserData.profile_photo_path);
-                        } else {
-                            setProfileImage(updatedUserData.profile_photo_path);
+                        console.log('Foto actualizada, obteniendo nueva URL firmada');
+                        
+                        // Intentar obtener la URL firmada directamente desde el backend
+                        try {
+                            // Obtener la URL firmada actualizada
+                            await getProfilePhotoUrl();
+                        } catch (photoError) {
+                            console.error('Error al obtener URL firmada de foto actualizada:', photoError);
                         }
                     }
+                    // Ya no necesitamos actualizar la URL de la imagen aquí, ya que getProfilePhotoUrl lo hace
                 }
                 
                 Swal.fire({
@@ -300,10 +314,18 @@ const Perfil = () => {
             console.log('Tipo del archivo:', file.type);
             console.log('Tamaño del archivo:', file.size, 'bytes');
             
-            // Importante: asegurarse de que el nombre del campo coincida exactamente con lo que espera el backend
-            // El error nos indica que el backend espera 'profile_photo' y no 'photo'
+            // IMPORTANTE: asegurarse de que el nombre del campo sea exactamente 'profile_photo'
+            console.log('Agregando archivo al FormData:', file.name, file.type, file.size);
             formData.append('profile_photo', file);
-            formData.append('_method', 'PATCH'); 
+            
+            // Simular PATCH con el parámetro _method
+            formData.append('_method', 'PATCH');
+            
+            // Para depuración: verificar el contenido del FormData
+            console.log('Contenido del FormData:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + (pair[1] instanceof File ? `File: ${pair[1].name}` : pair[1]));
+            }
             
             // Logging del FormData (no muestra contenido pero confirma que existe)
             console.log('FormData creado:', formData);
@@ -317,9 +339,11 @@ const Perfil = () => {
             };
             console.log('Configuración de la solicitud:', config);
             
-            // Enviar la imagen al backend
-            console.log('Enviando solicitud al endpoint: /update-profile-photo');
-            const response = await api.post('/update-profile-photo', formData, config);
+            // Enviar la imagen al backend usando POST pero simulando PATCH
+            console.log('Enviando solicitud al endpoint: /user/update-profile-photo como POST con _method=PATCH');
+            // FormData ya contiene _method=PATCH, así que usamos POST que maneja mejor la subida de archivos
+            const response = await api.post('/user/update-profile-photo', formData, config);
+            console.log('Content-Type de la solicitud:', config.headers['Content-Type']);
             console.log('Respuesta completa del servidor:', response);
             console.log('Datos de respuesta:', response.data);
             
@@ -352,16 +376,20 @@ const Perfil = () => {
                     localStorage.setItem('user_photo_path', photoPath);
                     console.log('Ruta de foto guardada en localStorage:', photoPath);
                     
-                    // Construir la URL completa para la imagen usando el bucket S3 correcto
-                    const s3BaseUrl = 'https://psiregistro.s3.us-west-1.amazonaws.com/';
-                    const fullImageUrl = s3BaseUrl + photoPath;
-                    console.log('URL completa de S3 para la imagen:', fullImageUrl);
-                    
-                    // Actualizar el estado con la URL completa de S3
-                    setProfileImage(fullImageUrl);
-                    
-                    // También guardar la base URL para referencias futuras
-                    localStorage.setItem('s3_base_url', s3BaseUrl);
+                    // Después de subir la imagen, obtener la URL firmada directamente del backend
+                    console.log('Obteniendo URL firmada de la nueva foto subida');
+                    try {
+                        // Obtener la URL firmada del backend
+                        await getProfilePhotoUrl();
+                    } catch (photoError) {
+                        console.error('Error al obtener URL firmada de la nueva foto:', photoError);
+                        
+                        // Como respaldo, construir una URL directa (puede no funcionar si el bucket es privado)
+                        const s3BaseUrl = 'https://psiregistro.s3.us-west-1.amazonaws.com/';
+                        const fullImageUrl = s3BaseUrl + photoPath;
+                        console.log('URL de respaldo para la imagen:', fullImageUrl);
+                        setProfileImage(fullImageUrl);
+                    }
                 }
                 
                 // IMPORTANTE: Refrescar los datos completos del usuario para asegurar consistencia
