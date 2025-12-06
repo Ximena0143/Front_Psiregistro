@@ -9,10 +9,6 @@ const ListaRecordatorios = ({ patientId, onAddNew, onEditReminder }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadReminders();
-  }, [patientId, loadReminders]);
-
   // Cargar recordatorios del paciente
   const loadReminders = useCallback(async () => {
       try {
@@ -27,6 +23,10 @@ const ListaRecordatorios = ({ patientId, onAddNew, onEditReminder }) => {
         setLoading(false);
       }
     }, [patientId]);
+
+    useEffect(() => {
+    loadReminders();
+  }, [patientId, loadReminders]);
 
   // Eliminar recordatorio
   const handleDelete = (id, title) => {
