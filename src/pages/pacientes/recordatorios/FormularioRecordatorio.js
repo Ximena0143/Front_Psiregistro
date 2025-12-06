@@ -31,7 +31,7 @@ const FormularioRecordatorio = ({ patientId, reminderToEdit, onClose, onSuccess 
     } else {
       setFormData(initialState);
     }
-  }, [reminderToEdit, patientId]);
+  }, [reminderToEdit, patientId, initialState]);
 
   // Manejar cambios en el formulario
   const handleChange = (e) => {

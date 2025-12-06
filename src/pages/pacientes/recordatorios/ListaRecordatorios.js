@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, MessageSquare, AlertCircle } from 'react-feather';
 import Swal from 'sweetalert2';
 import reminderService from '../../../services/reminder';
@@ -11,10 +11,10 @@ const ListaRecordatorios = ({ patientId, onAddNew, onEditReminder }) => {
 
   useEffect(() => {
     loadReminders();
-  }, [patientId]);
+  }, [patientId, loadReminders]);
 
   // Cargar recordatorios del paciente
-  const loadReminders = async () => {
+  const loadReminders = (async () => {
     try {
       setLoading(true);
       const data = await reminderService.getPatientReminders(patientId);
@@ -26,7 +26,7 @@ const ListaRecordatorios = ({ patientId, onAddNew, onEditReminder }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [patientId]);
 
   // Eliminar recordatorio
   const handleDelete = (id, title) => {
