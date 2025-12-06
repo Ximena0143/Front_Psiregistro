@@ -2,10 +2,14 @@ import SeccionTexto from '../../components/common/SeccionTexto/SeccionTexto';
 import styles from './styles.module.css';
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header/Header';
-import { ChevronUp } from 'lucide-react';
+import { ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import landingService from '../../services/landingService';
 
 const LandingPage = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [psicologos, setPsicologos] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [visibleCount, setVisibleCount] = useState(3); // Número de psicólogos visibles a la vez
 
     // Función para controlar la visibilidad del botón según el scroll
     useEffect(() => {
@@ -71,7 +75,71 @@ const LandingPage = () => {
                 link.removeEventListener('click', handleClick);
             });
         };
-    }, []);    
+    }, []);
+
+    // Cargar los datos de los psicólogos al montar el componente
+    useEffect(() => {
+        const fetchPsychologists = async () => {
+            try {
+                console.log('Obteniendo datos de psicólogos para la landing page...');
+                const data = await landingService.getPsychologists();
+                console.log('Datos de psicólogos obtenidos:', data);
+                
+                if (data && data.length > 0) {
+                    setPsicologos(data);
+                } else {
+                    console.log('No se encontraron datos de psicólogos');
+                }
+            } catch (error) {
+                console.error('Error al cargar los psicólogos:', error);
+            }
+        };
+        
+        fetchPsychologists();
+    }, []);
+    
+    // Ajustar el número de psicólogos visibles según el tamaño de la pantalla
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setVisibleCount(1);
+            } else if (window.innerWidth < 992) {
+                setVisibleCount(2);
+            } else {
+                setVisibleCount(3);
+            }
+        };
+        
+        // Ejecutar una vez al montar y luego en cada cambio de tamaño
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+    
+    // Funciones para navegar entre los psicólogos
+    const goToPrevious = () => {
+        setCurrentIndex(prevIndex => {
+            if (prevIndex === 0) {
+                // Si estamos al principio, ir al último grupo posible
+                return Math.max(0, psicologos.length - visibleCount);
+            }
+            return Math.max(0, prevIndex - visibleCount);
+        });
+    };
+    
+    const goToNext = () => {
+        setCurrentIndex(prevIndex => {
+            const nextIndex = prevIndex + visibleCount;
+            if (nextIndex >= psicologos.length) {
+                // Si llegamos al final, volver al principio
+                return 0;
+            }
+            return nextIndex;
+        });
+    };
 
     return (
         <div className={styles.container}>
@@ -172,26 +240,95 @@ const LandingPage = () => {
                         <div className={styles.container_titulo_psicologos}>
                             <h4 className={styles.titulo_psicologos}>Nuestros psicólogos especialistas</h4>
                         </div>
-                        <div className={styles.container_info_psicologos}>
-                            <div className={styles.item1_psicologos}>
-                                <p className={styles.nombre_psicologo}>Dra. Jimena García</p>
-                                <p className={styles.especialidad_psicologos}>Psicóloga forense</p>
-                                <img className={styles.imagen_psicologos} src="/Images/Imagen1PSI.jpg" alt="Imagen1 psicologos" />
-                                <p className={styles.descripcion_psicologos}>Descripción de la especialización de cada psicólogo </p>
+                        
+                        <div className={styles.carousel_container}>
+                            {/* Botón de navegación izquierdo */}
+                            <button 
+                                className={styles.carousel_button} 
+                                onClick={goToPrevious}
+                                aria-label="Ver psicólogos anteriores"
+                            >
+                                <ChevronLeft size={30} />
+                            </button>
+                            
+                            <div className={styles.container_info_psicologos}>
+                                {psicologos.length > 0 ? (
+                                    // Mostrar solo los psicólogos del rango actual
+                                    psicologos
+                                        .slice(currentIndex, currentIndex + visibleCount)
+                                        .map((psicologo, index) => (
+                                            <div className={styles.item1_psicologos} key={psicologo.id || `visible-${index}`}>
+                                                {/* Mostrar nombre completo */}
+                                                <p className={styles.nombre_psicologo}>
+                                                    {psicologo.human && `${psicologo.human.first_name || ''} ${psicologo.human.last_name || ''}`}
+                                                </p>
+                                                {/* Mostrar especialización */}
+                                                <p className={styles.especialidad_psicologos}>
+                                                    {psicologo.specialization ? psicologo.specialization.name : 'Psicología General'}
+                                                </p>
+                                                {/* Mostrar foto de perfil */}
+                                                <img 
+                                                    className={styles.imagen_psicologos} 
+                                                    src={psicologo.photo_url || '/Images/default-profile.jpg'} 
+                                                    alt={`Foto de ${psicologo.human ? psicologo.human.first_name : 'Psicólogo'}`} 
+                                                />
+                                                {/* Mostrar descripción */}
+                                                <p className={styles.descripcion_psicologos}>
+                                                    {psicologo.profile_description || 'Profesional especializado en atención psicológica.'}
+                                                </p>
+                                            </div>
+                                        ))
+                                ) : (
+                                    // Mostrar versión estática como respaldo
+                                    <>
+                                        <div className={styles.item1_psicologos}>
+                                            <p className={styles.nombre_psicologo}>Dra. Jimena García</p>
+                                            <p className={styles.especialidad_psicologos}>Psicóloga forense</p>
+                                            <img className={styles.imagen_psicologos} src="/Images/Imagen1PSI.jpg" alt="Imagen1 psicologos" />
+                                            <p className={styles.descripcion_psicologos}>Especialista en psicología forense con amplia experiencia en evaluaciones psicológicas.</p>
+                                        </div>
+                                        {visibleCount > 1 && (
+                                            <div className={styles.item1_psicologos}>
+                                                <p className={styles.nombre_psicologo}>Dr. César Estrada</p>
+                                                <p className={styles.especialidad_psicologos}>Psicólogo educación y del desarrollo</p>
+                                                <img className={styles.imagen_psicologos} src="/Images/Imagen2PSI.jpg" alt="Imagen2 psicologos" />
+                                                <p className={styles.descripcion_psicologos}>Especializado en psicología educativa y del desarrollo, enfocado en niños y adolescentes.</p>
+                                            </div>
+                                        )}
+                                        {visibleCount > 2 && (
+                                            <div className={styles.item1_psicologos}>
+                                                <p className={styles.nombre_psicologo}>Dra. Marisol Flores</p>
+                                                <p className={styles.especialidad_psicologos}>Psicóloga pareja y familiar</p>
+                                                <img className={styles.imagen_psicologos} src="/Images/Imagen3PSI.jpg" alt="Imagen3 psicologos" />
+                                                <p className={styles.descripcion_psicologos}>Experta en terapia de pareja y familiar, con enfoque en resolución de conflictos.</p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </div>
-                            <div className={styles.item1_psicologos}>
-                                <p className={styles.nombre_psicologo}>Dr. César Estrada</p>
-                                <p className={styles.especialidad_psicologos}>Psicólogo educación y del desarrollo</p>
-                                <img className={styles.imagen_psicologos} src="/Images/Imagen2PSI.jpg" alt="Imagen2 psicologos" />
-                                <p className={styles.descripcion_psicologos}>Descripción de la especialización de cada psicólogo </p>
-                            </div>
-                            <div className={styles.item1_psicologos}>
-                                <p className={styles.nombre_psicologo}>Dra. Marisol Flores</p>
-                                <p className={styles.especialidad_psicologos}>Psicóloga pareja y familiar</p>
-                                <img className={styles.imagen_psicologos} src="/Images/Imagen3PSI.jpg" alt="Imagen3 psicologos" />
-                                <p className={styles.descripcion_psicologos}>Descripción de la especialización de cada psicólogo </p>
-                            </div>
+                            
+                            {/* Botón de navegación derecho */}
+                            <button 
+                                className={styles.carousel_button} 
+                                onClick={goToNext}
+                                aria-label="Ver más psicólogos"
+                            >
+                                <ChevronRight size={30} />
+                            </button>
                         </div>
+                        
+                        {/* Indicadores de página (opcional) */}
+                        {psicologos.length > visibleCount && (
+                            <div className={styles.carousel_indicators}>
+                                {Array.from({ length: Math.ceil(psicologos.length / visibleCount) }, (_, i) => (
+                                    <div 
+                                        key={`indicator-${i}`}
+                                        className={`${styles.indicator} ${Math.floor(currentIndex / visibleCount) === i ? styles.active_indicator : ''}`}
+                                        onClick={() => setCurrentIndex(i * visibleCount)}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </section>
                 <section id="Contacto">
