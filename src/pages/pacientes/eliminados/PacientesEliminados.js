@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layout/Header/Header';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
@@ -14,21 +14,15 @@ const PacientesEliminados = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchDeletedPatients();
-    }, []);
-
-    const fetchDeletedPatients = async () => {
+    const fetchDeletedPatients = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             
-            // Llamar al servicio para obtener pacientes eliminados
             const response = await getDeletedPatients();
             
             let deletedPatientsData = [];
             
-            // Determinar la estructura de la respuesta
             if (response) {
                 if (Array.isArray(response)) {
                     deletedPatientsData = response;
@@ -39,12 +33,8 @@ const PacientesEliminados = () => {
                 }
             }
             
-            // Inspeccionar el primer paciente para ver su estructura exacta
             if (deletedPatientsData && deletedPatientsData.length > 0) {
-                
-                // Transformar los datos al formato que espera el componente
                 const formattedData = deletedPatientsData.map(patient => {
-                    // Asegurarse de que todos los campos necesarios estén presentes
                     return {
                         id: patient.id,
                         nombre: formatFullName(patient),
@@ -53,7 +43,6 @@ const PacientesEliminados = () => {
                         tipoIdentificacion: patient.identification_type || 'N/A',
                         email: patient.email || 'N/A',
                         fechaEliminacion: patient.fechaEliminacion || patient.deleted_at || 'N/A',
-                        // Mantener el objeto original para acceder a todos sus datos si es necesario
                         originalData: patient
                     };
                 });
@@ -68,17 +57,18 @@ const PacientesEliminados = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []); // <-- dependencias visibles: ninguna cambiable
+
+    useEffect(() => {
+        fetchDeletedPatients();
+    }, [fetchDeletedPatients]);
 
     const formatFullName = (patient) => {
-        // Función para formatear el nombre completo del paciente
         const human = patient.human || patient;
-        
         const firstName = human.first_name || human.firstName || '';
         const middleName = human.middle_name || human.middleName || '';
         const lastName = human.last_name || human.lastName || '';
         const secondLastName = human.second_last_name || human.secondLastName || '';
-        
         return [firstName, middleName, lastName, secondLastName].filter(Boolean).join(' ');
     };
 
@@ -88,7 +78,6 @@ const PacientesEliminados = () => {
 
     const handleRestore = async (id) => {
         try {
-            // Confirmación antes de restaurar
             const result = await Swal.fire({
                 title: '¿Restaurar paciente?',
                 text: 'El paciente será restaurado y volverá a estar activo',
@@ -102,10 +91,7 @@ const PacientesEliminados = () => {
             
             if (result.isConfirmed) {
                 await restorePatient(id);
-                
-                // Actualizar la lista después de restaurar
                 await fetchDeletedPatients();
-                
                 Swal.fire({
                     title: '¡Restaurado!',
                     text: 'El paciente ha sido restaurado correctamente',
@@ -117,12 +103,10 @@ const PacientesEliminados = () => {
             }
         } catch (error) {
             console.error('Error al restaurar:', error);
-            
             let errorMessage = 'No se pudo restaurar el paciente';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
             }
-            
             Swal.fire({
                 title: 'Error',
                 text: errorMessage,
@@ -135,7 +119,6 @@ const PacientesEliminados = () => {
 
     const handleForceDelete = async (id) => {
         try {
-            // Confirmación antes de eliminar permanentemente
             const result = await Swal.fire({
                 title: '¿Eliminar permanentemente?',
                 text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
@@ -149,10 +132,7 @@ const PacientesEliminados = () => {
             
             if (result.isConfirmed) {
                 await forceDeletePatient(id);
-                
-                // Actualizar la lista después de eliminar
                 await fetchDeletedPatients();
-                
                 Swal.fire({
                     title: '¡Eliminado!',
                     text: 'El paciente ha sido eliminado permanentemente',
@@ -164,12 +144,10 @@ const PacientesEliminados = () => {
             }
         } catch (error) {
             console.error('Error al eliminar permanentemente:', error);
-            
             let errorMessage = 'No se pudo eliminar el paciente permanentemente';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
             }
-            
             Swal.fire({
                 title: 'Error',
                 text: errorMessage,
@@ -180,7 +158,6 @@ const PacientesEliminados = () => {
         }
     };
 
-    // Definición de columnas para DataTable
     const columns = [
         { id: 'nombre', label: 'Nombre', minWidth: 200 },
         { id: 'numeroIdentificacion', label: 'Identificación', minWidth: 150 },

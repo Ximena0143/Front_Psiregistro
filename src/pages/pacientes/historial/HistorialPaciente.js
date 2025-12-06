@@ -629,21 +629,6 @@ const HistorialPaciente = () => {
         }
     };
 
-    // La función handleDownloadDocument ya está definida arriba
-
-    const renderDocumentIcon = (icono, color) => {
-        switch(icono) {
-            case 'FileCheck':
-                return <FileText size={24} color={color} />;
-            case 'FileText':
-                return <FileText size={24} color={color} />;
-            case 'FileX':
-                return <FileText size={24} color={color} />;
-            default:
-                return <FileText size={24} color={color} />;
-        }
-    };
-
     // Manejadores para recordatorios
     const handleAddReminder = () => {
         setReminderToEdit(null);
