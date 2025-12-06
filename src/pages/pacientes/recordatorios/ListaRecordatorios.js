@@ -14,19 +14,19 @@ const ListaRecordatorios = ({ patientId, onAddNew, onEditReminder }) => {
   }, [patientId, loadReminders]);
 
   // Cargar recordatorios del paciente
-  const loadReminders = (async () => {
-    try {
-      setLoading(true);
-      const data = await reminderService.getPatientReminders(patientId);
-      setReminders(data);
-      setError(null);
-    } catch (err) {
-      console.error('Error al cargar recordatorios:', err);
-      setError('No se pudieron cargar los recordatorios. Por favor, intente nuevamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [patientId]);
+  const loadReminders = useCallback(async () => {
+      try {
+        setLoading(true);
+        const data = await reminderService.getPatientReminders(patientId);
+        setReminders(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error al cargar recordatorios:', err);
+        setError('No se pudieron cargar los recordatorios. Por favor, intente nuevamente.');
+      } finally {
+        setLoading(false);
+      }
+    }, [patientId]);
 
   // Eliminar recordatorio
   const handleDelete = (id, title) => {

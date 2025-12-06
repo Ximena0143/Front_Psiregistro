@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save } from 'react-feather';
 import Swal from 'sweetalert2';
 import reminderService from '../../../services/reminder';
@@ -6,11 +6,11 @@ import styles from './styles.module.css';
 
 const FormularioRecordatorio = ({ patientId, reminderToEdit, onClose, onSuccess }) => {
   // Estado inicial del formulario
-  const initialState = {
-    title: '',
-    description: '',
-    patient_id: patientId
-  };
+  const initialState = useMemo(() => ({
+        title: '',
+        description: '',
+        patient_id: patientId
+    }), [patientId]);
 
   // Estado del formulario
   const [formData, setFormData] = useState(initialState);
