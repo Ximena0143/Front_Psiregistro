@@ -130,7 +130,7 @@ export const login = async (credentials) => {
     throw new Error('No se pudo extraer el token de la respuesta del servidor');
   } catch (error) {
     // Propagar el error para que el componente Login pueda manejarlo
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -228,7 +228,7 @@ export const refreshToken = async () => {
   } catch (error) {
     // Si hay un error al refrescar, cerramos la sesión
     logout();
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -292,7 +292,7 @@ export const me = async () => {
       throw new Error('Formato de respuesta inesperado en /auth/me');
     }
   } catch (error) {
-    throw error;
+    throw new Error(error.message);
   }
 };
 

@@ -11,7 +11,6 @@ import api from './api';
 export const getPatientReminders = async (patientId) => {
   try {
     const response = await api.get(`/reminder/patient/${patientId}`);
-    console.log('Respuesta de recordatorios del paciente:', response);
     
     // Verificar estructura de respuesta y retornar datos
     if (response.data && response.data.data && Array.isArray(response.data.data)) {
@@ -24,7 +23,7 @@ export const getPatientReminders = async (patientId) => {
     }
   } catch (error) {
     console.error('Error al obtener recordatorios del paciente:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -44,7 +43,7 @@ export const getReminder = async (id) => {
     }
   } catch (error) {
     console.error('Error al obtener recordatorio:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -65,10 +64,9 @@ export const createReminder = async (reminderData) => {
       errorMessage = error.response.data.message || errorMessage;
     }
     
-    throw {
-      message: errorMessage,
-      originalError: error
-    };
+    const err = new Error(errorMessage);
+    err.originalError = error;
+    throw err;
   }
 };
 
@@ -90,10 +88,9 @@ export const updateReminder = async (id, reminderData) => {
       errorMessage = error.response.data.message || errorMessage;
     }
     
-    throw {
-      message: errorMessage,
-      originalError: error
-    };
+    const err = new Error(errorMessage);
+    err.originalError = error;
+    throw err;
   }
 };
 
@@ -108,14 +105,16 @@ export const deleteReminder = async (id) => {
     return response.data;
   } catch (error) {
     console.error('Error al eliminar recordatorio:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
-export default {
+const reminderService = {
   getPatientReminders,
   getReminder,
   createReminder,
   updateReminder,
   deleteReminder
 };
+
+export default reminderService;

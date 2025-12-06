@@ -11,9 +11,7 @@ import api from './api';
  */
 export const getPatients = async (perPage = 10, page = 1) => {
   try {
-    console.log(`Llamando a API: /patient/index?per_page=${perPage}&page=${page}`);
     const response = await api.get(`/patient/index?per_page=${perPage}&page=${page}`);
-    console.log('Respuesta completa de API getPatients:', response);
     
     // Verificar la estructura de la respuesta
     if (!response.data) {
@@ -23,16 +21,13 @@ export const getPatients = async (perPage = 10, page = 1) => {
     
     // Manejar la nueva estructura de respuesta
     if (response.data.data && Array.isArray(response.data.data)) {
-      console.log('Usando nueva estructura de respuesta con datos y paginación');
       return response.data.data;
     } 
     // Mantener compatibilidad con la estructura anterior
     else if (Array.isArray(response.data)) {
-      console.log('Usando estructura de respuesta antigua (array directo)');
       return response.data;
     } 
     else if (response.data.data && Array.isArray(response.data.data)) {
-      console.log('Usando estructura de respuesta con data anidado');
       return response.data.data;
     } 
     else {
@@ -41,7 +36,7 @@ export const getPatients = async (perPage = 10, page = 1) => {
     }
   } catch (error) {
     console.error('Error al obtener pacientes:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -53,13 +48,11 @@ export const getPatients = async (perPage = 10, page = 1) => {
  */
 export const getDeletedPatients = async (perPage = 10, page = 1) => {
   try {
-    console.log(`Llamando a API: /patient/deleted-index?per_page=${perPage}&page=${page}`);
     const response = await api.get(`/patient/deleted-index?per_page=${perPage}&page=${page}`);
-    console.log('Respuesta de pacientes eliminados:', response);
     return response.data;
   } catch (error) {
     console.error('Error al obtener pacientes eliminados:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -74,7 +67,7 @@ export const registerPatient = async (patientData) => {
     return response.data;
   } catch (error) {
     console.error('Error al registrar paciente:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -86,9 +79,7 @@ export const registerPatient = async (patientData) => {
  */
 export const updatePatient = async (id, patientData) => {
   try {
-    console.log(`Enviando actualización para paciente ID: ${id}`, patientData);
     const response = await api.put(`/patient/update/${id}`, patientData);
-    console.log('Respuesta completa de updatePatient:', response);
     
     if (!response.data) {
       throw new Error('La respuesta no contiene datos');
@@ -105,10 +96,9 @@ export const updatePatient = async (id, patientData) => {
       console.error('Mensaje de error del servidor:', errorMessage);
     }
     
-    throw {
-      message: errorMessage,
-      originalError: error
-    };
+    const err = new Error(errorMessage);
+    err.originalError = error;
+    throw err;
   }
 };
 
@@ -123,7 +113,7 @@ export const deletePatient = async (id) => {
     return response.data;
   } catch (error) {
     console.error('Error al eliminar paciente:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -138,7 +128,7 @@ export const restorePatient = async (id) => {
     return response.data;
   } catch (error) {
     console.error('Error al restaurar paciente:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -153,7 +143,7 @@ export const forceDeletePatient = async (id) => {
     return response.data;
   } catch (error) {
     console.error('Error al eliminar permanentemente el paciente:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -167,25 +157,7 @@ export const getIdentificationTypes = async () => {
     return response.data;
   } catch (error) {
     console.error('Error al obtener tipos de identificación:', error);
-    // Si no existe el endpoint, devolvemos los tipos de identificación hardcodeados
-    return {
-      data: [
-        { id: 1, name: 'Cedula de ciudadania' },
-        { id: 2, name: 'Registro civil' },
-        { id: 3, name: 'Tarjeta de identidad' },
-        { id: 4, name: 'Cedula extranjera' },
-        { id: 5, name: 'NUIP' },
-        { id: 6, name: 'Pasaporte' },
-        { id: 7, name: 'Adulto sin identificar' },
-        { id: 8, name: 'Menor sin identificar' },
-        { id: 9, name: 'Permiso especial de permanencia' },
-        { id: 10, name: 'Certificado nacido vivo' },
-        { id: 11, name: 'Salvo conducto Asilado o Refugiado' },
-        { id: 12, name: 'Tarjeta Extranjeria' },
-        { id: 13, name: 'Carnet Diplomatico' },
-        { id: 14, name: 'Permiso por Protección Temporal' }
-      ]
-    };
+    throw new Error(error.message);
   }
 };
 
@@ -196,12 +168,9 @@ export const getIdentificationTypes = async () => {
  */
 export const getPatientById = async (id) => {
   try {
-    console.log(`Buscando paciente con ID: ${id}`);
-    
     // Como no hay un endpoint específico para obtener un paciente por ID,
     // obtenemos todos los pacientes y filtramos por ID
     const response = await api.get('/patient/index');
-    console.log('Respuesta de getPatients:', response);
     
     if (!response.data) {
       throw new Error('No se recibieron datos de la API');
@@ -226,7 +195,6 @@ export const getPatientById = async (id) => {
       throw new Error(`No se encontró ningún paciente con ID ${id}`);
     }
     
-    console.log('Paciente encontrado:', patient);
     
     // Construir el objeto de respuesta con la misma estructura que esperaría
     // si viniera de un endpoint específico
@@ -236,7 +204,7 @@ export const getPatientById = async (id) => {
     };
   } catch (error) {
     console.error('Error al obtener paciente por ID:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -247,10 +215,8 @@ export const getPatientById = async (id) => {
  */
 export const getPatientDocuments = async (patientId) => {
   try {
-    console.log(`Obteniendo documentos del paciente con ID: ${patientId}`);
     // Usar la ruta correcta del backend (sin duplicar /api/ ya que está en la URL base)
     const response = await api.get(`/document/gdbpi/${patientId}`);
-    console.log('Respuesta completa de getPatientDocuments:', response);
     
     // Verificar la estructura de la respuesta
     if (!response || !response.data) {
@@ -260,13 +226,10 @@ export const getPatientDocuments = async (patientId) => {
     
     // La respuesta tiene la estructura { message, error, data: [...documentos] }
     if (response.data.data && Array.isArray(response.data.data)) {
-      console.log('Documentos obtenidos correctamente:', response.data.data);
       return response.data.data;
     } else if (response.data && Array.isArray(response.data)) {
-      console.log('Documentos obtenidos correctamente:', response.data);
       return response.data;
     } else {
-      console.log('Documentos obtenidos:', response.data);
       // Si data es un objeto con los documentos dentro
       return response.data && response.data.data ? response.data.data : [];
     }
@@ -279,7 +242,7 @@ export const getPatientDocuments = async (patientId) => {
       console.warn('No se encontraron documentos para el paciente con ID:', patientId);
       return [];
     }
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -311,7 +274,7 @@ export const uploadPatientDocument = async (patientId, document, title, document
     return response.data;
   } catch (error) {
     console.error('Error al subir documento del paciente:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -326,7 +289,7 @@ export const deletePatientDocument = async (documentId) => {
     return response.data;
   } catch (error) {
     console.error('Error al eliminar documento:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -364,7 +327,7 @@ export const updatePatientDocument = async (documentId, patientId, title, docume
     return response.data;
   } catch (error) {
     console.error('Error al actualizar documento del paciente:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 

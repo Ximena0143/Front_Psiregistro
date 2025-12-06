@@ -14,7 +14,6 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     // Verificar autenticación cada vez que cambia la ruta
     if (!isAuthenticated) {
-      console.log('Usuario no autenticado, redirigiendo a login');
     }
   }, [location.pathname, isAuthenticated]);
 

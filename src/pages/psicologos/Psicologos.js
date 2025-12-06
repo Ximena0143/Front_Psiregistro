@@ -26,25 +26,6 @@ const Psicologos = () => {
             setLoading(true);
             setError(null);
             const response = await userService.getUsers();
-            console.log('Respuesta de getUsers:', response);
-            
-            // Depuración: Mostrar la estructura completa de la respuesta
-            console.log('Estructura completa de la respuesta:', JSON.stringify(response, null, 2));
-            
-            // Verificar si hay datos y mostrar información de depuración
-            if (response && response.data) {
-                console.log('Cantidad de usuarios recibidos:', response.data.length);
-                
-                // Si hay datos, mostrar el primer elemento para depuración
-                if (Array.isArray(response.data) && response.data.length > 0) {
-                    const firstUser = response.data[0];
-                    console.log('Primer usuario (detalle):', firstUser);
-                    console.log('ID del primer usuario:', firstUser.id);
-                    console.log('Email del primer usuario:', firstUser.email);
-                    console.log('Human del primer usuario:', firstUser.human);
-                    console.log('Specialization del primer usuario:', firstUser.specialization);
-                }
-            }
             
             if (response && response.data && Array.isArray(response.data)) {
                 // Transformar los datos al formato que espera el componente
@@ -84,11 +65,9 @@ const Psicologos = () => {
                         rol: Array.isArray(user.roles) && user.roles.length > 0 ? user.roles.map(r => r.role).join(', ') : 'No asignado'
                     };
                     
-                    console.log('Usuario formateado:', formattedUser);
                     return formattedUser;
                 });
                 
-                console.log('Datos formateados para mostrar:', formattedData);
                 setPsicologos(formattedData);
             } else {
                 setPsicologos([]);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, MessageSquare, AlertCircle } from 'react-feather';
 import Swal from 'sweetalert2';
 import reminderService from '../../../services/reminder';
@@ -9,24 +9,24 @@ const ListaRecordatorios = ({ patientId, onAddNew, onEditReminder }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadReminders();
-  }, [patientId]);
-
   // Cargar recordatorios del paciente
-  const loadReminders = async () => {
-    try {
-      setLoading(true);
-      const data = await reminderService.getPatientReminders(patientId);
-      setReminders(data);
-      setError(null);
-    } catch (err) {
-      console.error('Error al cargar recordatorios:', err);
-      setError('No se pudieron cargar los recordatorios. Por favor, intente nuevamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loadReminders = useCallback(async () => {
+      try {
+        setLoading(true);
+        const data = await reminderService.getPatientReminders(patientId);
+        setReminders(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error al cargar recordatorios:', err);
+        setError('No se pudieron cargar los recordatorios. Por favor, intente nuevamente.');
+      } finally {
+        setLoading(false);
+      }
+    }, [patientId]);
+
+    useEffect(() => {
+    loadReminders();
+  }, [patientId, loadReminders]);
 
   // Eliminar recordatorio
   const handleDelete = (id, title) => {

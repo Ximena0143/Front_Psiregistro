@@ -39,7 +39,6 @@ const Especializaciones = () => {
             setLoading(true);
             setError(null);
             const response = await specializationService.getSpecializations();
-            console.log('Respuesta de getSpecializations:', response);
             
             if (response && response.data && Array.isArray(response.data)) {
                 setEspecializaciones(response.data);

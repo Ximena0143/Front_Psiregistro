@@ -20,11 +20,9 @@ export const getUsers = async (perPage = 100, page = 1) => {
     
     // Manejar la estructura de respuesta
     if (Array.isArray(response.data)) {
-      console.log('Usando estructura de respuesta con array directo');
       return { data: response.data };
     } 
     else if (response.data.data && Array.isArray(response.data.data)) {
-      console.log('Usando estructura de respuesta con data anidado');
       return response.data;
     } 
     else {
@@ -35,7 +33,7 @@ export const getUsers = async (perPage = 100, page = 1) => {
     }
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -63,7 +61,7 @@ export const getUserById = async (id) => {
     }
   } catch (error) {
     console.error(`Error al obtener usuario con ID ${id}:`, error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -79,7 +77,7 @@ export const getDeletedUsers = async (perPage = 10, page = 1) => {
     return response;
   } catch (error) {
     console.error('Error al obtener usuarios eliminados:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -106,12 +104,11 @@ export const registerUser = async (userData) => {
       throw new Error('La especialización debe ser un número válido');
     }
     
-    console.log('Datos enviados al backend:', dataToSend);
     const response = await api.post('/user/register', dataToSend);
     return response;
   } catch (error) {
     console.error('Error al registrar usuario:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -127,7 +124,7 @@ export const updateUser = async (id, userData) => {
     return response;
   } catch (error) {
     console.error('Error al actualizar usuario:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -142,7 +139,7 @@ export const deleteUser = async (id) => {
     return response;
   } catch (error) {
     console.error('Error al eliminar usuario:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -157,7 +154,7 @@ export const restoreUser = async (id) => {
     return response;
   } catch (error) {
     console.error('Error al restaurar usuario:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -172,7 +169,7 @@ export const forceDeleteUser = async (id) => {
     return response;
   } catch (error) {
     console.error('Error al eliminar permanentemente usuario:', error);
-    throw error;
+    throw new Error(error.message);
   }
 };
 

@@ -44,9 +44,7 @@ const EditarPaciente = () => {
                 setLoading(true);
                 
                 // Obtener los datos del paciente por ID
-                console.log('Obteniendo datos del paciente con ID:', id);
                 const response = await patientService.getPatientById(id);
-                console.log('Respuesta del paciente:', response);
                 
                 // Verificar que la respuesta contenga datos
                 if (!response) {
@@ -65,8 +63,6 @@ const EditarPaciente = () => {
                 const patient = response.patient;
                 const human = response.human;
                 
-                console.log('Datos del paciente:', patient);
-                console.log('Datos de human:', human);
                 
                 if (patient && human) {
                     // Transformar los datos al formato del formulario
@@ -207,12 +203,8 @@ const EditarPaciente = () => {
                     identification_number: formData.numeroIdentificacion
                 };
                 
-                console.log('Enviando datos de actualización:', patientData);
-                console.log('ID del paciente a actualizar:', id);
-                
                 // Llamar al servicio para actualizar el paciente
-                const response = await patientService.updatePatient(id, patientData);
-                console.log('Respuesta de actualización:', response);
+                await patientService.updatePatient(id, patientData);
                 
                 // Mostrar alerta de confirmación
                 Swal.fire({

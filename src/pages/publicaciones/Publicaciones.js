@@ -90,44 +90,37 @@ const Publicaciones = () => {
     };
 
     // Guardar nueva publicación
-    const handleSavePublicacion = async () => {
-        try {
-            // Preparar los archivos para subir
-            const files = newPublicacion.imagen ? [newPublicacion.imagen] : [];
-            
-            // Llamar al servicio para crear la publicación
-            await postService.createPost(newPublicacion, files);
-            
-            // Recargar las publicaciones para mostrar la nueva
-            await loadPosts();
-            
-            // Mostrar alerta de éxito
-            Swal.fire({
-                title: '¡Éxito!',
-                text: 'La publicación se ha guardado correctamente',
-                icon: 'success',
-                confirmButtonColor: '#FB8500',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            
-            // Cerrar el modal
-            handleCloseNewModal();
-        } catch (error) {
-            console.error('Error al guardar la publicación:', error);
-            Swal.fire({
-                title: 'Error',
-                text: error.message || 'No se pudo guardar la publicación',
-                icon: 'error',
-                confirmButtonColor: '#FB8500'
-            });
-        }
+    const handleSavePublicacion = () => {
+        // Aquí iría la lógica real para guardar la publicación en el servidor
+        
+        // Añadimos la publicación nueva a la lista (simulación)
+        const nuevaPublicacion = {
+            id: publicaciones.length + 1,
+            titulo: newPublicacion.titulo,
+            descripcion: newPublicacion.descripcion,
+            fecha: formatDate(),
+            imagen: newPublicacion.imagen ? URL.createObjectURL(newPublicacion.imagen) : "/Images/placeholder.jpg"
+        };
+        
+        setPublicaciones([nuevaPublicacion, ...publicaciones]);
+        
+        // Mostrar alerta de éxito
+        Swal.fire({
+            title: '¡Éxito!',
+            text: 'La publicación se ha guardado correctamente',
+            icon: 'success',
+            confirmButtonColor: '#FB8500',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        // Cerrar el modal
+        handleCloseNewModal();
     };
 
     // Actualizar publicación existente
     const handleUpdatePublicacion = () => {
         // Aquí iría la lógica real para actualizar la publicación en el servidor
-        console.log('Actualizando publicación:', newPublicacion);
         
         // Actualizamos la publicación en la lista (simulación)
         const publicacionesActualizadas = publicaciones.map(pub => {
@@ -172,32 +165,21 @@ const Publicaciones = () => {
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
-                try {
-                    // Llamar al servicio para eliminar la publicación
-                    await postService.deletePost(publicacion.id);
-                    
-                    // Eliminamos la publicación de la lista local
-                    const publicacionesFiltradas = publicaciones.filter(pub => pub.id !== publicacion.id);
-                    setPublicaciones(publicacionesFiltradas);
-                    
-                    // Mostrar alerta de éxito
-                    Swal.fire({
-                        title: '¡Éxito!',
-                        text: 'La publicación se ha eliminado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#FB8500',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                } catch (error) {
-                    console.error('Error al eliminar la publicación:', error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: error.message || 'No se pudo eliminar la publicación',
-                        icon: 'error',
-                        confirmButtonColor: '#FB8500'
-                    });
-                }
+                // Aquí iría la lógica real para eliminar la publicación del servidor
+                
+                // Eliminamos la publicación de la lista (simulación)
+                const publicacionesFiltradas = publicaciones.filter(pub => pub.id !== publicacion.id);
+                setPublicaciones(publicacionesFiltradas);
+                
+                // Mostrar alerta de éxito
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'La publicación se ha eliminado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#FB8500',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
         });
     };

@@ -223,30 +223,7 @@ const Perfil = () => {
             
             try {
                 // Llamar al servicio para actualizar el usuario
-                const updateResponse = await userService.updateUser(userData.id, updateData);
-                console.log('Respuesta de actualización del perfil:', updateResponse);
-                
-                // Verificar si la respuesta contiene la información del usuario actualizado
-                if (updateResponse && updateResponse.data) {
-                    // Actualizar el estado con los datos más recientes
-                    const updatedUserData = updateResponse.data;
-                    
-                    // Si se actualizaron los datos con éxito, obtener la URL firmada de la foto
-                    if (updatedUserData.profile_photo_path && 
-                        updatedUserData.profile_photo_path !== 'default.jpg') {
-                        
-                        console.log('Foto actualizada, obteniendo nueva URL firmada');
-                        
-                        // Intentar obtener la URL firmada directamente desde el backend
-                        try {
-                            // Obtener la URL firmada actualizada
-                            await getProfilePhotoUrl();
-                        } catch (photoError) {
-                            console.error('Error al obtener URL firmada de foto actualizada:', photoError);
-                        }
-                    }
-                    // Ya no necesitamos actualizar la URL de la imagen aquí, ya que getProfilePhotoUrl lo hace
-                }
+                await userService.updateUser(userData.id, updateData);
                 
                 Swal.fire({
                     title: 'Éxito',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layout/Header/Header';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
@@ -8,30 +8,21 @@ import styles from './styles.module.css';
 import userService from '../../../services/user';
 import DataTable from '../../../components/common/DataTable/DataTable';
 
-// Componente para mostrar y gestionar psicólogos eliminados
 const PsicologosEliminados = () => {
     const navigate = useNavigate();
     const [psychologists, setPsychologists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [actionInProgress, setActionInProgress] = useState(false);
 
-    useEffect(() => {
-        fetchDeletedPsychologists();
-    }, []);
-
-    const fetchDeletedPsychologists = async () => {
+    const fetchDeletedPsychologists = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             
-            // Llamar al servicio para obtener psicólogos eliminados
             const response = await userService.getDeletedUsers();
-            console.log('Respuesta de psicólogos eliminados (completa):', response);
             
             let deletedPsychologistsData = [];
             
-            // Determinar la estructura de la respuesta
             if (response) {
                 if (Array.isArray(response)) {
                     deletedPsychologistsData = response;
@@ -42,21 +33,13 @@ const PsicologosEliminados = () => {
                 }
             }
             
-            console.log('Datos de psicólogos eliminados procesados:', deletedPsychologistsData);
-            
-            // Inspeccionar el primer psicólogo para ver su estructura exacta
             if (deletedPsychologistsData && deletedPsychologistsData.length > 0) {
-                console.log('Ejemplo de estructura de un psicólogo eliminado:', JSON.stringify(deletedPsychologistsData[0], null, 2));
-                
-                // Transformar los datos al formato que espera el componente
                 const formattedData = deletedPsychologistsData.map(psychologist => {
-                    // Asegurarse de que todos los campos necesarios estén presentes
                     return {
                         id: psychologist.id,
                         nombre: formatFullName(psychologist),
                         email: psychologist.email || 'N/A',
                         fechaEliminacion: psychologist.fechaEliminacion || psychologist.deleted_at || 'N/A',
-                        // Mantener el objeto original para acceder a todos sus datos si es necesario
                         originalData: psychologist
                     };
                 });
@@ -71,17 +54,18 @@ const PsicologosEliminados = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchDeletedPsychologists();
+    }, [fetchDeletedPsychologists]);
 
     const formatFullName = (psychologist) => {
-        // Función para formatear el nombre completo del psicólogo
         const human = psychologist.human || psychologist;
-        
         const firstName = human.first_name || human.firstName || '';
         const middleName = human.middle_name || human.middleName || '';
         const lastName = human.last_name || human.lastName || '';
         const secondLastName = human.second_last_name || human.secondLastName || '';
-        
         return [firstName, middleName, lastName, secondLastName].filter(Boolean).join(' ');
     };
 
@@ -91,9 +75,6 @@ const PsicologosEliminados = () => {
 
     const handleRestore = async (id) => {
         try {
-            setActionInProgress(true);
-            
-            // Confirmación antes de restaurar
             const result = await Swal.fire({
                 title: '¿Restaurar psicólogo?',
                 text: 'El psicólogo será restaurado y volverá a estar activo',
@@ -107,10 +88,7 @@ const PsicologosEliminados = () => {
             
             if (result.isConfirmed) {
                 await userService.restoreUser(id);
-                
-                // Actualizar la lista después de restaurar
                 await fetchDeletedPsychologists();
-                
                 Swal.fire({
                     title: '¡Restaurado!',
                     text: 'El psicólogo ha sido restaurado correctamente',
@@ -122,12 +100,10 @@ const PsicologosEliminados = () => {
             }
         } catch (error) {
             console.error('Error al restaurar:', error);
-            
             let errorMessage = 'No se pudo restaurar el psicólogo';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
             }
-            
             Swal.fire({
                 title: 'Error',
                 text: errorMessage,
@@ -135,16 +111,11 @@ const PsicologosEliminados = () => {
                 confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#FB8500'
             });
-        } finally {
-            setActionInProgress(false);
         }
     };
 
     const handleForceDelete = async (id) => {
         try {
-            setActionInProgress(true);
-            
-            // Confirmación antes de eliminar permanentemente
             const result = await Swal.fire({
                 title: '¿Eliminar permanentemente?',
                 text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
@@ -158,10 +129,7 @@ const PsicologosEliminados = () => {
             
             if (result.isConfirmed) {
                 await userService.forceDeleteUser(id);
-                
-                // Actualizar la lista después de eliminar
                 await fetchDeletedPsychologists();
-                
                 Swal.fire({
                     title: '¡Eliminado!',
                     text: 'El psicólogo ha sido eliminado permanentemente',
@@ -173,12 +141,10 @@ const PsicologosEliminados = () => {
             }
         } catch (error) {
             console.error('Error al eliminar permanentemente:', error);
-            
             let errorMessage = 'No se pudo eliminar el psicólogo permanentemente';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
             }
-            
             Swal.fire({
                 title: 'Error',
                 text: errorMessage,
@@ -186,12 +152,9 @@ const PsicologosEliminados = () => {
                 confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#FB8500'
             });
-        } finally {
-            setActionInProgress(false);
         }
     };
 
-    // Definición de columnas para DataTable
     const columns = [
         { id: 'nombre', label: 'Nombre', minWidth: 200 },
         { id: 'email', label: 'Correo', minWidth: 200 },
