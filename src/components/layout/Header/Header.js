@@ -5,6 +5,7 @@ import { FaRegUser } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
 import { FiMenu, FiX } from "react-icons/fi"; 
 import { FiClock, FiCalendar } from "react-icons/fi";
+import api from '../../../services/api';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 import authService from '../../../services/auth'; 
@@ -14,7 +15,28 @@ const Header = ({ variant = 'landing' }) => {
     const [userName, setUserName] = useState('Usuario');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
+    const [profilePhotoUrl, setProfilePhotoUrl] = useState(null);
     const navigate = useNavigate();
+    
+    // Función para obtener la URL firmada de la foto de perfil
+    const getProfilePhotoUrl = async () => {
+        try {
+            console.log('Header: Obteniendo URL firmada de la foto de perfil');
+            const response = await api.get('/user/get-profile-photo');
+            
+            if (response && response.data && response.data.URL) {
+                console.log('Header: URL firmada obtenida:', response.data.URL);
+                setProfilePhotoUrl(response.data.URL);
+                return response.data.URL;
+            } else {
+                console.log('Header: No se pudo obtener la URL firmada');
+                return null;
+            }
+        } catch (error) {
+            console.error('Header: Error al obtener URL de foto:', error);
+            return null;
+        }
+    };
     
     // Actualizar fecha y hora cada segundo
     useEffect(() => {
@@ -32,6 +54,9 @@ const Header = ({ variant = 'landing' }) => {
         // Función para obtener datos del usuario
         const fetchUserData = async () => {
             try {
+                // Obtener la URL firmada de la foto de perfil
+                await getProfilePhotoUrl();
+                
                 // Intentar obtener datos actualizados del backend
                 const userData = await authService.me();
                 
@@ -267,7 +292,17 @@ const Header = ({ variant = 'landing' }) => {
                         <p className={styles.welcome_text}>Bienvenid@</p>
                         <div className={styles.user} onClick={toggleMenu}>
                             <p className={styles.name_user}>{userName}</p>
-                            <HiUserCircle className={styles.icon_user} size={35}/>
+                            {profilePhotoUrl ? (
+                                <div className={styles.profile_photo_container}>
+                                    <img 
+                                        src={profilePhotoUrl} 
+                                        alt="Foto de perfil" 
+                                        className={styles.profile_photo} 
+                                    />
+                                </div>
+                            ) : (
+                                <HiUserCircle className={styles.icon_user} size={35} />
+                            )}
                             {showMenu && (
                                 <div className={styles.dropdown}>
                                     <Link to="/perfil">

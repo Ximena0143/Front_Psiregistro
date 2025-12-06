@@ -55,7 +55,11 @@ const Perfil = () => {
         
         // Actualizar la imagen de perfil si existe
         if (userData.profile_photo_path) {
-            setProfileImage(userData.profile_photo_path);
+            // Guardamos la ruta pero no la usamos para mostrar la imagen
+            // Usaremos getProfilePhotoUrl para obtener la URL firmada
+            localStorage.setItem('user_photo_path', userData.profile_photo_path);
+            // Intentamos obtener la URL firmada inmediatamente
+            getProfilePhotoUrl();
         }
     };
 
