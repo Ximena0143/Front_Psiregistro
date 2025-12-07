@@ -2,13 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
 import Sidebar from '../../components/layout/Sidebar/Sidebar';
-import { X, Upload, Edit, Trash } from 'lucide-react';
+import { X, Upload, Trash } from 'lucide-react';
 import Swal from 'sweetalert2';
 import postService from '../../services/postService';
 
 const Publicaciones = () => {
     const [showNewModal, setShowNewModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
     const [publicaciones, setPublicaciones] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     
@@ -17,8 +16,6 @@ const Publicaciones = () => {
         descripcion: '',
         imagen: null
     });
-    
-    const [currentPublicacion, setCurrentPublicacion] = useState(null);
     const [selectedFileName, setSelectedFileName] = useState('');
     const fileInputRef = useRef(null);
     
@@ -42,27 +39,7 @@ const Publicaciones = () => {
         setSelectedFileName('');
     };
 
-    // Funciones para manejar edición de publicación
-    const handleOpenEditModal = (publicacion) => {
-        setCurrentPublicacion(publicacion);
-        setNewPublicacion({
-            titulo: publicacion.titulo,
-            descripcion: publicacion.descripcion,
-            imagen: null
-        });
-        setShowEditModal(true);
-    };
-
-    const handleCloseEditModal = () => {
-        setShowEditModal(false);
-        setCurrentPublicacion(null);
-        setNewPublicacion({
-            titulo: '',
-            descripcion: '',
-            imagen: null
-        });
-        setSelectedFileName('');
-    };
+    // Se eliminaron las funciones de edición ya que no están soportadas por el backend
 
     // Manejar cambios en los campos del formulario
     const handleInputChange = (e) => {
@@ -90,66 +67,76 @@ const Publicaciones = () => {
     };
 
     // Guardar nueva publicación
-    const handleSavePublicacion = () => {
-        // Aquí iría la lógica real para guardar la publicación en el servidor
+    const handleSavePublicacion = async () => {
+        // Validar que tengamos los campos requeridos
+        if (!newPublicacion.titulo || !newPublicacion.imagen) {
+            Swal.fire({
+                title: 'Error',
+                text: 'El título y la imagen son obligatorios',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+            return;
+        }
         
-        // Añadimos la publicación nueva a la lista (simulación)
-        const nuevaPublicacion = {
-            id: publicaciones.length + 1,
-            titulo: newPublicacion.titulo,
-            descripcion: newPublicacion.descripcion,
-            fecha: formatDate(),
-            imagen: newPublicacion.imagen ? URL.createObjectURL(newPublicacion.imagen) : "/Images/placeholder.jpg"
-        };
-        
-        setPublicaciones([nuevaPublicacion, ...publicaciones]);
-        
-        // Mostrar alerta de éxito
-        Swal.fire({
-            title: '¡Éxito!',
-            text: 'La publicación se ha guardado correctamente',
-            icon: 'success',
-            confirmButtonColor: '#FB8500',
-            timer: 2000,
-            showConfirmButton: false
-        });
-        
-        // Cerrar el modal
-        handleCloseNewModal();
+        try {
+            // Mostrar indicador de carga
+            Swal.fire({
+                title: 'Guardando publicación',
+                text: 'Por favor espere...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Preparar datos para enviar al servicio
+            const postData = {
+                titulo: newPublicacion.titulo,
+                descripcion: newPublicacion.descripcion || ''
+            };
+            
+            // Convertir la imagen en un array como espera el backend
+            const files = [newPublicacion.imagen];
+            
+            console.log('Archivo a enviar:', {
+                nombre: newPublicacion.imagen.name,
+                tipo: newPublicacion.imagen.type,
+                tamaño: newPublicacion.imagen.size
+            });
+            
+            // Llamar al servicio para crear la publicación
+            const response = await postService.createPost(postData, files);
+            
+            // Recargar las publicaciones para mostrar la recién creada
+            await loadPosts();
+            
+            // Mostrar alerta de éxito
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'La publicación se ha guardado correctamente',
+                icon: 'success',
+                confirmButtonColor: '#FB8500',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            // Cerrar el modal
+            handleCloseNewModal();
+        } catch (error) {
+            console.error('Error al guardar la publicación:', error);
+            
+            // Mostrar mensaje de error
+            Swal.fire({
+                title: 'Error',
+                text: error.message || 'No se pudo guardar la publicación',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+        }
     };
 
-    // Actualizar publicación existente
-    const handleUpdatePublicacion = () => {
-        // Aquí iría la lógica real para actualizar la publicación en el servidor
-        
-        // Actualizamos la publicación en la lista (simulación)
-        const publicacionesActualizadas = publicaciones.map(pub => {
-            if (pub.id === currentPublicacion.id) {
-                return {
-                    ...pub,
-                    titulo: newPublicacion.titulo,
-                    descripcion: newPublicacion.descripcion,
-                    imagen: newPublicacion.imagen ? URL.createObjectURL(newPublicacion.imagen) : pub.imagen
-                };
-            }
-            return pub;
-        });
-        
-        setPublicaciones(publicacionesActualizadas);
-        
-        // Mostrar alerta de éxito
-        Swal.fire({
-            title: '¡Éxito!',
-            text: 'La publicación se ha actualizado correctamente',
-            icon: 'success',
-            confirmButtonColor: '#FB8500',
-            timer: 2000,
-            showConfirmButton: false
-        });
-        
-        // Cerrar el modal
-        handleCloseEditModal();
-    };
+    // Se eliminó la función de actualización ya que no está soportada por el backend
 
     // Eliminar publicación
     const handleDeletePublicacion = (publicacion) => {
@@ -165,21 +152,43 @@ const Publicaciones = () => {
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
-                // Aquí iría la lógica real para eliminar la publicación del servidor
-                
-                // Eliminamos la publicación de la lista (simulación)
-                const publicacionesFiltradas = publicaciones.filter(pub => pub.id !== publicacion.id);
-                setPublicaciones(publicacionesFiltradas);
-                
-                // Mostrar alerta de éxito
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'La publicación se ha eliminado correctamente',
-                    icon: 'success',
-                    confirmButtonColor: '#FB8500',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                try {
+                    // Mostrar indicador de carga
+                    Swal.fire({
+                        title: 'Eliminando publicación',
+                        text: 'Por favor espere...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Llamar al servicio para eliminar la publicación
+                    await postService.deletePost(publicacion.id);
+                    
+                    // Recargar la lista de publicaciones
+                    await loadPosts();
+                    
+                    // Mostrar alerta de éxito
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'La publicación se ha eliminado correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#FB8500',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    console.error('Error al eliminar la publicación:', error);
+                    
+                    // Mostrar mensaje de error
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.message || 'No se pudo eliminar la publicación',
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    });
+                }
             }
         });
     };
@@ -278,10 +287,6 @@ const Publicaciones = () => {
                                     <div className={styles.cardFooter}>
                                         <span>{publicacion.fecha}</span>
                                         <div className={styles.actionButtons}>
-                                            <button className={styles.editButton} onClick={() => handleOpenEditModal(publicacion)}>
-                                                <Edit size={14} />
-                                                Editar
-                                            </button>
                                             <button className={styles.deleteButton} onClick={() => handleDeletePublicacion(publicacion)}>
                                                 <Trash size={14} />
                                                 Eliminar
@@ -372,86 +377,7 @@ const Publicaciones = () => {
                 </div>
             )}
 
-            {/* Modal para editar publicación */}
-            {showEditModal && currentPublicacion && (
-                <div className={styles.modal}>
-                    <div className={styles.modalContainer}>
-                        <div className={styles.modalHeader}>
-                            <h4>Editar publicación</h4>
-                            <button className={styles.closeButton} onClick={handleCloseEditModal}>
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className={styles.modalContent}>
-                            <div className={styles.formField}>
-                                <label htmlFor="titulo">Título de la publicación *</label>
-                                <input
-                                    id="titulo"
-                                    name="titulo"
-                                    type="text"
-                                    value={newPublicacion.titulo}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="descripcion">Descripción *</label>
-                                <textarea
-                                    id="descripcion"
-                                    name="descripcion"
-                                    value={newPublicacion.descripcion}
-                                    onChange={handleInputChange}
-                                    rows={4}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formField}>
-                                <label>Imagen de portada</label>
-                                <div className={styles.currentImagePreview}>
-                                    <p>Imagen actual:</p>
-                                    <img src={currentPublicacion.imagen} alt="Imagen actual" className={styles.previewImage} />
-                                </div>
-                                <div 
-                                    className={styles.fileUploadArea}
-                                    onClick={handleUploadAreaClick}
-                                >
-                                    <div className={styles.fileUploadIcon}>
-                                        <Upload size={30} color="#219EBC" />
-                                    </div>
-                                    <p className={styles.fileUploadText}>
-                                        Haz clic aquí para cambiar la imagen o arrástrala y suéltala
-                                    </p>
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        className={styles.fileInput}
-                                        onChange={handleFileSelect}
-                                        accept=".jpg,.jpeg,.png,.gif"
-                                    />
-                                </div>
-                                {selectedFileName && (
-                                    <p className={styles.selectedFileName}>{selectedFileName}</p>
-                                )}
-                            </div>
-                        </div>
-                        <div className={styles.modalActions}>
-                            <button 
-                                className={styles.cancelButton}
-                                onClick={handleCloseEditModal}
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                className={styles.saveButton}
-                                onClick={handleUpdatePublicacion}
-                                disabled={!newPublicacion.titulo || !newPublicacion.descripcion}
-                            >
-                                Actualizar publicación
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Se eliminó el modal de edición ya que no está soportado por el backend */}
         </div>
     );
 };

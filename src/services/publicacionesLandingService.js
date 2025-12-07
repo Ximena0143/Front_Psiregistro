@@ -53,9 +53,25 @@ const publicacionesLandingService = {
                         
                         // Procesar cada publicación para asegurar que tiene la estructura correcta
                         const publicacionesFormateadas = publicaciones.map(publicacion => {
+                            // Formatear el título para que se vea mejor
+                            let titulo = publicacion.tittle || publicacion.title || 'Sin título';
+                            
+                            // Si el título parece ser un nombre de archivo (tiene extensión)
+                            if (titulo.endsWith('.jpg') || titulo.endsWith('.png') || titulo.endsWith('.jpeg') || 
+                                titulo.endsWith('.gif') || titulo.endsWith('.mp4')) {
+                                // Quitar la extensión
+                                titulo = titulo.substring(0, titulo.lastIndexOf('.'));
+                            }
+                            
+                            // Reemplazar guiones por espacios y capitalizar palabras
+                            titulo = titulo.replace(/[-_]/g, ' ')
+                                         .split(' ')
+                                         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                         .join(' ');
+                            
                             return {
                                 id: publicacion.id || '',
-                                titulo: publicacion.tittle || publicacion.title || 'Sin título', // Probar ambos campos
+                                titulo: titulo,
                                 descripcion: publicacion.description || publicacion.descripcion || 'Sin descripción',
                                 tipo: publicacion.post_type || publicacion.tipo || 'image',
                                 url: publicacion.signed_url || publicacion.url || '',
@@ -89,14 +105,32 @@ const publicacionesLandingService = {
                     // Procesar la respuesta alternativa
                     const publicaciones = directData.data;
                     
-                    const publicacionesFormateadas = publicaciones.map(publicacion => ({
-                        id: publicacion.id || '',
-                        titulo: publicacion.tittle || publicacion.title || 'Sin título',
-                        descripcion: publicacion.description || publicacion.descripcion || 'Sin descripción',
-                        tipo: publicacion.post_type || publicacion.tipo || 'image',
-                        url: publicacion.signed_url || publicacion.url || '',
-                        fecha: publicacion.created_at ? new Date(publicacion.created_at).toLocaleDateString() : ''
-                    }));
+                    const publicacionesFormateadas = publicaciones.map(publicacion => {
+                        // Formatear el título para que se vea mejor
+                        let titulo = publicacion.tittle || publicacion.title || 'Sin título';
+                        
+                        // Si el título parece ser un nombre de archivo (tiene extensión)
+                        if (titulo.endsWith('.jpg') || titulo.endsWith('.png') || titulo.endsWith('.jpeg') || 
+                            titulo.endsWith('.gif') || titulo.endsWith('.mp4')) {
+                            // Quitar la extensión
+                            titulo = titulo.substring(0, titulo.lastIndexOf('.'));
+                        }
+                        
+                        // Reemplazar guiones por espacios y capitalizar palabras
+                        titulo = titulo.replace(/[-_]/g, ' ')
+                                     .split(' ')
+                                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                     .join(' ');
+                        
+                        return {
+                            id: publicacion.id || '',
+                            titulo: titulo,
+                            descripcion: publicacion.description || publicacion.descripcion || 'Sin descripción',
+                            tipo: publicacion.post_type || publicacion.tipo || 'image',
+                            url: publicacion.signed_url || publicacion.url || '',
+                            fecha: publicacion.created_at ? new Date(publicacion.created_at).toLocaleDateString() : ''
+                        };
+                    });
                     
                     return publicacionesFormateadas;
                 }

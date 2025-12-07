@@ -224,21 +224,38 @@ const LandingPage = () => {
                             ) : publicaciones.length > 0 ? (
                                 // Mostrar la publicación activa
                                 <>
-                                    <div className={styles.publicacion_navegacion}>
+                                    <div className={styles.container_titulo_publi2}>
+                                        <h3 className={styles.titulo_publi2}>
+                                            {publicaciones[publicacionActiva]?.titulo || 'Sin título'}
+                                        </h3>
+                                    </div>
+
+                                    <div className={styles.container_imagen_publi2_wrapper}>
                                         {publicaciones.length > 1 && (
                                             <button 
                                                 className={`${styles.publicacion_button} ${styles.publicacion_prev}`}
                                                 onClick={() => setPublicacionActiva((prev) => prev === 0 ? publicaciones.length - 1 : prev - 1)}
                                                 aria-label="Publicación anterior"
                                             >
-                                                <ChevronLeft size={20} />
+                                                <ChevronLeft size={24} />
                                             </button>
                                         )}
                                         
-                                        <div className={styles.container_titulo_publi2}>
-                                            <h3 className={styles.titulo_publi2}>
-                                                {publicaciones[publicacionActiva]?.titulo || 'Sin título'}
-                                            </h3>
+                                        <div className={styles.container_imagen_publi2}>
+                                            {publicaciones[publicacionActiva]?.tipo === 'video' ? (
+                                                <video 
+                                                    className={styles.image1_publi} 
+                                                    src={publicaciones[publicacionActiva].url} 
+                                                    controls
+                                                    alt={publicaciones[publicacionActiva].titulo} 
+                                                />
+                                            ) : (
+                                                <img 
+                                                    className={styles.image1_publi} 
+                                                    src={publicaciones[publicacionActiva].url || '/Images/Imagen1Publi.jpg'} 
+                                                    alt={publicaciones[publicacionActiva].titulo} 
+                                                />
+                                            )}
                                         </div>
                                         
                                         {publicaciones.length > 1 && (
@@ -247,25 +264,8 @@ const LandingPage = () => {
                                                 onClick={() => setPublicacionActiva((prev) => (prev + 1) % publicaciones.length)}
                                                 aria-label="Siguiente publicación"
                                             >
-                                                <ChevronRight size={20} />
+                                                <ChevronRight size={24} />
                                             </button>
-                                        )}
-                                    </div>
-                                    
-                                    <div className={styles.container_imagen_publi2}>
-                                        {publicaciones[publicacionActiva]?.tipo === 'video' ? (
-                                            <video 
-                                                className={styles.image1_publi} 
-                                                src={publicaciones[publicacionActiva].url} 
-                                                controls
-                                                alt={publicaciones[publicacionActiva].titulo} 
-                                            />
-                                        ) : (
-                                            <img 
-                                                className={styles.image1_publi} 
-                                                src={publicaciones[publicacionActiva].url || '/Images/Imagen1Publi.jpg'} 
-                                                alt={publicaciones[publicacionActiva].titulo} 
-                                            />
                                         )}
                                     </div>
                                     

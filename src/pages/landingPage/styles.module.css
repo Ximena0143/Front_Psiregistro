@@ -222,8 +222,19 @@ h1{
   font-family: 'Playfair Display', serif;
 }
 
-.container_imagen_publi2{
+/* Contenedor wrapper para la imagen con botones de navegación */
+.container_imagen_publi2_wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   height: 70%;
+}
+
+/* El contenedor actual de la imagen */
+.container_imagen_publi2{
+  height: 100%;
   width: 100%;
 }
 
@@ -246,22 +257,14 @@ h1{
   text-align: left;
 }
 
-/* Carrusel de publicaciones */
-.publicacion_navegacion {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  position: relative;
-}
-
+/* Botones de navegación para las publicaciones */
 .publicacion_button {
   background-color: #FB8500;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -270,7 +273,8 @@ h1{
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 5;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .publicacion_button:hover {
@@ -278,12 +282,14 @@ h1{
   transform: translateY(-50%) scale(1.1);
 }
 
+/* Posicionar botón izquierdo */
 .publicacion_prev {
-  left: -15px;
+  left: -20px;
 }
 
+/* Posicionar botón derecho */
 .publicacion_next {
-  right: -15px;
+  right: -20px;
 }
 
 .publicacion_indicadores {
