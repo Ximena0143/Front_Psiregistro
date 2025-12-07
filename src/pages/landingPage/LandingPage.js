@@ -4,12 +4,16 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header/Header';
 import { ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import landingService from '../../services/landingService';
+import publicacionesLandingService from '../../services/publicacionesLandingService';
 
 const LandingPage = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [psicologos, setPsicologos] = useState([]);
+    const [publicaciones, setPublicaciones] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [visibleCount, setVisibleCount] = useState(3); // Número de psicólogos visibles a la vez
+    const [loadingPublicaciones, setLoadingPublicaciones] = useState(true);
+    const [publicacionActiva, setPublicacionActiva] = useState(0); // Índice de la publicación activa
 
     // Función para controlar la visibilidad del botón según el scroll
     useEffect(() => {
@@ -98,6 +102,30 @@ const LandingPage = () => {
         fetchPsychologists();
     }, []);
     
+    // Cargar las publicaciones para la landing page
+    useEffect(() => {
+        const fetchPublicaciones = async () => {
+            try {
+                setLoadingPublicaciones(true);
+                console.log('Obteniendo publicaciones para la landing page...');
+                const data = await publicacionesLandingService.getPublicaciones();
+                console.log('Publicaciones obtenidas:', data);
+                
+                if (data && data.length > 0) {
+                    setPublicaciones(data);
+                } else {
+                    console.log('No se encontraron publicaciones');
+                }
+            } catch (error) {
+                console.error('Error al cargar las publicaciones:', error);
+            } finally {
+                setLoadingPublicaciones(false);
+            }
+        };
+        
+        fetchPublicaciones();
+    }, []);
+    
     // Ajustar el número de psicólogos visibles según el tamaño de la pantalla
     useEffect(() => {
         const handleResize = () => {
@@ -144,7 +172,7 @@ const LandingPage = () => {
     return (
         <div className={styles.container}>
             <Header variant="landing" />
-            <body className={styles.body}>
+            <main className={styles.body}>
                 <section id="Inicio">
                     <div className={styles.container_inicio}>
                         <div className={styles.item1_inicio}>
@@ -189,18 +217,94 @@ const LandingPage = () => {
                             <p className={styles.parrafo_publicacion}>Conoce los eventos realizados mes a mes por nuestros expertos</p>
                         </div>
                         <div className={styles.item2_publicacion}>
-                            <div className={styles.container_titulo_publi2}>
-                                <h3 className={styles.titulo_publi2}>Fortalecimiento de la inteligencia emocional en el aula</h3>
-                            </div>
-                            <div className={styles.container_imagen_publi2}>
-                                <img className={styles.image1_publi} src="/Images/Imagen1Publi.jpg" alt="Imagen1 publicaciones" />
-                            </div>
-                            <div className={styles.container_descripcion_publi}>
-                                <p className={styles.descripcion_publi}>En colaboración con la <strong>Institución Educativa San Gabriel</strong>,
-                                    realizamos una charla dirigida a los maestros de secundaria para brindarles herramientas efectivas
-                                    que les permitan manejar sus emociones y ayudar a sus estudiantes a desarrollar una inteligencia
-                                    emocional saludable. </p>
-                            </div>
+                            {loadingPublicaciones ? (
+                                <div className={styles.loading_container}>
+                                    <p>Cargando publicaciones...</p>
+                                </div>
+                            ) : publicaciones.length > 0 ? (
+                                // Mostrar la publicación activa
+                                <>
+                                    <div className={styles.publicacion_navegacion}>
+                                        {publicaciones.length > 1 && (
+                                            <button 
+                                                className={`${styles.publicacion_button} ${styles.publicacion_prev}`}
+                                                onClick={() => setPublicacionActiva((prev) => prev === 0 ? publicaciones.length - 1 : prev - 1)}
+                                                aria-label="Publicación anterior"
+                                            >
+                                                <ChevronLeft size={20} />
+                                            </button>
+                                        )}
+                                        
+                                        <div className={styles.container_titulo_publi2}>
+                                            <h3 className={styles.titulo_publi2}>
+                                                {publicaciones[publicacionActiva]?.titulo || 'Sin título'}
+                                            </h3>
+                                        </div>
+                                        
+                                        {publicaciones.length > 1 && (
+                                            <button 
+                                                className={`${styles.publicacion_button} ${styles.publicacion_next}`}
+                                                onClick={() => setPublicacionActiva((prev) => (prev + 1) % publicaciones.length)}
+                                                aria-label="Siguiente publicación"
+                                            >
+                                                <ChevronRight size={20} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    <div className={styles.container_imagen_publi2}>
+                                        {publicaciones[publicacionActiva]?.tipo === 'video' ? (
+                                            <video 
+                                                className={styles.image1_publi} 
+                                                src={publicaciones[publicacionActiva].url} 
+                                                controls
+                                                alt={publicaciones[publicacionActiva].titulo} 
+                                            />
+                                        ) : (
+                                            <img 
+                                                className={styles.image1_publi} 
+                                                src={publicaciones[publicacionActiva].url || '/Images/Imagen1Publi.jpg'} 
+                                                alt={publicaciones[publicacionActiva].titulo} 
+                                            />
+                                        )}
+                                    </div>
+                                    
+                                    <div className={styles.container_descripcion_publi}>
+                                        <p className={styles.descripcion_publi}>
+                                            {publicaciones[publicacionActiva].descripcion || 'No hay descripción disponible'}
+                                        </p>
+                                        <p className={styles.fecha_publi}>{publicaciones[publicacionActiva].fecha}</p>
+                                    </div>
+                                    
+                                    {publicaciones.length > 1 && (
+                                        <div className={styles.publicacion_indicadores}>
+                                            {publicaciones.map((_, index) => (
+                                                <span 
+                                                    key={`indicator-${index}`}
+                                                    className={`${styles.publicacion_indicador} ${index === publicacionActiva ? styles.publicacion_indicador_active : ''}`}
+                                                    onClick={() => setPublicacionActiva(index)}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                // Fallback estático si no hay publicaciones
+                                <>
+                                    <div className={styles.container_titulo_publi2}>
+                                        <h3 className={styles.titulo_publi2}>Fortalecimiento de la inteligencia emocional en el aula</h3>
+                                    </div>
+                                    <div className={styles.container_imagen_publi2}>
+                                        <img className={styles.image1_publi} src="/Images/Imagen1Publi.jpg" alt="Imagen ejemplo publicaciones" />
+                                    </div>
+                                    <div className={styles.container_descripcion_publi}>
+                                        <p className={styles.descripcion_publi}>En colaboración con la <strong>Institución Educativa San Gabriel</strong>,
+                                            realizamos una charla dirigida a los maestros de secundaria para brindarles herramientas efectivas
+                                            que les permitan manejar sus emociones y ayudar a sus estudiantes a desarrollar una inteligencia
+                                            emocional saludable.</p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -356,39 +460,38 @@ const LandingPage = () => {
                             <img className={styles.image1_c} src="/Images/Imagen1C.jpg" alt="Imagen1 contacto" />
                         </div>
                     </div>
-
                 </section>
                 <section>
-                <div className={styles.container_footer}>
-                    <div className={styles.item1_footer}>
-                        <div className={styles.descripcion_footer}>
-                            <p  className={styles.somos}>Somos una clínica especialista en psicología.</p>
+                    <div className={styles.container_footer}>
+                        <div className={styles.item1_footer}>
+                            <div className={styles.descripcion_footer}>
+                                <p className={styles.somos}>Somos una clínica especialista en psicología.</p>
+                            </div>
+                            <div className={styles.descripcion2_footer}>
+                                <p className={styles.compania}>Compañia<br /></p>
+                                <ul className={styles.nav_links_footer}>
+                                    <li><a href="#Inicio"><button className={styles.boton_footer}>Inicio</button></a></li>
+                                    <li><a href="#Nosotros"><button className={styles.boton_footer}>Nosotros</button></a></li>
+                                    <li><a href="#Servicios"><button className={styles.boton_footer}>Servicios</button></a></li>
+                                    <li><a href="#Contacto"><button className={styles.boton_footer}>Contacto</button></a></li>
+                                </ul>
+                            </div>
                         </div>
-                        <div className={styles.descripcion2_footer}>
-                            <p className={styles.compania}>Compañia<br /></p>
-                            <ul className={styles.nav_links_footer}>
-                                <li><a href="#Inicio"><button className={styles.boton_footer}>Inicio</button></a></li>
-                                <li><a href="#Nosotros"><button className={styles.boton_footer}>Nosotros</button></a></li>
-                                <li><a href="#Servicios"><button className={styles.boton_footer}>Servicios</button></a></li>
-                                <li><a href="#Contacto"><button className={styles.boton_footer}>Contacto</button></a></li>
-                            </ul>
+                        <div className={styles.linea_amarilla}></div>
+                        <div className={styles.item2_footer}> 
+                            &copy; 2025 Righteous | Todos los derechos reservados
                         </div>
                     </div>
-                    <div className={styles.linea_amarilla}></div>
-                    <div className={styles.item2_footer}> 
-                        &copy; 2025 Righteous | Todos los derechos reservados
-                    </div>
-                </div>
-            </section>
-            {/* Botón para volver al inicio */}
-            <button 
-                className={`${styles.scrollTopButton} ${showScrollTop ? styles.showScrollButton : ''}`}
-                onClick={scrollToTop}
-                aria-label="Volver al inicio"
-            >
-                <ChevronUp size={24} />
-            </button>
-            </body>
+                </section>
+                {/* Botón para volver al inicio */}
+                <button 
+                    className={`${styles.scrollTopButton} ${showScrollTop ? styles.showScrollButton : ''}`}
+                    onClick={scrollToTop}
+                    aria-label="Volver al inicio"
+                >
+                    <ChevronUp size={24} />
+                </button>
+            </main>
         </div>
     );
 };

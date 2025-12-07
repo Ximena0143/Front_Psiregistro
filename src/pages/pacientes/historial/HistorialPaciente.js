@@ -357,7 +357,6 @@ const HistorialPaciente = () => {
         if (documento && documento.signed_url) {
             // Crear un elemento a invisible para forzar la descarga
             const link = document.createElement('a');
-            link.href = downloadUrl;
             link.target = '_blank';
             link.download = documento.tituloOriginal || documento.titulo || 'documento';
             document.body.appendChild(link);

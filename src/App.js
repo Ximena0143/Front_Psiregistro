@@ -5,7 +5,7 @@ import Login from "./pages/login/Login";
 import ForgotPassword from "./pages/login/ForgotPassword";
 import ResetPassword from "./pages/login/ResetPassword";
 import SignUp from "./pages/signup/SignUp";
-import Documentos from "./pages/documentos/documentos";
+import Documentos from "./pages/documentos/Documentos";
 import Psicologos from "./pages/psicologos/Psicologos";
 import Publicaciones from "./pages/publicaciones/Publicaciones";
 import TestPsi from "./pages/test_psi/TestPsi";
@@ -19,6 +19,7 @@ import AgregarPsicologo from './pages/psicologos/agregar/AgregarPsicologo';
 import PsicologosEliminados from './pages/psicologos/eliminados/PsicologosEliminados';
 import Especializaciones from './pages/especializaciones/Especializaciones';
 import TestConnectionPage from './pages/test-connection/TestConnectionPage';
+import TestPostsApi from './pages/TestPostsApi';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 
@@ -36,6 +37,7 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/test-connection" element={<TestConnectionPage />} />
+          <Route path="/test-posts-api" element={<TestPostsApi />} />
           
           {/* Rutas protegidas (requieren autenticación) */}
           <Route path="/dashboard" element={

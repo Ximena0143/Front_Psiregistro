@@ -245,6 +245,83 @@ h1{
   color: #243A76;
   text-align: left;
 }
+
+/* Carrusel de publicaciones */
+.publicacion_navegacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.publicacion_button {
+  background-color: #FB8500;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.publicacion_button:hover {
+  background-color: #e67a00;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.publicacion_prev {
+  left: -15px;
+}
+
+.publicacion_next {
+  right: -15px;
+}
+
+.publicacion_indicadores {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.publicacion_indicador {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #cccccc;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.publicacion_indicador_active {
+  background-color: #FB8500;
+  transform: scale(1.2);
+}
+
+.loading_container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  width: 100%;
+}
+
+.fecha_publi {
+  font-family: 'DM Sans', serif;
+  font-size: 14px;
+  color: #666;
+  margin-top: 10px;
+  text-align: right;
+}
 /*-----------Fin Publicaciones-----------*/
 
 /*-----------Servicios-----------*/

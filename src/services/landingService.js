@@ -11,7 +11,7 @@ const landingService = {
     getPsychologists: async () => {
         try {
             // Solicitar hasta 100 usuarios por página para asegurar mostrar todos
-            const response = await api.get('/landing/index?per_page=100');
+            const response = await api.get('/landing/user/index?per_page=100');
             console.log('Respuesta de psicólogos para landing page:', response);
             
             if (response && response.data && response.data.data) {
@@ -41,7 +41,7 @@ const landingService = {
                             console.log(`[Usuario ${userId}] Obteniendo URL firmada. Ruta foto: ${user.profile_photo_path}`);
                             
                             // Usar la nueva ruta para obtener la URL firmada
-                            const photoResponse = await api.get(`/landing/get-profile-photo?user_id=${userId}`);
+                            const photoResponse = await api.get(`/landing/user/get-profile-photo?user_id=${userId}`);
                             console.log('Respuesta completa para foto del usuario:', userId, photoResponse);
                             
                             if (photoResponse && photoResponse.data && photoResponse.data.URL) {

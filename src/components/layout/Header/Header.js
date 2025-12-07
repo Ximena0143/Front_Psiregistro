@@ -22,7 +22,7 @@ const Header = ({ variant = 'landing' }) => {
     const getProfilePhotoUrl = async () => {
         try {
             console.log('Header: Obteniendo URL firmada de la foto de perfil');
-            const response = await api.get('/user/get-profile-photo');
+            const response = await api.get('/landing/user/get-profile-photo');
             
             if (response && response.data && response.data.URL) {
                 console.log('Header: URL firmada obtenida:', response.data.URL);
