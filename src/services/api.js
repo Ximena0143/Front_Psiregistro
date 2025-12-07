@@ -3,7 +3,7 @@
  */
 
 // URL base para todas las peticiones API
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://psiregistroback-hdhbacacaabud9gz.chilecentral-01.azurewebsites.net/api';
 // Interceptores para modificar las peticiones y respuestas
 const interceptors = {
   request: null,
