@@ -11,6 +11,7 @@ import Publicaciones from "./pages/publicaciones/Publicaciones";
 import TestPsi from "./pages/test_psi/TestPsi";
 import Dashboard from './pages/dashboard/Dashboard';
 import Perfil from './pages/perfil/Perfil';
+import Manuales from './pages/manuales/Manuales';
 import AgregarPaciente from './pages/pacientes/agregar/AgregarPaciente';
 import EditarPaciente from './pages/pacientes/editar/EditarPaciente';
 import HistorialPaciente from './pages/pacientes/historial/HistorialPaciente';
@@ -103,6 +104,11 @@ function App() {
           <Route path="/pacientes/eliminados" element={
             <ProtectedRoute>
               <PacientesEliminados />
+            </ProtectedRoute>
+          } />
+          <Route path="/manuales" element={
+            <ProtectedRoute>
+              <Manuales />
             </ProtectedRoute>
           } />
         </Routes>

@@ -1,4 +1,4 @@
-import { FaUserFriends, FaImage, FaFileAlt, FaUserMd, FaTrashRestore, FaGraduationCap } from "react-icons/fa";
+import { FaUserFriends, FaImage, FaFileAlt, FaUserMd, FaTrashRestore, FaGraduationCap, FaQuestionCircle } from "react-icons/fa";
 
 export const sidebarItems = [
     {
@@ -39,5 +39,10 @@ export const sidebarItems = [
                 icon: FaGraduationCap
             }
         ]
+    },
+    {
+        title: 'Ayuda',
+        path: '/manuales',
+        icon: FaQuestionCircle
     }
 ];
