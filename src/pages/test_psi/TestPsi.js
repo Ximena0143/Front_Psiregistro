@@ -44,7 +44,7 @@ const TestPsi = () => {
                             const formattedTests = blanksData.map(blank => {
                                 return {
                                     id: blank.id,
-                                    nombre: blank.tittle || 'Test sin nombre',
+                                    nombre: cleanPlantillaName(blank.tittle) || 'Sin nombre',
                                     archivo: blank.path || '',
                                     formato: getFormatFromUrl(blank.path) || 'PDF'
                                 };
@@ -92,12 +92,22 @@ const TestPsi = () => {
     
     // La función formatDate ha sido eliminada ya que no se necesita
     
-    // Función para obtener el formato del archivo a partir de la URL
+    // Función para obtener el formato desde una URL
     const getFormatFromUrl = (url) => {
-        if (!url) return 'PDF';
-        
-        const extension = url.split('.').pop().toUpperCase();
+        if (!url) return '';
+        const extension = url.split('.').pop().split('?')[0].toUpperCase();
         return extension || 'PDF';
+    };
+    
+    // Función para limpiar el nombre de la plantilla (quitar timestamps)
+    const cleanPlantillaName = (nombre) => {
+        if (!nombre) return 'Sin nombre';
+        // Si el nombre tiene el formato "nombre_timestamp", extraer solo el nombre
+        const match = nombre.match(/^(.+?)_\d+$/);
+        if (match && match[1]) {
+            return match[1]; // Devolver solo el nombre sin el timestamp
+        }
+        return nombre; // Si no tiene timestamp, devolver el nombre original
     };
 
     // Funciones para manejar el modal de subir test
@@ -174,7 +184,7 @@ const TestPsi = () => {
         fileInputRef.current.click();
     };
 
-    // Guardar nuevo test
+    // Guardar nueva plantilla
     const handleSaveTest = async () => {
         if (!newTest.nombre || !newTest.archivo) {
             Swal.fire({
@@ -223,7 +233,7 @@ const TestPsi = () => {
                 // Obtener la información del test recién creado
                 const nuevoTest = {
                     id: responseData.id || Math.floor(Math.random() * 10000), // ID temporal si no hay ID
-                    nombre: responseData.tittle || newTest.nombre,
+                    nombre: cleanPlantillaName(responseData.tittle) || newTest.nombre,
                     formato: getFormatFromUrl(responseData.path) || selectedFileName.split('.').pop().toUpperCase(),
                     archivo: responseData.path || ''
                 };
@@ -235,7 +245,7 @@ const TestPsi = () => {
                 // Mostrar alerta de éxito
                 Swal.fire({
                     title: '¡Éxito!',
-                    text: 'El test se ha guardado correctamente',
+                    text: 'La plantilla se ha guardado correctamente',
                     icon: 'success',
                     confirmButtonColor: '#FB8500',
                     timer: 2000,
@@ -249,8 +259,8 @@ const TestPsi = () => {
                 throw new Error('La respuesta del servidor no tiene el formato esperado');
             }
         } catch (error) {
-            console.error('Error al guardar el test:', error);
-            let errorMessage = 'No se pudo guardar el test. Por favor, intenta de nuevo más tarde.';
+            console.error('Error al guardar la plantilla:', error);
+            let errorMessage = 'No se pudo guardar la plantilla. Por favor, intenta de nuevo más tarde.';
             
             // Intentar obtener un mensaje de error más específico si está disponible
             if (error.response && error.response.data && error.response.data.message) {
@@ -286,7 +296,7 @@ const TestPsi = () => {
             // Mostrar alerta de éxito
             Swal.fire({
                 title: '¡Éxito!',
-                text: `El test "${currentTest.nombre}" ha sido enviado a ${assignData.pacienteEmail} correctamente`,
+                text: `La plantilla "${cleanPlantillaName(currentTest.nombre)}" ha sido enviada a ${assignData.pacienteEmail} correctamente`,
                 icon: 'success',
                 confirmButtonColor: '#FB8500',
                 timer: 2000,
@@ -298,7 +308,7 @@ const TestPsi = () => {
         } catch (error) {
             console.error('Error al enviar el test:', error);
             
-            let errorMessage = 'No se pudo enviar el test. Por favor, intenta de nuevo más tarde.';
+            let errorMessage = 'No se pudo enviar la plantilla. Por favor, intenta de nuevo más tarde.';
             
             // Intentar obtener un mensaje de error más específico si está disponible
             if (error.response && error.response.data && error.response.data.message) {
@@ -377,7 +387,7 @@ const TestPsi = () => {
                         ) : tests.length > 0 ? (
                             tests.map((test) => (
                                 <div key={test.id} className={styles.testCard}>
-                                    <h3>{test.nombre}</h3>
+                                    <h3>{cleanPlantillaName(test.nombre)}</h3>
                                     <div className={styles.testMeta}>
                                         <div className={styles.metaItem} style={{ margin: '0 auto' }}>
                                             <span className={styles.metaLabel}>Formato:</span> 
@@ -408,12 +418,12 @@ const TestPsi = () => {
                 </div>
             </div>
 
-            {/* Modal para subir test */}
+            {/* Modal para subir plantilla */}
             {showUploadModal && (
                 <div className={styles.modal}>
                     <div className={styles.modalContainer}>
                         <div className={styles.modalHeader}>
-                            <h4>Subir nuevo test</h4>
+                            <h4>Subir nueva plantilla</h4>
                             <button className={styles.closeButton} onClick={handleCloseUploadModal}>
                                 <X size={20} />
                             </button>
@@ -468,26 +478,26 @@ const TestPsi = () => {
                                 onClick={handleSaveTest}
                                 disabled={!newTest.nombre || !selectedFileName || isLoading}
                             >
-                                {isLoading ? 'Guardando...' : 'Guardar test'}
+                                {isLoading ? 'Guardando...' : 'Guardar plantilla'}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Modal para ver detalles del test */}
+            {/* Modal para ver detalles de la plantilla */}
             {showDetailsModal && currentTest && (
                 <div className={styles.modal}>
                     <div className={styles.modalContainer}>
                         <div className={styles.modalHeader}>
-                            <h4>Detalles del test</h4>
+                            <h4>Detalles de la plantilla</h4>
                             <button className={styles.closeButton} onClick={handleCloseDetailsModal}>
                                 <X size={20} />
                             </button>
                         </div>
                         <div className={styles.modalContent}>
                             <div className={styles.testDetails}>
-                                <h3 className={styles.testDetailTitle}>{currentTest.nombre}</h3>
+                                <h3 className={styles.testDetailTitle}>{cleanPlantillaName(currentTest.nombre)}</h3>
 
                                 <div className={styles.testDetailInfo}>
                                     <div className={styles.metaItem} style={{ margin: '0 auto', minWidth: '200px' }}>
@@ -514,14 +524,14 @@ const TestPsi = () => {
                 <div className={styles.modal}>
                     <div className={styles.modalContainer}>
                         <div className={styles.modalHeader}>
-                            <h4>Asignar test a paciente</h4>
+                            <h4>Asignar plantilla a paciente</h4>
                             <button className={styles.closeButton} onClick={handleCloseAssignModal}>
                                 <X size={20} />
                             </button>
                         </div>
                         <div className={styles.modalContent}>
                             <div className={styles.assignHeader}>
-                                <h3>Test: {currentTest.nombre}</h3>
+                                <h3>Plantilla: {cleanPlantillaName(currentTest.nombre)}</h3>
                             </div>
                             <div className={styles.formField}>
                                 <label htmlFor="pacienteEmail">Correo electrónico del paciente *</label>
@@ -566,7 +576,7 @@ const TestPsi = () => {
                                 {isLoading ? 'Procesando...' : (
                                     <>
                                         <Send size={16} />
-                                        Asignar test
+                                        Asignar plantilla
                                     </>
                                 )}
                             </button>

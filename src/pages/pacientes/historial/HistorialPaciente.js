@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Eye, Download, Upload, FileText, Trash2, ArrowLeft, Plus, Edit2 } from 'react-feather';
+import { Eye, Download, Upload, FileText, Trash2, ArrowLeft, Plus } from 'react-feather';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import Header from '../../../components/layout/Header/Header';
 import Swal from 'sweetalert2';
@@ -134,22 +134,10 @@ const HistorialPaciente = () => {
     ];
     const [selectedFileName, setSelectedFileName] = useState('');
     const fileInputRef = useRef(null);
-    const editFileInputRef = useRef(null);
     const [error, setError] = useState(null);
     const [tiposIdentificacion, setTiposIdentificacion] = useState([]);
     const [loadingDocuments, setLoadingDocuments] = useState(false);
     
-    // Estados para la funcionalidad de edición
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editingDocument, setEditingDocument] = useState(null);
-    const [editDocumentData, setEditDocumentData] = useState({
-        titulo: '',
-        document_type: '',
-        status_id: '',
-        archivo: null
-    });
-    const [editSelectedFileName, setEditSelectedFileName] = useState('');
-
     // Cargar los tipos de identificación
     useEffect(() => {
         const fetchIdentificationTypes = async () => {
@@ -458,118 +446,7 @@ const HistorialPaciente = () => {
         setSelectedFileName('');
     };
     
-    // Handler para abrir el modal de edición de documento
-    const handleEditDocument = (documento) => {
-        setEditingDocument(documento);
-        setEditDocumentData({
-            titulo: documento.titulo,
-            document_type: documento.tipo,
-            status_id: documento.status_id || 1,
-            archivo: null
-        });
-        setEditSelectedFileName('');
-        setShowEditModal(true);
-    };
-    
-    // Handler para cerrar el modal de edición
-    const handleCloseEditModal = () => {
-        setShowEditModal(false);
-        setEditingDocument(null);
-        setEditDocumentData({
-            titulo: '',
-            document_type: '',
-            status_id: '',
-            archivo: null
-        });
-        setEditSelectedFileName('');
-    };
-    
-    // Handler para cambios en los campos del formulario de edición
-    const handleEditDocumentInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditDocumentData(prevData => ({
-            ...prevData,
-            [name]: value
-        }));
-    };
-    
-    // Handler para seleccionar un archivo en el formulario de edición
-    const handleEditFileSelect = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setEditDocumentData(prevData => ({
-                ...prevData,
-                archivo: file
-            }));
-            setEditSelectedFileName(file.name);
-        }
-    };
-    
-    // Handler para hacer clic en el área de upload en edición
-    const handleEditUploadAreaClick = () => {
-        editFileInputRef.current.click();
-    };
-    
-    // Handler para guardar los cambios de un documento editado
-    const handleUpdateDocument = async () => {
-        if (!editingDocument || !editDocumentData.titulo) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Por favor completa todos los campos obligatorios',
-                icon: 'error',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
-        
-        try {
-            Swal.fire({
-                title: 'Actualizando...',
-                text: 'Guardando cambios en el documento',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            // Llamada a la API para actualizar el documento
-            await patientService.updatePatientDocument(
-                editingDocument.id,
-                id, // paciente ID desde useParams
-                editDocumentData.titulo,
-                editDocumentData.document_type,
-                editDocumentData.status_id,
-                editDocumentData.archivo // podría ser null si no hay archivo nuevo
-            );
-            
-            // Actualizar la lista de documentos
-            await fetchPatientDocuments(id);
-            
-            // Cerrar el modal y limpiar el formulario
-            handleCloseEditModal();
-            
-            Swal.fire({
-                title: '¡Éxito!',
-                text: 'Documento actualizado correctamente',
-                icon: 'success',
-                confirmButtonText: 'Continuar'
-            });
-            
-        } catch (error) {
-            console.error('Error al actualizar el documento:', error);
-            let errorMessage = 'Error al actualizar el documento';
-            if (error.response && error.response.data) {
-                errorMessage = error.response.data.message || errorMessage;
-            }
-            
-            Swal.fire({
-                title: 'Error',
-                text: errorMessage,
-                icon: 'error',
-                confirmButtonText: 'Entendido'
-            });
-        }
-    };
+    // Se han eliminado todas las funciones relacionadas con la edición de documentos
 
     const handleDocumentInputChange = (e) => {
         const { name, value } = e.target;
@@ -858,15 +735,7 @@ const HistorialPaciente = () => {
                                                                     <span>{isPdfDocument(documento) ? "Ver" : "Descargar"}</span>
                                                                 </button>
                                                                 
-                                                                <button 
-                                                                    className={styles.actionButton}
-                                                                    title="Editar documento"
-                                                                    onClick={() => handleEditDocument(documento)}
-                                                                >
-                                                                    <Edit2 size={18} color="#0891B2" />
-                                                                    <span>Editar</span>
-                                                                </button>
-                                                                
+                                                                                                                                
                                                                 <button 
                                                                     className={styles.actionButton}
                                                                     title="Eliminar documento"
@@ -1143,108 +1012,7 @@ const HistorialPaciente = () => {
                 </div>
             )}
 
-            {/* Modal para editar documento */}
-            {showEditModal && editingDocument && (
-                <div className={styles.uploadModal}>
-                    <div className={styles.uploadContainer}>
-                        <div className={styles.uploadHeader}>
-                            <h4>Editar documento</h4>
-                            <button onClick={handleCloseEditModal} className={styles.closeButton}>×</button>
-                        </div>
-                        <div className={styles.uploadContent}>
-                            <div className={styles.formField}>
-                                <label htmlFor="titulo">Nombre del documento *</label>
-                                <input
-                                    type="text"
-                                    id="titulo"
-                                    name="titulo"
-                                    value={editDocumentData.titulo}
-                                    onChange={handleEditDocumentInputChange}
-                                    placeholder="Nombre del documento"
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label htmlFor="document_type">Tipo de documento *</label>
-                                <select
-                                    id="document_type"
-                                    name="document_type"
-                                    value={editDocumentData.document_type}
-                                    onChange={handleEditDocumentInputChange}
-                                    required
-                                    className={styles.selectField}
-                                >
-                                    {documentTypes.map(type => (
-                                        <option key={type.value} value={type.value}>
-                                            {type.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label htmlFor="status_id">Estado del documento *</label>
-                                <select
-                                    id="status_id"
-                                    name="status_id"
-                                    value={editDocumentData.status_id}
-                                    onChange={handleEditDocumentInputChange}
-                                    required
-                                    className={styles.selectField}
-                                >
-                                    {documentStatuses.map(status => (
-                                        <option key={status.value} value={status.value}>
-                                            {status.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className={styles.formField}>
-                                <label>Reemplazar documento (opcional)</label>
-                                <div 
-                                    className={styles.fileUploadArea}
-                                    onClick={handleEditUploadAreaClick}
-                                >
-                                    <div className={styles.fileUploadIcon}>
-                                        <Upload size={30} color="#0891B2" />
-                                    </div>
-                                    <p className={styles.fileUploadText}>
-                                        Haz clic aquí para seleccionar un nuevo archivo o arrástralo y suéltalo
-                                    </p>
-                                    <input
-                                        type="file"
-                                        ref={editFileInputRef}
-                                        className={styles.fileInput}
-                                        onChange={handleEditFileSelect}
-                                        accept=".pdf,.doc,.docx"
-                                    />
-                                </div>
-                                {editSelectedFileName && (
-                                    <p className={styles.selectedFileName}>{editSelectedFileName}</p>
-                                )}
-                            </div>
-                        </div>
-                        <div className={styles.uploadActions}>
-                            <button 
-                                className={styles.cancelButton}
-                                onClick={handleCloseEditModal}
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                className={styles.uploadButton}
-                                onClick={handleUpdateDocument}
-                                disabled={!editDocumentData.titulo}
-                            >
-                                <Edit2 size={16} color="#FFFFFF" />
-                                Guardar cambios
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Se ha eliminado el modal de edición de documentos */}
             
             {/* Modal para subir documento */}
             {showUploadModal && (
