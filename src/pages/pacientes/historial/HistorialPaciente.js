@@ -355,10 +355,24 @@ const HistorialPaciente = () => {
     const handleDownloadDocument = (documento) => {
         // Verificar que documento y signed_url existan
         if (documento && documento.signed_url) {
-            // Crear un elemento a invisible para forzar la descarga
+            // Comprobar si es PDF para abrir en nueva pestaña o descargar
+            const esPDF = isPdfDocument(documento);
+            
+            // Crear un elemento <a> para la acción correspondiente
             const link = document.createElement('a');
-            link.target = '_blank';
-            link.download = documento.tituloOriginal || documento.titulo || 'documento';
+            link.href = documento.signed_url;
+            
+            if (esPDF) {
+                // Para PDF: abrir en nueva pestaña
+                link.target = '_blank';
+                // No establecer el atributo download para PDFs
+                console.log('Abriendo PDF en nueva pestaña:', documento.signed_url);
+            } else {
+                // Para otros archivos: forzar descarga
+                link.download = documento.tituloOriginal || documento.titulo || 'documento';
+                console.log('Descargando documento:', documento.tituloOriginal || documento.titulo);
+            }
+            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

@@ -154,7 +154,22 @@ export const forceDeletePatient = async (id) => {
 export const getIdentificationTypes = async () => {
   try {
     const response = await api.get('/identification-type/index');
-    return response.data;
+    console.log('Respuesta de tipos de identificación:', response);
+    
+    // Manejar diferentes estructuras de respuesta posibles
+    if (response && response.data && Array.isArray(response.data)) {
+      // Si la respuesta ya es un array
+      return response.data;
+    } else if (response && response.data && response.data.data && Array.isArray(response.data.data)) {
+      // Si la respuesta tiene el formato { message, error, data: [...] }
+      return response.data.data;
+    } else if (response && Array.isArray(response)) {
+      // Si la respuesta es directamente un array
+      return response;
+    } else {
+      console.warn('Estructura de respuesta no reconocida para tipos de identificación:', response);
+      return [];
+    }
   } catch (error) {
     console.error('Error al obtener tipos de identificación:', error);
     throw new Error(error.message);
