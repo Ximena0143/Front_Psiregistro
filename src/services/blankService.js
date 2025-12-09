@@ -141,10 +141,9 @@ export const deleteBlank = async (id) => {
  * Envía una plantilla a los correos electrónicos especificados
  * @param {number} blankId - ID de la plantilla
  * @param {Array<string>} emails - Lista de correos electrónicos
- * @param {string} message - Mensaje para incluir en el correo (opcional)
  * @returns {Promise} - Respuesta del envío
  */
-export const sendBlank = async (blankId, emails, message = '') => {
+export const sendBlank = async (blankId, emails) => {
   try {
     console.log('Sending blank to emails:', emails);
     
@@ -152,11 +151,6 @@ export const sendBlank = async (blankId, emails, message = '') => {
       blank_id: blankId,
       emails: emails
     };
-    
-    // Si hay un mensaje, lo incluimos en la solicitud
-    if (message && message.trim() !== '') {
-      requestData.message = message;
-    }
     
     const response = await api.post('/blank/send-blank', requestData, {
       headers: {

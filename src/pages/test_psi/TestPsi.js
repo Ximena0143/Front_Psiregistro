@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
 import Sidebar from '../../components/layout/Sidebar/Sidebar';
-import { X, Upload, Eye, UserRound, Send } from 'lucide-react';
+import { X, Upload, Eye, UserRound, Send, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import blankService from '../../services/blankService';
 import authService from '../../services/auth';
@@ -21,8 +21,7 @@ const TestPsi = () => {
     });
     
     const [assignData, setAssignData] = useState({
-        pacienteEmail: '',
-        mensaje: ''
+        pacienteEmail: ''
     });
     
     const [selectedFileName, setSelectedFileName] = useState('');
@@ -145,8 +144,7 @@ const TestPsi = () => {
         setShowAssignModal(false);
         setCurrentTest(null);
         setAssignData({
-            pacienteEmail: '',
-            mensaje: ''
+            pacienteEmail: ''
         });
     };
 
@@ -280,6 +278,59 @@ const TestPsi = () => {
         }
     };
 
+    // Eliminar test
+    const handleDeleteTest = (test) => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: `¿Quieres eliminar la plantilla "${cleanPlantillaName(test.nombre)}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FB8500',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                setIsLoading(true);
+                try {
+                    await blankService.deleteBlank(test.id);
+                    
+                    // Actualizar la lista de tests
+                    setTests(tests.filter(t => t.id !== test.id));
+                    
+                    Swal.fire({
+                        title: '¡Eliminado!',
+                        text: 'La plantilla ha sido eliminada correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#FB8500',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    console.error('Error al eliminar la plantilla:', error);
+                    
+                    let errorMessage = 'No se pudo eliminar la plantilla. Por favor, intenta de nuevo más tarde.';
+                    
+                    // Intentar obtener un mensaje de error más específico si está disponible
+                    if (error.response && error.response.data && error.response.data.message) {
+                        errorMessage = error.response.data.message;
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage,
+                        confirmButtonColor: '#FB8500'
+                    });
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        });
+    };
+    
     // Asignar test a paciente
     const handleAssignTest = async () => {
         setIsLoading(true);
@@ -287,10 +338,9 @@ const TestPsi = () => {
         try {
             // Preparar los datos para enviar el test
             const emails = [assignData.pacienteEmail];
-            const message = assignData.mensaje || '';
             
             // Llamar al servicio para enviar el test
-            const response = await blankService.sendBlank(currentTest.id, emails, message);
+            const response = await blankService.sendBlank(currentTest.id, emails);
             console.log('Send blank response:', response);
             
             // Mostrar alerta de éxito
@@ -395,13 +445,13 @@ const TestPsi = () => {
                                         </div>
                                     </div>
                                     <div className={styles.cardActions}>
-                                        <button className={styles.viewButton} onClick={() => handleOpenDetailsModal(test)}>
-                                            <Eye size={16} />
-                                            Ver detalles
-                                        </button>
                                         <button className={styles.assignButton} onClick={() => handleOpenAssignModal(test)}>
                                             <Send size={16} />
                                             Asignar
+                                        </button>
+                                        <button className={styles.deleteButton} onClick={() => handleDeleteTest(test)}>
+                                            <Trash2 size={16} />
+                                            Eliminar
                                         </button>
                                     </div>
                                 </div>
@@ -548,17 +598,6 @@ const TestPsi = () => {
                                         required
                                     />
                                 </div>
-                            </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="mensaje">Mensaje para el paciente (opcional)</label>
-                                <textarea
-                                    id="mensaje"
-                                    name="mensaje"
-                                    value={assignData.mensaje}
-                                    onChange={handleAssignInputChange}
-                                    rows={4}
-                                    placeholder="Introduzca un mensaje personalizado que recibirá el paciente junto con el test..."
-                                />
                             </div>
                         </div>
                         <div className={styles.modalActions}>

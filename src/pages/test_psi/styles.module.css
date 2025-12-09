@@ -140,7 +140,7 @@
     justify-content: space-between;
 }
 
-.viewButton, .assignButton, .downloadButton, .assignModalButton {
+.viewButton, .assignButton, .downloadButton, .assignModalButton, .deleteButton {
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
@@ -191,6 +191,16 @@
 
 .assignModalButton:hover {
     background: #e67700;
+}
+
+.deleteButton {
+    background: #dc3545;
+    border: none;
+    color: white;
+}
+
+.deleteButton:hover {
+    background: #bd2130;
 }
 
 /* Estilos para modales */
@@ -542,7 +552,8 @@
 .downloadButton:disabled,
 .saveButton:disabled,
 .assignModalButton:disabled,
-.addButton:disabled {
+.addButton:disabled,
+.deleteButton:disabled {
     background-color: #ccc;
     border-color: #ccc;
     color: #666;

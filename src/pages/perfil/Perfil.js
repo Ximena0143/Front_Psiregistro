@@ -234,13 +234,29 @@ const Perfil = () => {
                 
                 setIsEditing(false);
             } catch (updateError) {
-                // Mensaje de error más descriptivo
-                Swal.fire({
-                    title: 'Error',
-                    text: `No se pudieron guardar los cambios: ${updateError.message || 'Error desconocido'}`,
-                    icon: 'error',
-                    confirmButtonColor: '#FB8500'
-                });
+                // Comprobar si es un error de permisos de administrador
+                if (updateError.message && updateError.message.includes('Admin role required')) {
+                    // Mostrar un mensaje más amigable ya que sabemos que la foto se ha subido correctamente
+                    Swal.fire({
+                        title: 'Información',
+                        text: 'Tu foto de perfil se ha actualizado correctamente. Los demás cambios requieren permisos adicionales.',
+                        icon: 'info',
+                        confirmButtonColor: '#FB8500'
+                    });
+                    // Forzar una recarga para mostrar los cambios (la foto sí se actualizó)
+                    setTimeout(() => {
+                        fetchUserData();
+                    }, 1000);
+                    setIsEditing(false);
+                } else {
+                    // Otro tipo de error
+                    Swal.fire({
+                        title: 'Error',
+                        text: `No se pudieron guardar los cambios: ${updateError.message || 'Error desconocido'}`,
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    });
+                }
             }
         } catch (error) {
             Swal.fire({

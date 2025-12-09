@@ -123,8 +123,18 @@ export const updateUser = async (id, userData) => {
     const response = await api.put(`/user/update/${id}`, userData);
     return response;
   } catch (error) {
+    // Log detallado del error
     console.error('Error al actualizar usuario:', error);
-    throw new Error(error.message);
+    
+    // Mejorar el mensaje de error para que sea más descriptivo
+    let errorMessage = error.message || 'Error desconocido';
+    
+    // Si hay un mensaje en la respuesta del servidor, usarlo
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage = error.response.data.message;
+    }
+    
+    throw new Error(errorMessage);
   }
 };
 
