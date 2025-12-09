@@ -4,6 +4,8 @@ import { HiUserCircle } from "react-icons/hi2";
 import { FaRegUser } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
 import { FiMenu, FiX } from "react-icons/fi"; 
+import { FiClock, FiCalendar } from "react-icons/fi";
+import api from '../../../services/api';
 import Swal from 'sweetalert2';
 import styles from './styles.module.css';
 import authService from '../../../services/auth'; 
@@ -12,13 +14,45 @@ const Header = ({ variant = 'landing' }) => {
     const [showMenu, setShowMenu] = useState(false);
     const [userName, setUserName] = useState('Usuario');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
+    const [currentDateTime, setCurrentDateTime] = useState(new Date());
+    const [profilePhotoUrl, setProfilePhotoUrl] = useState(null);
     const navigate = useNavigate();
+    
+    // Función para obtener la URL firmada de la foto de perfil
+    const getProfilePhotoUrl = async () => {
+        try {
+            const response = await api.get('/landing/user/get-profile-photo');
+            
+            if (response && response.data && response.data.URL) {
+                setProfilePhotoUrl(response.data.URL);
+                return response.data.URL;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            return null;
+        }
+    };
+    
+    // Actualizar fecha y hora cada segundo
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentDateTime(new Date());
+        }, 1000);
+        
+        return () => {
+            clearInterval(timer);
+        };
+    }, []);
     
     // Cargar información del usuario al montar el componente
     useEffect(() => {
         // Función para obtener datos del usuario
         const fetchUserData = async () => {
             try {
+                // Obtener la URL firmada de la foto de perfil
+                await getProfilePhotoUrl();
+                
                 // Intentar obtener datos actualizados del backend
                 const userData = await authService.me();
                 
@@ -168,6 +202,18 @@ const Header = ({ variant = 'landing' }) => {
         };
     }, [mobileMenuOpen]);
     
+    // Función para formatear la fecha (ej: Viernes, 15 de Noviembre de 2025)
+    const formatDate = (date) => {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('es-ES', options).replace(/^\w/, (c) => c.toUpperCase());
+    };
+    
+    // Función para formatear la hora (ej: 06:23 PM)
+    const formatTime = (date) => {
+        const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+        return date.toLocaleTimeString('es-ES', options);
+    };
+    
     const handleLogout = async () => {
         Swal.fire({
             title: '¿Cerrar sesión?',
@@ -226,11 +272,33 @@ const Header = ({ variant = 'landing' }) => {
                         <img src="/Images/Logo2.png" alt="Logo" />
                         <p>Righteous</p>
                     </div>
+                    
+                    <div className={styles.dateTimeContainer}>
+                        <div className={styles.dateContainer}>
+                            <FiCalendar size={16} className={styles.dateTimeIcon} />
+                            <span className={styles.dateText}>{formatDate(currentDateTime)}</span>
+                        </div>
+                        <div className={styles.timeContainer}>
+                            <FiClock size={16} className={styles.dateTimeIcon} />
+                            <span className={styles.timeText}>{formatTime(currentDateTime)}</span>
+                        </div>
+                    </div>
+                    
                     <nav className={styles.nav_header}>
                         <p className={styles.welcome_text}>Bienvenid@</p>
                         <div className={styles.user} onClick={toggleMenu}>
                             <p className={styles.name_user}>{userName}</p>
-                            <HiUserCircle className={styles.icon_user} size={35}/>
+                            {profilePhotoUrl ? (
+                                <div className={styles.profile_photo_container}>
+                                    <img 
+                                        src={profilePhotoUrl} 
+                                        alt="Foto de perfil" 
+                                        className={styles.profile_photo} 
+                                    />
+                                </div>
+                            ) : (
+                                <HiUserCircle className={styles.icon_user} size={35} />
+                            )}
                             {showMenu && (
                                 <div className={styles.dropdown}>
                                     <Link to="/perfil">

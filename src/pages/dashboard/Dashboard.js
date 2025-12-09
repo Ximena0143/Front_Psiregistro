@@ -80,10 +80,8 @@ const Dashboard = () => {
                 setPatients(formattedData);
             } else {
                 setPatients([]);
-                console.warn('No se recibieron datos de pacientes del servidor');
             }
         } catch (err) {
-            console.error('Error al cargar pacientes:', err);
             setError('No se pudieron cargar los pacientes. Por favor, intente de nuevo más tarde.');
         } finally {
             setLoading(false);
@@ -103,7 +101,6 @@ const Dashboard = () => {
         if (id && idStr !== '' && !idStr.startsWith('no-id-')) {
             navigate(`/pacientes/editar/${id}`);
         } else {
-            console.warn('Intento de editar paciente con ID inválido:', id);
             Swal.fire({
                 title: 'Error',
                 text: 'No se puede editar este paciente porque no tiene un ID válido en el sistema',
@@ -158,10 +155,7 @@ const Dashboard = () => {
                         timer: 2000,
                         showConfirmButton: false
                     });
-                } catch (error) {
-                    console.error('Error al eliminar paciente:', error);
-                    
-                    // Mostrar mensaje de error con detalles si están disponibles
+                } catch (error) {                    
                     Swal.fire({
                         title: 'Error',
                         text: error.message || 'No se pudo eliminar el paciente. Por favor, intente de nuevo más tarde.',

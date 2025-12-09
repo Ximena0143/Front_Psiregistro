@@ -33,62 +33,103 @@ const Perfil = () => {
         rol_id: ''
     });
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                setLoading(true);
-                
-                // Cargar especializaciones
-                await fetchEspecializaciones();
-                
-                // Obtener el usuario actual usando el endpoint /auth/me
-                const meResponse = await api.post('/auth/me');
-                
-                if (!meResponse || !meResponse.data) {
-                    setLoading(false);
-                    return;
-                }
-                
-                // Verificar si el usuario es administrador
-                setIsUserAdmin(isAdmin());
-                
-                // Usar los datos del usuario desde meResponse.data
-                const basicUserData = meResponse.data;
-                
-                // Mapear los datos del usuario a formData con verificaciones robustas
-                setFormData({
-                    primerNombre: basicUserData.human?.first_name || '',
-                    segundoNombre: basicUserData.human?.middle_name || '',
-                    primerApellido: basicUserData.human?.last_name || '',
-                    segundoApellido: basicUserData.human?.second_last_name || '',
-                    correo: basicUserData.email || '',
-                    especializacion: basicUserData.specialization?.name || '',
-                    especializacion_id: basicUserData.specialization?.id || '',
-                    descripcionPerfil: basicUserData.profile_description || '',
-                    rol: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
-                         basicUserData.roles[0]?.name || basicUserData.roles[0]?.role || '' : '',
-                    rol_id: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
-                           basicUserData.roles[0]?.id || '' : ''
-                });
-                
-                // Establecer la imagen de perfil si existe
-                if (basicUserData.profile_photo_path) {
-                    setProfileImage(basicUserData.profile_photo_path);
-                }
-                
-                setLoading(false);
-            } catch (error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo cargar la información del perfil',
-                    icon: 'error',
-                    confirmButtonColor: '#FB8500'
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Función para actualizar el estado del componente con los datos del usuario
+    const updateUserDataState = (userData) => {
+        if (!userData) return;
         
+        // Actualizar el estado del formulario con los datos más recientes
+        setFormData({
+            primerNombre: userData.human?.first_name || '',
+            segundoNombre: userData.human?.middle_name || '',
+            primerApellido: userData.human?.last_name || '',
+            segundoApellido: userData.human?.second_last_name || '',
+            correo: userData.email || '',
+            especializacion: userData.specialization?.name || '',
+            especializacion_id: userData.specialization?.id || '',
+            descripcionPerfil: userData.profile_description || '',
+            rol: Array.isArray(userData.roles) && userData.roles.length > 0 ? 
+                 userData.roles[0]?.name || userData.roles[0]?.role || '' : '',
+            rol_id: Array.isArray(userData.roles) && userData.roles.length > 0 ? 
+                   userData.roles[0]?.id || '' : ''
+        });
+        
+        // Actualizar la imagen de perfil si existe
+        if (userData.profile_photo_path) {
+            // Guardamos la ruta pero no la usamos para mostrar la imagen
+            // Usaremos getProfilePhotoUrl para obtener la URL firmada
+            localStorage.setItem('user_photo_path', userData.profile_photo_path);
+            // Intentamos obtener la URL firmada inmediatamente
+            getProfilePhotoUrl();
+        }
+    };
+
+    // Función para obtener y actualizar datos del usuario
+    // Esta función debe estar definida antes de ser usada en useEffect o handleCancel
+    const fetchUserData = async () => {
+        try {
+            setLoading(true);
+            
+            // Cargar especializaciones si es necesario
+            if (especializaciones.length === 0) {
+                await fetchEspecializaciones();
+            }
+            
+            // Obtener el usuario actual usando el endpoint /auth/me
+            const meResponse = await api.post('/auth/me');
+
+            
+            if (!meResponse || !meResponse.data) {
+                setLoading(false);
+                return;
+            }
+            
+            // Verificar si el usuario es administrador
+            setIsUserAdmin(isAdmin());
+            
+            // Usar los datos del usuario desde meResponse.data
+            const basicUserData = meResponse.data;
+
+            
+            // Utilizar la función reutilizable para actualizar los datos de usuario
+            updateUserDataState(basicUserData);
+            
+            setLoading(false);
+            return basicUserData; // Retorna los datos por si son necesarios
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo cargar la información del perfil',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Método para obtener la URL firmada de la foto de perfil directamente del backend
+    const getProfilePhotoUrl = async () => {
+        try {
+            const response = await api.get('/user/get-profile-photo');
+            
+            // Verificamos si tenemos la estructura esperada en la respuesta
+            if (response && response.data && response.data.URL) {
+                // Actualizar el estado con la URL firmada
+                setProfileImage(response.data.URL);
+                return response.data.URL;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            return null;
+        }
+    };
+    
+    useEffect(() => {
+        // Intentar cargar la URL firmada de la foto de perfil directamente
+        getProfilePhotoUrl();
+        
+        // También cargar los datos completos del usuario
         fetchUserData();
     }, []);
 
@@ -187,13 +228,29 @@ const Perfil = () => {
                 
                 setIsEditing(false);
             } catch (updateError) {
-                // Mensaje de error más descriptivo
-                Swal.fire({
-                    title: 'Error',
-                    text: `No se pudieron guardar los cambios: ${updateError.message || 'Error desconocido'}`,
-                    icon: 'error',
-                    confirmButtonColor: '#FB8500'
-                });
+                // Comprobar si es un error de permisos de administrador
+                if (updateError.message && updateError.message.includes('Admin role required')) {
+                    // Mostrar un mensaje más amigable ya que sabemos que la foto se ha subido correctamente
+                    Swal.fire({
+                        title: 'Información',
+                        text: 'Tu foto de perfil se ha actualizado correctamente. Los demás cambios requieren permisos adicionales.',
+                        icon: 'info',
+                        confirmButtonColor: '#FB8500'
+                    });
+                    // Forzar una recarga para mostrar los cambios (la foto sí se actualizó)
+                    setTimeout(() => {
+                        fetchUserData();
+                    }, 1000);
+                    setIsEditing(false);
+                } else {
+                    // Otro tipo de error
+                    Swal.fire({
+                        title: 'Error',
+                        text: `No se pudieron guardar los cambios: ${updateError.message || 'Error desconocido'}`,
+                        icon: 'error',
+                        confirmButtonColor: '#FB8500'
+                    });
+                }
             }
         } catch (error) {
             Swal.fire({
@@ -220,56 +277,95 @@ const Perfil = () => {
             cancelButtonText: 'No, continuar editando'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Recargar los datos originales y salir del modo edición
-                const fetchUserData = async () => {
-                    try {
-                        setLoading(true);
-                        
-                        // Obtener el usuario actual usando el endpoint /auth/me
-                        const meResponse = await api.post('/auth/me');
-                        
-                        if (!meResponse || !meResponse.data) {
-                            setLoading(false);
-                            return;
-                        }
-                        
-                        // Usar los datos del usuario desde meResponse.data
-                        const basicUserData = meResponse.data;
-                        
-                        // Mapear los datos del usuario a formData con verificaciones robustas
-                        setFormData({
-                            primerNombre: basicUserData.human?.first_name || '',
-                            segundoNombre: basicUserData.human?.middle_name || '',
-                            primerApellido: basicUserData.human?.last_name || '',
-                            segundoApellido: basicUserData.human?.second_last_name || '',
-                            correo: basicUserData.email || '',
-                            especializacion: basicUserData.specialization?.name || '',
-                            especializacion_id: basicUserData.specialization?.id || '',
-                            descripcionPerfil: basicUserData.profile_description || '',
-                            rol: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
-                                 basicUserData.roles[0]?.name || basicUserData.roles[0]?.role || '' : '',
-                            rol_id: Array.isArray(basicUserData.roles) && basicUserData.roles.length > 0 ? 
-                                   basicUserData.roles[0]?.id || '' : ''
-                        });
-                        
-                        // Establecer la imagen de perfil si existe
-                        if (basicUserData.profile_photo_path) {
-                            setProfileImage(basicUserData.profile_photo_path);
-                        }
-                        
-                        setLoading(false);
+                // Usar la función centralizada para recargar los datos
+                fetchUserData()
+                    .then(() => {
+                        // Desactivar el modo edición cuando termine de cargar los datos
                         setIsEditing(false);
-                    } catch (error) {
-                        setLoading(false);
+                    })
+                    .catch((error) => {
                         setIsEditing(false);
-                    }
-                };
-                
-                fetchUserData();
+                    });
             }
         });
     };
 
+    const updateProfilePhoto = async (file) => {
+        try {
+            setLoading(true);
+            
+            // Usar el servicio para actualizar la foto de perfil
+            // Crear un FormData para enviar el archivo
+            const formData = new FormData();
+    
+            formData.append('profile_photo', file);
+            
+            // Simular PATCH con el parámetro _method
+            formData.append('_method', 'PATCH');
+            
+            // Configurar headers para envío de archivos
+            const config = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                }
+            };
+            // Enviar la imagen al backend usando POST pero simulando PATCH
+            const response = await api.post('/user/update-profile-photo', formData, config);
+            
+            if (response && !response.error) {
+                Swal.fire({
+                    title: 'Éxito',
+                    text: 'Foto de perfil actualizada correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#FB8500'
+                });
+                                
+                // Obtener la ruta de la foto de la respuesta del servidor
+                let photoPath = null;
+                
+                // Verificar primero en response.data.path (estructura devuelta por el backend actual)
+                if (response.data && response.data.path) {
+                    photoPath = response.data.path;
+                }
+                // Verificar estructura alternativa por compatibilidad
+                else if (response.data && response.data.user && response.data.user.profile_photo_path) {
+                    photoPath = response.data.user.profile_photo_path;
+                }
+                
+                if (photoPath) {
+                    // IMPORTANTE: Guardar la ruta en localStorage para persistencia
+                    localStorage.setItem('user_photo_path', photoPath);
+                    
+                    // Después de subir la imagen, obtener la URL firmada directamente del backend
+                    try {
+                        // Obtener la URL firmada del backend
+                        await getProfilePhotoUrl();
+                    } catch (photoError) {
+                        console.error('Error al obtener URL firmada de la nueva foto:', photoError);
+                        
+                        // Como respaldo, construir una URL directa (puede no funcionar si el bucket es privado)
+                        const s3BaseUrl = 'https://psiregistro.s3.us-west-1.amazonaws.com/';
+                        const fullImageUrl = s3BaseUrl + photoPath;
+                        setProfileImage(fullImageUrl);
+                    }
+                }
+                
+                // IMPORTANTE: Refrescar los datos completos del usuario para asegurar consistencia
+                await fetchUserData();
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo actualizar la foto de perfil',
+                icon: 'error',
+                confirmButtonColor: '#FB8500'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
     const handleImageChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -277,6 +373,9 @@ const Perfil = () => {
             
             reader.onloadend = () => {
                 setProfileImage(reader.result);
+                
+                // Enviar la imagen al backend cuando se selecciona
+                updateProfilePhoto(file);
             };
             
             reader.readAsDataURL(file);

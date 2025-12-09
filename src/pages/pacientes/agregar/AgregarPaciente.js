@@ -24,26 +24,43 @@ const AgregarPaciente = () => {
         correo: ''
     });
 
+    // Estados adicionales para el manejo de la carga de tipos de identificación
+    const [loadingIdentificationTypes, setLoadingIdentificationTypes] = useState(true);
+    const [errorIdentificationTypes, setErrorIdentificationTypes] = useState(null);
+
     // Cargar tipos de identificación al montar el componente
     useEffect(() => {
         const fetchIdentificationTypes = async () => {
+            setLoadingIdentificationTypes(true);
+            setErrorIdentificationTypes(null);
+            
             try {
                 const response = await patientService.getIdentificationTypes();
                 
-                // Manejar diferentes estructuras de respuesta posibles
-                if (response && response.data) {
-                    setIdentificationTypes(response.data);
-                } else if (response && response.message && response.data) {
-                    // Nueva estructura con Res::info
-                    setIdentificationTypes(response.data);
-                } else if (Array.isArray(response)) {
-                    // Si la respuesta es un array directamente
+                if (Array.isArray(response)) {
                     setIdentificationTypes(response);
+                    
+                    // Si no hay tipos de identificación disponibles
+                    if (response.length === 0) {
+                        setErrorIdentificationTypes('No hay tipos de identificación disponibles');
+                    }
                 } else {
-                    console.warn('Estructura de respuesta no reconocida:', response);
+                    setIdentificationTypes([]);
+                    setErrorIdentificationTypes('Error al obtener los tipos de identificación');
                 }
             } catch (error) {
-                console.error('Error al cargar tipos de identificación:', error);
+                setErrorIdentificationTypes('Error al cargar los tipos de identificación: ' + error.message);
+                setIdentificationTypes([]);
+                
+                // Mostrar mensaje de error al usuario
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los tipos de identificación. Por favor, intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonColor: '#FB8500'
+                });
+            } finally {
+                setLoadingIdentificationTypes(false);
             }
         };
 
@@ -60,7 +77,8 @@ const AgregarPaciente = () => {
     };
 
     const validateIdentificacion = (numero) => {
-        return /^\d{6,11}$/.test(numero);
+        // Permite letras, números, guiones y entre 3 y 30 caracteres
+        return /^[a-zA-Z0-9\-]{3,30}$/.test(numero);
     };
 
     const validateNombre = (nombre) => {
@@ -331,14 +349,22 @@ const AgregarPaciente = () => {
                                             value={formData.tipoIdentificacion}
                                             onChange={handleInputChange}
                                             className={errors.tipoIdentificacion ? styles.inputError : ''}
-                                            disabled={loading}
+                                            disabled={loading || loadingIdentificationTypes}
                                         >
-                                            <option value="">Seleccione un tipo</option>
-                                            {identificationTypes.map(type => (
-                                                <option key={type.id} value={type.id}>
-                                                    {type.name}
-                                                </option>
-                                            ))}
+                                            {loadingIdentificationTypes ? (
+                                                <option value="">Cargando tipos de identificación...</option>
+                                            ) : errorIdentificationTypes ? (
+                                                <option value="">Error al cargar tipos de identificación</option>
+                                            ) : (
+                                                <>
+                                                    <option value="">Seleccione un tipo</option>
+                                                    {identificationTypes.map(type => (
+                                                        <option key={type.id} value={type.id}>
+                                                            {type.name}
+                                                        </option>
+                                                    ))}
+                                                </>
+                                            )}
                                         </select>
                                         {errors.tipoIdentificacion && <span className={styles.errorMessage}>{errors.tipoIdentificacion}</span>}
                                     </div>

@@ -89,7 +89,6 @@ export default function Login() {
           response = await authService.login({ email, password });
           loginSuccess = true;
         } catch (loginError) {
-          console.error("Error en la primera llamada de login:", loginError);
 
           // Verificamos si a pesar del error se guardó un token (puede pasar si el servidor
           // responde con un token pero luego hay un error en el procesamiento)
@@ -265,24 +264,8 @@ export default function Login() {
   };
 
   const handleForgotPassword = () => {
-    Swal.fire({
-      title: "¡Éxito!",
-      text: `Se ha enviado un correo de recuperación de contraseña a ${email}`,
-      icon: "success",
-      confirmButtonColor: "#FB8500",
-      customClass: {
-        confirmButton: "font-dm-sans",
-        title: "font-dm-sans",
-        popup: "font-dm-sans swal-modal-login",
-        container: "swal-overlay-login",
-      },
-      timer: 2000,
-      timerProgressBar: true,
-      showConfirmButton: false,
-      backdrop: true,
-      heightAuto: false, // Evita que SweetAlert modifique la altura del documento
-      position: "center", // Posición centrada
-    });
+    // Redirigir a la página de recuperación de contraseña
+    navigate('/forgot-password');
   };
 
   return (

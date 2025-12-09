@@ -15,7 +15,6 @@ export const getPatients = async (perPage = 10, page = 1) => {
     
     // Verificar la estructura de la respuesta
     if (!response.data) {
-      console.warn('La respuesta no contiene datos');
       return [];
     }
     
@@ -31,11 +30,9 @@ export const getPatients = async (perPage = 10, page = 1) => {
       return response.data.data;
     } 
     else {
-      console.warn('Estructura de respuesta no reconocida:', response.data);
       return [];
     }
-  } catch (error) {
-    console.error('Error al obtener pacientes:', error);
+  } catch (error) {    
     throw new Error(error.message);
   }
 };
@@ -50,8 +47,7 @@ export const getDeletedPatients = async (perPage = 10, page = 1) => {
   try {
     const response = await api.get(`/patient/deleted-index?per_page=${perPage}&page=${page}`);
     return response.data;
-  } catch (error) {
-    console.error('Error al obtener pacientes eliminados:', error);
+  } catch (error) {    
     throw new Error(error.message);
   }
 };
@@ -66,7 +62,6 @@ export const registerPatient = async (patientData) => {
     const response = await api.post('/patient/register', patientData);
     return response.data;
   } catch (error) {
-    console.error('Error al registrar paciente:', error);
     throw new Error(error.message);
   }
 };
@@ -86,14 +81,12 @@ export const updatePatient = async (id, patientData) => {
     }
     
     return response.data;
-  } catch (error) {
-    console.error('Error al actualizar paciente:', error);
+  } catch (error) {    
     
     // Extraer mensaje de error para mostrar al usuario
     let errorMessage = 'Error al actualizar paciente';
     if (error.response && error.response.data) {
       errorMessage = error.response.data.message || errorMessage;
-      console.error('Mensaje de error del servidor:', errorMessage);
     }
     
     const err = new Error(errorMessage);
@@ -112,7 +105,6 @@ export const deletePatient = async (id) => {
     const response = await api.del(`/patient/delete/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar paciente:', error);
     throw new Error(error.message);
   }
 };
@@ -127,7 +119,6 @@ export const restorePatient = async (id) => {
     const response = await api.patch(`/patient/restore/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error al restaurar paciente:', error);
     throw new Error(error.message);
   }
 };
@@ -142,7 +133,6 @@ export const forceDeletePatient = async (id) => {
     const response = await api.del(`/patient/force-delete/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar permanentemente el paciente:', error);
     throw new Error(error.message);
   }
 };
@@ -153,10 +143,21 @@ export const forceDeletePatient = async (id) => {
  */
 export const getIdentificationTypes = async () => {
   try {
-    const response = await api.get('/identification-type/index');
-    return response.data;
+    const response = await api.get('/identification-type/index');    
+    // Manejar diferentes estructuras de respuesta posibles
+    if (response && response.data && Array.isArray(response.data)) {
+      // Si la respuesta ya es un array
+      return response.data;
+    } else if (response && response.data && response.data.data && Array.isArray(response.data.data)) {
+      // Si la respuesta tiene el formato { message, error, data: [...] }
+      return response.data.data;
+    } else if (response && Array.isArray(response)) {
+      // Si la respuesta es directamente un array
+      return response;
+    } else {
+      return [];
+    }
   } catch (error) {
-    console.error('Error al obtener tipos de identificación:', error);
     throw new Error(error.message);
   }
 };
@@ -203,7 +204,6 @@ export const getPatientById = async (id) => {
       human: patient.human || null
     };
   } catch (error) {
-    console.error('Error al obtener paciente por ID:', error);
     throw new Error(error.message);
   }
 };
@@ -220,7 +220,6 @@ export const getPatientDocuments = async (patientId) => {
     
     // Verificar la estructura de la respuesta
     if (!response || !response.data) {
-      console.warn('La respuesta no contiene datos');
       return [];
     }
     
@@ -233,13 +232,11 @@ export const getPatientDocuments = async (patientId) => {
       // Si data es un objeto con los documentos dentro
       return response.data && response.data.data ? response.data.data : [];
     }
-  } catch (error) {
-    console.error('Error al obtener documentos del paciente:', error);
+  } catch (error) {    
     // Si es un error 404 (documentos no encontrados), devolver array vacío
     const is404 = (error.status === 404) || (error.response && error.response.status === 404);
     const isNotFoundMsg = error.message && error.message.toLowerCase().includes('documents not found');
     if (is404 || isNotFoundMsg) {
-      console.warn('No se encontraron documentos para el paciente con ID:', patientId);
       return [];
     }
     throw new Error(error.message);
@@ -272,8 +269,7 @@ export const uploadPatientDocument = async (patientId, document, title, document
     const response = await api.post('/document/upload', formData, options);
     
     return response.data;
-  } catch (error) {
-    console.error('Error al subir documento del paciente:', error);
+  } catch (error) {     
     throw new Error(error.message);
   }
 };
@@ -287,8 +283,7 @@ export const deletePatientDocument = async (documentId) => {
   try {
     const response = await api.del(`/document/delete/${documentId}`);
     return response.data;
-  } catch (error) {
-    console.error('Error al eliminar documento:', error);
+  } catch (error) {    
     throw new Error(error.message);
   }
 };
@@ -325,8 +320,7 @@ export const updatePatientDocument = async (documentId, patientId, title, docume
     });
     
     return response.data;
-  } catch (error) {
-    console.error('Error al actualizar documento del paciente:', error);
+  } catch (error) {    
     throw new Error(error.message);
   }
 };

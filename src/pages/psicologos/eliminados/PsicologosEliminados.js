@@ -99,7 +99,6 @@ const PsicologosEliminados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al restaurar:', error);
             let errorMessage = 'No se pudo restaurar el psicólogo';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
@@ -140,7 +139,6 @@ const PsicologosEliminados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al eliminar permanentemente:', error);
             let errorMessage = 'No se pudo eliminar el psicólogo permanentemente';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;

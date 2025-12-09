@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
 import Sidebar from '../../components/layout/Sidebar/Sidebar';
-import { X, Upload, Download, Eye, UserRound, Send } from 'lucide-react';
+import { X, Upload, UserRound, Send, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import blankService from '../../services/blankService';
 import authService from '../../services/auth';
@@ -21,8 +21,7 @@ const TestPsi = () => {
     });
     
     const [assignData, setAssignData] = useState({
-        pacienteEmail: '',
-        mensaje: ''
+        pacienteEmail: ''
     });
     
     const [selectedFileName, setSelectedFileName] = useState('');
@@ -41,21 +40,20 @@ const TestPsi = () => {
                         const blanksData = await blankService.getBlanksByUser(currentUser.id);
                         if (Array.isArray(blanksData)) {
                             // Transformar los datos al formato que espera el componente
-                            const formattedTests = blanksData.map(blank => ({
-                                id: blank.id,
-                                nombre: blank.tittle || 'Test sin nombre',
-                                archivo: blank.path || '',
-                                fechaCreacion: formatDate(blank.created_at) || 'Fecha desconocida',
-                                formato: getFormatFromUrl(blank.path) || 'PDF'
-                            }));
+                            const formattedTests = blanksData.map(blank => {
+                                return {
+                                    id: blank.id,
+                                    nombre: cleanPlantillaName(blank.tittle) || 'Sin nombre',
+                                    archivo: blank.path || '',
+                                    formato: getFormatFromUrl(blank.path) || 'PDF'
+                                };
+                            });
                             
                             setTests(formattedTests);
                         } else {
-                            console.error('blanksData no es un array:', blanksData);
                             setTests([]);
                         }
                     } catch (apiError) {
-                        console.error('Error en la llamada a la API:', apiError);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error de conexión',
@@ -64,8 +62,6 @@ const TestPsi = () => {
                         });
                     }
                 } else {
-                    console.warn('No se encontró el ID del usuario o datos de usuario');
-                    
                     Swal.fire({
                         icon: 'warning',
                         title: 'Sesión no encontrada',
@@ -74,7 +70,6 @@ const TestPsi = () => {
                     });
                 }
             } catch (error) {
-                console.error('Error general al cargar los tests:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -89,22 +84,24 @@ const TestPsi = () => {
         fetchTests();
     }, []);
     
-    // Función para formatear la fecha desde el backend
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        
-        const date = new Date(dateString);
-        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        
-        return `${date.getDate()} ${months[date.getMonth()]}, ${date.getFullYear()}`;
+    // La función formatDate ha sido eliminada ya que no se necesita
+    
+    // Función para obtener el formato desde una URL
+    const getFormatFromUrl = (url) => {
+        if (!url) return '';
+        const extension = url.split('.').pop().split('?')[0].toUpperCase();
+        return extension || 'PDF';
     };
     
-    // Función para obtener el formato del archivo a partir de la URL
-    const getFormatFromUrl = (url) => {
-        if (!url) return 'PDF';
-        
-        const extension = url.split('.').pop().toUpperCase();
-        return extension || 'PDF';
+    // Función para limpiar el nombre de la plantilla (quitar timestamps)
+    const cleanPlantillaName = (nombre) => {
+        if (!nombre) return 'Sin nombre';
+        // Si el nombre tiene el formato "nombre_timestamp", extraer solo el nombre
+        const match = nombre.match(/^(.+?)_\d+$/);
+        if (match && match[1]) {
+            return match[1]; // Devolver solo el nombre sin el timestamp
+        }
+        return nombre; // Si no tiene timestamp, devolver el nombre original
     };
 
     // Funciones para manejar el modal de subir test
@@ -119,12 +116,6 @@ const TestPsi = () => {
             archivo: null
         });
         setSelectedFileName('');
-    };
-
-    // Funciones para manejar el modal de detalles del test
-    const handleOpenDetailsModal = (test) => {
-        setCurrentTest(test);
-        setShowDetailsModal(true);
     };
 
     const handleCloseDetailsModal = () => {
@@ -142,8 +133,7 @@ const TestPsi = () => {
         setShowAssignModal(false);
         setCurrentTest(null);
         setAssignData({
-            pacienteEmail: '',
-            mensaje: ''
+            pacienteEmail: ''
         });
     };
 
@@ -181,7 +171,7 @@ const TestPsi = () => {
         fileInputRef.current.click();
     };
 
-    // Guardar nuevo test
+    // Guardar nueva plantilla
     const handleSaveTest = async () => {
         if (!newTest.nombre || !newTest.archivo) {
             Swal.fire({
@@ -230,8 +220,7 @@ const TestPsi = () => {
                 // Obtener la información del test recién creado
                 const nuevoTest = {
                     id: responseData.id || Math.floor(Math.random() * 10000), // ID temporal si no hay ID
-                    nombre: responseData.tittle || newTest.nombre,
-                    fechaCreacion: formatDate(responseData.created_at) || formatDate(new Date()),
+                    nombre: cleanPlantillaName(responseData.tittle) || newTest.nombre,
                     formato: getFormatFromUrl(responseData.path) || selectedFileName.split('.').pop().toUpperCase(),
                     archivo: responseData.path || ''
                 };
@@ -243,7 +232,7 @@ const TestPsi = () => {
                 // Mostrar alerta de éxito
                 Swal.fire({
                     title: '¡Éxito!',
-                    text: 'El test se ha guardado correctamente',
+                    text: 'La plantilla se ha guardado correctamente',
                     icon: 'success',
                     confirmButtonColor: '#FB8500',
                     timer: 2000,
@@ -253,12 +242,10 @@ const TestPsi = () => {
                 // Cerrar el modal
                 handleCloseUploadModal();
             } else {
-                console.error('No se pudieron extraer datos de la respuesta:', response);
                 throw new Error('La respuesta del servidor no tiene el formato esperado');
             }
         } catch (error) {
-            console.error('Error al guardar el test:', error);
-            let errorMessage = 'No se pudo guardar el test. Por favor, intenta de nuevo más tarde.';
+            let errorMessage = 'No se pudo guardar la plantilla. Por favor, intenta de nuevo más tarde.';
             
             // Intentar obtener un mensaje de error más específico si está disponible
             if (error.response && error.response.data && error.response.data.message) {
@@ -278,96 +265,101 @@ const TestPsi = () => {
         }
     };
 
-    // Asignar test a paciente
-    const handleAssignTest = () => {
-        // Mostrar alerta de éxito
+    // Eliminar test
+    const handleDeleteTest = (test) => {
         Swal.fire({
-            title: '¡Éxito!',
-            text: `El test "${currentTest.nombre}" ha sido asignado a ${assignData.pacienteEmail} correctamente`,
-            icon: 'success',
+            title: '¿Estás seguro?',
+            text: `¿Quieres eliminar la plantilla "${cleanPlantillaName(test.nombre)}"?`,
+            icon: 'warning',
+            showCancelButton: true,
             confirmButtonColor: '#FB8500',
-            timer: 2000,
-            showConfirmButton: false
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                setIsLoading(true);
+                try {
+                    await blankService.deleteBlank(test.id);
+                    
+                    // Actualizar la lista de tests
+                    setTests(tests.filter(t => t.id !== test.id));
+                    
+                    Swal.fire({
+                        title: '¡Eliminado!',
+                        text: 'La plantilla ha sido eliminada correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#FB8500',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    
+                    let errorMessage = 'No se pudo eliminar la plantilla. Por favor, intenta de nuevo más tarde.';
+                    
+                    // Intentar obtener un mensaje de error más específico si está disponible
+                    if (error.response && error.response.data && error.response.data.message) {
+                        errorMessage = error.response.data.message;
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage,
+                        confirmButtonColor: '#FB8500'
+                    });
+                } finally {
+                    setIsLoading(false);
+                }
+            }
         });
-        
-        // Cerrar el modal
-        handleCloseAssignModal();
     };
-
-    // Descargar plantilla
-    const handleDownloadTest = async (test) => {
+    
+    // Asignar test a paciente
+    const handleAssignTest = async () => {
         setIsLoading(true);
         
         try {
-            // Obtener la URL de descarga del backend
-            const downloadUrl = await blankService.downloadBlank(test.id);
+            // Preparar los datos para enviar el test
+            const emails = [assignData.pacienteEmail];
             
-            if (downloadUrl) {
-                // Crear un enlace temporal para descargar el archivo
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.setAttribute('download', test.nombre || 'test');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Mostrar alerta de éxito
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: `El archivo del test "${test.nombre}" se ha descargado correctamente`,
-                    icon: 'success',
-                    confirmButtonColor: '#FB8500',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } else {
-                throw new Error('No se pudo obtener la URL de descarga');
-            }
+            // Llamar al servicio para enviar el test
+            const response = await blankService.sendBlank(currentTest.id, emails);
+            
+            // Mostrar alerta de éxito
+            Swal.fire({
+                title: '¡Éxito!',
+                text: `La plantilla "${cleanPlantillaName(currentTest.nombre)}" ha sido enviada a ${assignData.pacienteEmail} correctamente`,
+                icon: 'success',
+                confirmButtonColor: '#FB8500',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            // Cerrar el modal
+            handleCloseAssignModal();
         } catch (error) {
-            console.error('Error al descargar el test:', error);
+            
+            let errorMessage = 'No se pudo enviar la plantilla. Por favor, intenta de nuevo más tarde.';
+            
+            // Intentar obtener un mensaje de error más específico si está disponible
+            if (error.response && error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo descargar el archivo. Por favor, intenta de nuevo más tarde.',
+                text: errorMessage,
                 confirmButtonColor: '#FB8500'
             });
         } finally {
             setIsLoading(false);
         }
-    };
-
-    // Función para ver el documento directamente
-    const handleViewDocument = (documentUrl) => {
-        if (!documentUrl) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'URL no disponible',
-                text: 'No se puede acceder a este documento. La URL no está disponible.',
-                confirmButtonColor: '#FB8500'
-            });
-            return;
-        }
-        
-        // Mostrar notificación de que se está abriendo el documento
-        const toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer);
-                toast.addEventListener('mouseleave', Swal.resumeTimer);
-            }
-        });
-        
-        toast.fire({
-            icon: 'info',
-            title: 'Abriendo documento...'
-        });
-        
-        // Abrir el documento en una nueva pestaña
-        window.open(documentUrl, '_blank');
     };
 
     return (
@@ -393,20 +385,21 @@ const TestPsi = () => {
                         ) : tests.length > 0 ? (
                             tests.map((test) => (
                                 <div key={test.id} className={styles.testCard}>
-                                    <h3>{test.nombre}</h3>
+                                    <h3>{cleanPlantillaName(test.nombre)}</h3>
                                     <div className={styles.testMeta}>
-                                        <span className={styles.metaItem}>
-                                            <span className={styles.metaLabel}>Formato:</span> {test.formato}
-                                        </span>
+                                        <div className={styles.metaItem} style={{ margin: '0 auto' }}>
+                                            <span className={styles.metaLabel}>Formato:</span> 
+                                            <span className={styles.metaValue}>{test.formato}</span>
+                                        </div>
                                     </div>
                                     <div className={styles.cardActions}>
-                                        <button className={styles.viewButton} onClick={() => handleOpenDetailsModal(test)}>
-                                            <Eye size={16} />
-                                            Ver detalles
-                                        </button>
                                         <button className={styles.assignButton} onClick={() => handleOpenAssignModal(test)}>
                                             <Send size={16} />
                                             Asignar
+                                        </button>
+                                        <button className={styles.deleteButton} onClick={() => handleDeleteTest(test)}>
+                                            <Trash2 size={16} />
+                                            Eliminar
                                         </button>
                                     </div>
                                 </div>
@@ -423,19 +416,19 @@ const TestPsi = () => {
                 </div>
             </div>
 
-            {/* Modal para subir test */}
+            {/* Modal para subir plantilla */}
             {showUploadModal && (
                 <div className={styles.modal}>
                     <div className={styles.modalContainer}>
                         <div className={styles.modalHeader}>
-                            <h4>Subir nuevo test</h4>
+                            <h4>Subir nueva plantilla</h4>
                             <button className={styles.closeButton} onClick={handleCloseUploadModal}>
                                 <X size={20} />
                             </button>
                         </div>
                         <div className={styles.modalContent}>
                             <div className={styles.formField}>
-                                <label htmlFor="nombre">Nombre del test *</label>
+                                <label htmlFor="nombre">Nombre de la plantilla *</label>
                                 <input
                                     id="nombre"
                                     name="nombre"
@@ -447,7 +440,7 @@ const TestPsi = () => {
                             </div>
 
                             <div className={styles.formField}>
-                                <label>Archivo del test *</label>
+                                <label>Archivo de la plantilla *</label>
                                 <div 
                                     className={styles.fileUploadArea}
                                     onClick={handleUploadAreaClick}
@@ -483,49 +476,32 @@ const TestPsi = () => {
                                 onClick={handleSaveTest}
                                 disabled={!newTest.nombre || !selectedFileName || isLoading}
                             >
-                                {isLoading ? 'Guardando...' : 'Guardar test'}
+                                {isLoading ? 'Guardando...' : 'Guardar plantilla'}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Modal para ver detalles del test */}
+            {/* Modal para ver detalles de la plantilla */}
             {showDetailsModal && currentTest && (
                 <div className={styles.modal}>
                     <div className={styles.modalContainer}>
                         <div className={styles.modalHeader}>
-                            <h4>Detalles del test</h4>
+                            <h4>Detalles de la plantilla</h4>
                             <button className={styles.closeButton} onClick={handleCloseDetailsModal}>
                                 <X size={20} />
                             </button>
                         </div>
                         <div className={styles.modalContent}>
                             <div className={styles.testDetails}>
-                                <h3 className={styles.testDetailTitle}>{currentTest.nombre}</h3>
+                                <h3 className={styles.testDetailTitle}>{cleanPlantillaName(currentTest.nombre)}</h3>
 
                                 <div className={styles.testDetailInfo}>
-                                    <div className={styles.infoItem}>
-                                        <span className={styles.infoLabel}>Formato:</span>
-                                        <span>{currentTest.formato}</span>
+                                    <div className={styles.metaItem} style={{ margin: '0 auto', minWidth: '200px' }}>
+                                        <span className={styles.metaLabel}>Formato:</span>
+                                        <span className={styles.metaValue}>{currentTest.formato}</span>
                                     </div>
-
-                                    <div className={styles.infoItem}>
-                                        <span className={styles.infoLabel}>Fecha de creación:</span>
-                                        <span>{currentTest.fechaCreacion}</span>
-                                    </div>
-                                    {/* Vista previa del documento */}
-                                    {currentTest.archivo && (
-                                    <div className={styles.documentPreviewContainer}>
-                                        <button 
-                                            className={styles.viewDocumentButton}
-                                            onClick={() => handleViewDocument(currentTest.archivo)}
-                                        >
-                                            <Eye size={20} />
-                                            Ver documento
-                                        </button>
-                                    </div>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -535,21 +511,6 @@ const TestPsi = () => {
                                 onClick={handleCloseDetailsModal}
                             >
                                 Cerrar
-                            </button>
-                            <button 
-                                className={styles.downloadButton}
-                                onClick={() => {
-                                    handleDownloadTest(currentTest);
-                                    handleCloseDetailsModal();
-                                }}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? 'Descargando...' : (
-                                    <>
-                                        <Download size={16} />
-                                        Descargar test
-                                    </>
-                                )}
                             </button>
                         </div>
                     </div>
@@ -561,14 +522,14 @@ const TestPsi = () => {
                 <div className={styles.modal}>
                     <div className={styles.modalContainer}>
                         <div className={styles.modalHeader}>
-                            <h4>Asignar test a paciente</h4>
+                            <h4>Asignar plantilla a paciente</h4>
                             <button className={styles.closeButton} onClick={handleCloseAssignModal}>
                                 <X size={20} />
                             </button>
                         </div>
                         <div className={styles.modalContent}>
                             <div className={styles.assignHeader}>
-                                <h3>Test: {currentTest.nombre}</h3>
+                                <h3>Plantilla: {cleanPlantillaName(currentTest.nombre)}</h3>
                             </div>
                             <div className={styles.formField}>
                                 <label htmlFor="pacienteEmail">Correo electrónico del paciente *</label>
@@ -586,17 +547,6 @@ const TestPsi = () => {
                                     />
                                 </div>
                             </div>
-                            <div className={styles.formField}>
-                                <label htmlFor="mensaje">Mensaje para el paciente (opcional)</label>
-                                <textarea
-                                    id="mensaje"
-                                    name="mensaje"
-                                    value={assignData.mensaje}
-                                    onChange={handleAssignInputChange}
-                                    rows={4}
-                                    placeholder="Introduzca un mensaje personalizado que recibirá el paciente junto con el test..."
-                                />
-                            </div>
                         </div>
                         <div className={styles.modalActions}>
                             <button 
@@ -613,7 +563,7 @@ const TestPsi = () => {
                                 {isLoading ? 'Procesando...' : (
                                     <>
                                         <Send size={16} />
-                                        Asignar test
+                                        Asignar plantilla
                                     </>
                                 )}
                             </button>

@@ -250,7 +250,6 @@ const AgregarPsicologo = () => {
                     navigate('/psicologos');
                 });
             } catch (error) {
-                console.error('Error al registrar psicólogo:', error);
                 
                 // Mostrar mensaje de error
                 let errorMessage = 'Ocurrió un error al guardar el psicólogo';

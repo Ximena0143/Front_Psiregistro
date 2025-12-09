@@ -310,6 +310,45 @@ api.interceptors = {
   }
 };
 
+/**
+ * Envía solicitud para recuperar contraseña
+ * @param {Object} data - Contiene el email del usuario
+ * @returns {Promise} - Resultado de la solicitud
+ */
+export const forgotPassword = async (data) => {
+  try {
+    const response = await api.post('/password/forget', data);
+    return response;
+  } catch (error) {
+    // Registramos el error para fines de depuración interna
+    console.warn('Error en solicitud de recuperación de contraseña:', error);
+    
+    // Por razones de seguridad, no propagamos errores específicos relacionados con la existencia
+    // de cuentas. La función que llama a esto manejará el flujo como si fuera exitoso.
+    if (error.status === 404) {
+      // Simular una respuesta exitosa aunque el email no exista en la base de datos
+      return { success: true, simulated: true };
+    }
+    
+    // Para otros tipos de errores (como problemas de servidor), sí podemos propagarlos
+    throw error;
+  }
+};
+
+/**
+ * Resetea la contraseña del usuario usando el token
+ * @param {Object} data - Contiene email, token, password y password_confirmation
+ * @returns {Promise} - Resultado de la solicitud
+ */
+export const resetPassword = async (data) => {
+  try {
+    const response = await api.post('/password/reset', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const authService = {
   login,
   logout,
@@ -320,7 +359,9 @@ const authService = {
   hasRole,
   isAdmin,
   isDoctor,
-  me
+  me,
+  forgotPassword,
+  resetPassword
 };
 
 export default authService;

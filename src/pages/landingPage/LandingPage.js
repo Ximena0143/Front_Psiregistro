@@ -2,10 +2,18 @@ import SeccionTexto from '../../components/common/SeccionTexto/SeccionTexto';
 import styles from './styles.module.css';
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header/Header';
-import { ChevronUp } from 'lucide-react';
+import { ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import landingService from '../../services/landingService';
+import publicacionesLandingService from '../../services/publicacionesLandingService';
 
 const LandingPage = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [psicologos, setPsicologos] = useState([]);
+    const [publicaciones, setPublicaciones] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [visibleCount, setVisibleCount] = useState(3); // Número de psicólogos visibles a la vez
+    const [loadingPublicaciones, setLoadingPublicaciones] = useState(true);
+    const [publicacionActiva, setPublicacionActiva] = useState(0); // Índice de la publicación activa
 
     // Función para controlar la visibilidad del botón según el scroll
     useEffect(() => {
@@ -71,12 +79,90 @@ const LandingPage = () => {
                 link.removeEventListener('click', handleClick);
             });
         };
-    }, []);    
+    }, []);
+
+    // Cargar los datos de los psicólogos al montar el componente
+    useEffect(() => {
+        const fetchPsychologists = async () => {
+            try {
+                const data = await landingService.getPsychologists();                
+                if (data && data.length > 0) {
+                    setPsicologos(data);
+                }
+            } catch (error) {
+                console.error('Error al cargar los psicólogos:', error);
+            }
+        };
+        
+        fetchPsychologists();
+    }, []);
+    
+    // Cargar las publicaciones para la landing page
+    useEffect(() => {
+        const fetchPublicaciones = async () => {
+            try {
+                setLoadingPublicaciones(true);
+                const data = await publicacionesLandingService.getPublicaciones();                
+                if (data && data.length > 0) {
+                    setPublicaciones(data);
+                }
+            } catch (error) {
+                console.error('Error al cargar las publicaciones:', error);
+            } finally {
+                setLoadingPublicaciones(false);
+            }
+        };
+        
+        fetchPublicaciones();
+    }, []);
+    
+    // Ajustar el número de psicólogos visibles según el tamaño de la pantalla
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setVisibleCount(1);
+            } else if (window.innerWidth < 992) {
+                setVisibleCount(2);
+            } else {
+                setVisibleCount(3);
+            }
+        };
+        
+        // Ejecutar una vez al montar y luego en cada cambio de tamaño
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+    
+    // Funciones para navegar entre los psicólogos
+    const goToPrevious = () => {
+        setCurrentIndex(prevIndex => {
+            if (prevIndex === 0) {
+                // Si estamos al principio, ir al último grupo posible
+                return Math.max(0, psicologos.length - visibleCount);
+            }
+            return Math.max(0, prevIndex - visibleCount);
+        });
+    };
+    
+    const goToNext = () => {
+        setCurrentIndex(prevIndex => {
+            const nextIndex = prevIndex + visibleCount;
+            if (nextIndex >= psicologos.length) {
+                // Si llegamos al final, volver al principio
+                return 0;
+            }
+            return nextIndex;
+        });
+    };
 
     return (
         <div className={styles.container}>
             <Header variant="landing" />
-            <body className={styles.body}>
+            <main className={styles.body}>
                 <section id="Inicio">
                     <div className={styles.container_inicio}>
                         <div className={styles.item1_inicio}>
@@ -121,18 +207,91 @@ const LandingPage = () => {
                             <p className={styles.parrafo_publicacion}>Conoce los eventos realizados mes a mes por nuestros expertos</p>
                         </div>
                         <div className={styles.item2_publicacion}>
-                            <div className={styles.container_titulo_publi2}>
-                                <h3 className={styles.titulo_publi2}>Fortalecimiento de la inteligencia emocional en el aula</h3>
-                            </div>
-                            <div className={styles.container_imagen_publi2}>
-                                <img className={styles.image1_publi} src="/Images/Imagen1Publi.jpg" alt="Imagen1 publicaciones" />
-                            </div>
-                            <div className={styles.container_descripcion_publi}>
-                                <p className={styles.descripcion_publi}>En colaboración con la <strong>Institución Educativa San Gabriel</strong>,
-                                    realizamos una charla dirigida a los maestros de secundaria para brindarles herramientas efectivas
-                                    que les permitan manejar sus emociones y ayudar a sus estudiantes a desarrollar una inteligencia
-                                    emocional saludable. </p>
-                            </div>
+                            {loadingPublicaciones ? (
+                                <div className={styles.loading_container}>
+                                    <p>Cargando publicaciones...</p>
+                                </div>
+                            ) : publicaciones.length > 0 ? (
+                                // Mostrar la publicación activa
+                                <>
+                                    <div className={styles.container_titulo_publi2}>
+                                        <h3 className={styles.titulo_publi2}>
+                                            {publicaciones[publicacionActiva]?.titulo || 'Sin título'}
+                                        </h3>
+                                    </div>
+
+                                    <div className={styles.container_imagen_publi2_wrapper}>
+                                        {publicaciones.length > 1 && (
+                                            <button 
+                                                className={`${styles.publicacion_button} ${styles.publicacion_prev}`}
+                                                onClick={() => setPublicacionActiva((prev) => prev === 0 ? publicaciones.length - 1 : prev - 1)}
+                                                aria-label="Publicación anterior"
+                                            >
+                                                <ChevronLeft size={24} />
+                                            </button>
+                                        )}
+                                        
+                                        <div className={styles.container_imagen_publi2}>
+                                            {publicaciones[publicacionActiva]?.tipo === 'video' ? (
+                                                <video 
+                                                    className={styles.image1_publi} 
+                                                    src={publicaciones[publicacionActiva].url} 
+                                                    controls
+                                                    alt={publicaciones[publicacionActiva].titulo} 
+                                                />
+                                            ) : (
+                                                <img 
+                                                    className={styles.image1_publi} 
+                                                    src={publicaciones[publicacionActiva].url || '/Images/Imagen1Publi.jpg'} 
+                                                    alt={publicaciones[publicacionActiva].titulo} 
+                                                />
+                                            )}
+                                        </div>
+                                        
+                                        {publicaciones.length > 1 && (
+                                            <button 
+                                                className={`${styles.publicacion_button} ${styles.publicacion_next}`}
+                                                onClick={() => setPublicacionActiva((prev) => (prev + 1) % publicaciones.length)}
+                                                aria-label="Siguiente publicación"
+                                            >
+                                                <ChevronRight size={24} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    <div className={styles.container_descripcion_publi}>
+                                        <p className={styles.descripcion_publi}>
+                                            {publicaciones[publicacionActiva].descripcion || 'No hay descripción disponible'}
+                                        </p>
+                                        <p className={styles.fecha_publi}>{publicaciones[publicacionActiva].fecha}</p>
+                                    </div>
+                                    
+                                    {publicaciones.length > 1 && (
+                                        <div className={styles.publicacion_indicadores}>
+                                            {publicaciones.map((_, index) => (
+                                                <span 
+                                                    key={`indicator-${index}`}
+                                                    className={`${styles.publicacion_indicador} ${index === publicacionActiva ? styles.publicacion_indicador_active : ''}`}
+                                                    onClick={() => setPublicacionActiva(index)}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                // Mensaje cuando no hay publicaciones disponibles
+                                <>
+                                    <div className={styles.no_publications_container}>
+                                        <div className={styles.no_publications_content}>
+                                            <h3 className={styles.no_publications_title}>No hay publicaciones disponibles</h3>
+                                            <p className={styles.no_publications_text}>
+                                                En este momento no hay eventos o publicaciones disponibles para mostrar. 
+                                                Te invitamos a visitarnos próximamente para conocer nuestras actividades y novedades.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -172,26 +331,82 @@ const LandingPage = () => {
                         <div className={styles.container_titulo_psicologos}>
                             <h4 className={styles.titulo_psicologos}>Nuestros psicólogos especialistas</h4>
                         </div>
-                        <div className={styles.container_info_psicologos}>
-                            <div className={styles.item1_psicologos}>
-                                <p className={styles.nombre_psicologo}>Dra. Jimena García</p>
-                                <p className={styles.especialidad_psicologos}>Psicóloga forense</p>
-                                <img className={styles.imagen_psicologos} src="/Images/Imagen1PSI.jpg" alt="Imagen1 psicologos" />
-                                <p className={styles.descripcion_psicologos}>Descripción de la especialización de cada psicólogo </p>
+                        
+                        <div className={styles.carousel_container}>
+                            {/* Botón de navegación izquierdo */}
+                            <button 
+                                className={styles.carousel_button} 
+                                onClick={goToPrevious}
+                                aria-label="Ver psicólogos anteriores"
+                            >
+                                <ChevronLeft size={30} />
+                            </button>
+                            
+                            <div className={styles.container_info_psicologos}>
+                                {psicologos.length > 0 ? (
+                                    // Mostrar solo los psicólogos del rango actual
+                                    psicologos
+                                        .slice(currentIndex, currentIndex + visibleCount)
+                                        .map((psicologo, index) => (
+                                            <div className={styles.item1_psicologos} key={psicologo.id || `visible-${index}`}>
+                                                {/* Mostrar nombre completo */}
+                                                <p className={styles.nombre_psicologo}>
+                                                    {psicologo.human && `${psicologo.human.first_name || ''} ${psicologo.human.last_name || ''}`}
+                                                </p>
+                                                {/* Mostrar especialización */}
+                                                <p className={styles.especialidad_psicologos}>
+                                                    {psicologo.specialization ? psicologo.specialization.name : 'Psicología General'}
+                                                </p>
+                                                {/* Mostrar foto de perfil */}
+                                                <img 
+                                                    className={styles.imagen_psicologos} 
+                                                    src={psicologo.photo_url || '/Images/default-profile.jpg'} 
+                                                    alt={`Foto de ${psicologo.human ? psicologo.human.first_name : 'Psicólogo'}`} 
+                                                />
+                                                {/* Mostrar descripción */}
+                                                <p className={styles.descripcion_psicologos}>
+                                                    {psicologo.profile_description || 'Profesional especializado en atención psicológica.'}
+                                                </p>
+                                            </div>
+                                        ))
+                                ) : (
+                                    // Mensaje cuando no hay psicólogos disponibles
+                                    <>
+                                        <div className={styles.no_psychologists_container}>
+                                            <div className={styles.no_psychologists_content}>
+                                                <h3 className={styles.no_psychologists_title}>No hay psicólogos disponibles</h3>
+                                                <p className={styles.no_psychologists_text}>
+                                                    En este momento no tenemos información de psicólogos para mostrar.
+                                                    Pronto actualizaremos nuestro equipo de especialistas.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
-                            <div className={styles.item1_psicologos}>
-                                <p className={styles.nombre_psicologo}>Dr. César Estrada</p>
-                                <p className={styles.especialidad_psicologos}>Psicólogo educación y del desarrollo</p>
-                                <img className={styles.imagen_psicologos} src="/Images/Imagen2PSI.jpg" alt="Imagen2 psicologos" />
-                                <p className={styles.descripcion_psicologos}>Descripción de la especialización de cada psicólogo </p>
-                            </div>
-                            <div className={styles.item1_psicologos}>
-                                <p className={styles.nombre_psicologo}>Dra. Marisol Flores</p>
-                                <p className={styles.especialidad_psicologos}>Psicóloga pareja y familiar</p>
-                                <img className={styles.imagen_psicologos} src="/Images/Imagen3PSI.jpg" alt="Imagen3 psicologos" />
-                                <p className={styles.descripcion_psicologos}>Descripción de la especialización de cada psicólogo </p>
-                            </div>
+                            
+                            {/* Botón de navegación derecho */}
+                            <button 
+                                className={styles.carousel_button} 
+                                onClick={goToNext}
+                                aria-label="Ver más psicólogos"
+                            >
+                                <ChevronRight size={30} />
+                            </button>
                         </div>
+                        
+                        {/* Indicadores de página (opcional) */}
+                        {psicologos.length > visibleCount && (
+                            <div className={styles.carousel_indicators}>
+                                {Array.from({ length: Math.ceil(psicologos.length / visibleCount) }, (_, i) => (
+                                    <div 
+                                        key={`indicator-${i}`}
+                                        className={`${styles.indicator} ${Math.floor(currentIndex / visibleCount) === i ? styles.active_indicator : ''}`}
+                                        onClick={() => setCurrentIndex(i * visibleCount)}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </section>
                 <section id="Contacto">
@@ -216,42 +431,41 @@ const LandingPage = () => {
                             </div>
                         </div>
                         <div className={styles.item2_contacto}>
-                            <img className={styles.image1_c} src="/Images/Imagen1c.jpg" alt="Imagen1 contacto" />
+                            <img className={styles.image1_c} src="/Images/Imagen1C.jpg" alt="Imagen1 contacto" />
                         </div>
                     </div>
-
                 </section>
                 <section>
-                <div className={styles.container_footer}>
-                    <div className={styles.item1_footer}>
-                        <div className={styles.descripcion_footer}>
-                            <p  className={styles.somos}>Somos una clínica especialista en psicología.</p>
+                    <div className={styles.container_footer}>
+                        <div className={styles.item1_footer}>
+                            <div className={styles.descripcion_footer}>
+                                <p className={styles.somos}>Somos una clínica especialista en psicología.</p>
+                            </div>
+                            <div className={styles.descripcion2_footer}>
+                                <p className={styles.compania}>Compañia<br /></p>
+                                <ul className={styles.nav_links_footer}>
+                                    <li><a href="#Inicio"><button className={styles.boton_footer}>Inicio</button></a></li>
+                                    <li><a href="#Nosotros"><button className={styles.boton_footer}>Nosotros</button></a></li>
+                                    <li><a href="#Servicios"><button className={styles.boton_footer}>Servicios</button></a></li>
+                                    <li><a href="#Contacto"><button className={styles.boton_footer}>Contacto</button></a></li>
+                                </ul>
+                            </div>
                         </div>
-                        <div className={styles.descripcion2_footer}>
-                            <p className={styles.compania}>Compañia<br /></p>
-                            <ul className={styles.nav_links_footer}>
-                                <li><a href="#Inicio"><button className={styles.boton_footer}>Inicio</button></a></li>
-                                <li><a href="#Nosotros"><button className={styles.boton_footer}>Nosotros</button></a></li>
-                                <li><a href="#Servicios"><button className={styles.boton_footer}>Servicios</button></a></li>
-                                <li><a href="#Contacto"><button className={styles.boton_footer}>Contacto</button></a></li>
-                            </ul>
+                        <div className={styles.linea_amarilla}></div>
+                        <div className={styles.item2_footer}> 
+                            &copy; 2025 Righteous | Todos los derechos reservados
                         </div>
                     </div>
-                    <div className={styles.linea_amarilla}></div>
-                    <div className={styles.item2_footer}> 
-                        &copy; 2025 Righteous | Todos los derechos reservados
-                    </div>
-                </div>
-            </section>
-            {/* Botón para volver al inicio */}
-            <button 
-                className={`${styles.scrollTopButton} ${showScrollTop ? styles.showScrollButton : ''}`}
-                onClick={scrollToTop}
-                aria-label="Volver al inicio"
-            >
-                <ChevronUp size={24} />
-            </button>
-            </body>
+                </section>
+                {/* Botón para volver al inicio */}
+                <button 
+                    className={`${styles.scrollTopButton} ${showScrollTop ? styles.showScrollButton : ''}`}
+                    onClick={scrollToTop}
+                    aria-label="Volver al inicio"
+                >
+                    <ChevronUp size={24} />
+                </button>
+            </main>
         </div>
     );
 };

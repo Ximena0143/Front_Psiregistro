@@ -167,6 +167,47 @@
   cursor: pointer;
 }
 
+/* Estilos para el contenedor de fecha y hora */
+.dateTimeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 8px 14px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dateContainer, .timeContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateTimeIcon {
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.dateText, .timeText {
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  margin: 0;
+}
+
+.dateText {
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.timeText {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
 .welcome_text {
   font-family: 'Libre Baskerville', serif;
   color: #ffffff;
@@ -189,6 +230,22 @@
 
 .icon_user {
   color: #ffffff;
+}
+
+.profile_photo_container {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile_photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .dropdown {
@@ -259,12 +316,6 @@
   
   .welcome_text {
     font-size: 18px;
-  }
-}
-
-@media (max-width: 768px) {
-  .header {
-    height: 80px;
   }
   
   .header[data-variant="dashboard"] {
@@ -381,6 +432,31 @@
   
   .boton_header_sesion {
     font-size: 16px;
+  }
+  
+  .dateTimeContainer {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .dateContainer {
+    display: none;
+  }
+  
+  .dateTimeIcon {
+    display: none;
+  }
+  
+  .timeText {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
   }
 }
 

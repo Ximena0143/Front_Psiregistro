@@ -4,7 +4,6 @@
 
 // URL base para todas las peticiones API
 const API_BASE_URL = 'https://psiregistroback-hdhbacacaabud9gz.chilecentral-01.azurewebsites.net/api';
-
 // Interceptores para modificar las peticiones y respuestas
 const interceptors = {
   request: null,
@@ -346,11 +345,11 @@ export const del = async (endpoint, options = {}) => {
  */
 export const patch = async (endpoint, data = {}, options = {}) => {
   try {
-    // Aplicar interceptor de petición si existe
+    // Configuración básica de la petición
     let config = {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/plain, */*',
         ...options.headers
       },
       credentials: 'include',
@@ -358,9 +357,31 @@ export const patch = async (endpoint, data = {}, options = {}) => {
       ...options
     };
     
+    // Manejar FormData de manera especial (no establecer Content-Type ni usar JSON.stringify)
+    if (data instanceof FormData) {
+      console.log('Detected FormData in PATCH request, not setting Content-Type header');
+      config.body = data;
+      // Eliminar el Content-Type si existe para permitir que el navegador establezca el boundary correcto
+      if (config.headers['Content-Type']) {
+        console.log('Removing Content-Type header for FormData');
+        delete config.headers['Content-Type'];
+      }
+    } else {
+      // Para datos normales JSON
+      config.headers['Content-Type'] = 'application/json';
+      config.body = JSON.stringify(data);
+    }
+    
     if (interceptors.request) {
       config = interceptors.request(config);
     }
+    
+    console.log('Making PATCH request to:', `${API_BASE_URL}${endpoint}`);
+    console.log('With config:', { 
+      method: config.method,
+      headers: config.headers,
+      body: data instanceof FormData ? 'FormData object' : config.body
+    });
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Eye, Download, Upload, FileText, Trash2, ArrowLeft, Plus, Edit2 } from 'react-feather';
+import { Eye, Download, Upload, FileText, Trash2, ArrowLeft, Plus } from 'react-feather';
 import Sidebar from '../../../components/layout/Sidebar/Sidebar';
 import Header from '../../../components/layout/Header/Header';
 import Swal from 'sweetalert2';
@@ -14,12 +14,26 @@ const isPdfDocument = (documento) => {
     if (!documento) return false;
     
     // Verificar por la URL
-    if (documento.signed_url && documento.signed_url.toLowerCase().includes('.pdf')) {
-        return true;
+    if (documento.signed_url) {
+        // Check if URL contains .pdf
+        if (documento.signed_url.toLowerCase().includes('.pdf')) {
+            return true;
+        }
+        
+        // Check if URL contains specific AWS S3 parameters for PDFs
+        if (documento.signed_url.includes('X-Amz-') && 
+            (documento.signed_url.includes('/pdf') || documento.signed_url.includes('Content-Type=application%2Fpdf'))) {
+            return true;
+        }
     }
     
     // Verificar por el nombre original del archivo
     if (documento.tituloOriginal && documento.tituloOriginal.toLowerCase().endsWith('.pdf')) {
+        return true;
+    }
+    
+    // Verificar por el tipo MIME o content type si está disponible
+    if (documento.contentType && documento.contentType.toLowerCase().includes('pdf')) {
         return true;
     }
     
@@ -120,22 +134,10 @@ const HistorialPaciente = () => {
     ];
     const [selectedFileName, setSelectedFileName] = useState('');
     const fileInputRef = useRef(null);
-    const editFileInputRef = useRef(null);
     const [error, setError] = useState(null);
     const [tiposIdentificacion, setTiposIdentificacion] = useState([]);
     const [loadingDocuments, setLoadingDocuments] = useState(false);
     
-    // Estados para la funcionalidad de edición
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editingDocument, setEditingDocument] = useState(null);
-    const [editDocumentData, setEditDocumentData] = useState({
-        titulo: '',
-        document_type: '',
-        status_id: '',
-        archivo: null
-    });
-    const [editSelectedFileName, setEditSelectedFileName] = useState('');
-
     // Cargar los tipos de identificación
     useEffect(() => {
         const fetchIdentificationTypes = async () => {
@@ -222,7 +224,6 @@ const HistorialPaciente = () => {
                 fetchPatientDocuments(patient.id);
                 
             } catch (err) {
-                console.error('Error al cargar datos del paciente:', err);
                 setError(err.message || 'Error al cargar datos del paciente');
                 
                 // Mostrar alerta de error
@@ -305,7 +306,8 @@ const HistorialPaciente = () => {
                     fechaActualizacion: new Date().toISOString().split('T')[0],
                     estado: doc.estado || (statusId === 1 ? 'Completado' : 'En proceso'),
                     icono: 'FileText',
-                    signed_url: doc.document_path, // Usar document_path que es el campo que viene del backend
+                    signed_url: doc.document_url || doc.document_path, // Usar document_url para descargas, con fallback a document_path
+                    document_path: doc.document_path, // Mantener document_path para otros propósitos
                     expires_in: doc.expires_in,
                     status_id: statusId // Usamos el status_id asignado
                 };
@@ -313,7 +315,6 @@ const HistorialPaciente = () => {
             
             setDocumentos(documentosFormateados);
         } catch (error) {
-            console.error('Error al cargar documentos del paciente:', error);
             Swal.fire({
                 title: 'Error',
                 text: 'No se pudieron cargar los documentos del paciente',
@@ -340,16 +341,26 @@ const HistorialPaciente = () => {
     const handleDownloadDocument = (documento) => {
         // Verificar que documento y signed_url existan
         if (documento && documento.signed_url) {
-            // Crear un elemento a invisible para forzar la descarga
+            // Comprobar si es PDF para abrir en nueva pestaña o descargar
+            const esPDF = isPdfDocument(documento);
+            
+            // Crear un elemento <a> para la acción correspondiente
             const link = document.createElement('a');
             link.href = documento.signed_url;
-            link.target = '_blank';
-            link.download = documento.tituloOriginal || documento.titulo || 'documento';
+            
+            if (esPDF) {
+                // Para PDF: abrir en nueva pestaña
+                link.target = '_blank';
+                // No establecer el atributo download para PDFs
+            } else {
+                // Para otros archivos: forzar descarga
+                link.download = documento.tituloOriginal || documento.titulo || 'documento';
+            }
+            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         } else {
-            console.error('Error en descarga - URL no disponible:', documento);
             Swal.fire({
                 title: 'Error',
                 text: 'No se puede descargar el documento. URL no disponible.',
@@ -398,7 +409,6 @@ const HistorialPaciente = () => {
                 );
             }
         } catch (error) {
-            console.error('Error al eliminar documento:', error);
             Swal.fire(
                 'Error',
                 'No se pudo eliminar el documento. Inténtalo de nuevo.',
@@ -430,118 +440,7 @@ const HistorialPaciente = () => {
         setSelectedFileName('');
     };
     
-    // Handler para abrir el modal de edición de documento
-    const handleEditDocument = (documento) => {
-        setEditingDocument(documento);
-        setEditDocumentData({
-            titulo: documento.titulo,
-            document_type: documento.tipo,
-            status_id: documento.status_id || 1,
-            archivo: null
-        });
-        setEditSelectedFileName('');
-        setShowEditModal(true);
-    };
-    
-    // Handler para cerrar el modal de edición
-    const handleCloseEditModal = () => {
-        setShowEditModal(false);
-        setEditingDocument(null);
-        setEditDocumentData({
-            titulo: '',
-            document_type: '',
-            status_id: '',
-            archivo: null
-        });
-        setEditSelectedFileName('');
-    };
-    
-    // Handler para cambios en los campos del formulario de edición
-    const handleEditDocumentInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditDocumentData(prevData => ({
-            ...prevData,
-            [name]: value
-        }));
-    };
-    
-    // Handler para seleccionar un archivo en el formulario de edición
-    const handleEditFileSelect = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setEditDocumentData(prevData => ({
-                ...prevData,
-                archivo: file
-            }));
-            setEditSelectedFileName(file.name);
-        }
-    };
-    
-    // Handler para hacer clic en el área de upload en edición
-    const handleEditUploadAreaClick = () => {
-        editFileInputRef.current.click();
-    };
-    
-    // Handler para guardar los cambios de un documento editado
-    const handleUpdateDocument = async () => {
-        if (!editingDocument || !editDocumentData.titulo) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Por favor completa todos los campos obligatorios',
-                icon: 'error',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
-        
-        try {
-            Swal.fire({
-                title: 'Actualizando...',
-                text: 'Guardando cambios en el documento',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            // Llamada a la API para actualizar el documento
-            await patientService.updatePatientDocument(
-                editingDocument.id,
-                id, // paciente ID desde useParams
-                editDocumentData.titulo,
-                editDocumentData.document_type,
-                editDocumentData.status_id,
-                editDocumentData.archivo // podría ser null si no hay archivo nuevo
-            );
-            
-            // Actualizar la lista de documentos
-            await fetchPatientDocuments(id);
-            
-            // Cerrar el modal y limpiar el formulario
-            handleCloseEditModal();
-            
-            Swal.fire({
-                title: '¡Éxito!',
-                text: 'Documento actualizado correctamente',
-                icon: 'success',
-                confirmButtonText: 'Continuar'
-            });
-            
-        } catch (error) {
-            console.error('Error al actualizar el documento:', error);
-            let errorMessage = 'Error al actualizar el documento';
-            if (error.response && error.response.data) {
-                errorMessage = error.response.data.message || errorMessage;
-            }
-            
-            Swal.fire({
-                title: 'Error',
-                text: errorMessage,
-                icon: 'error',
-                confirmButtonText: 'Entendido'
-            });
-        }
-    };
+    // Se han eliminado todas las funciones relacionadas con la edición de documentos
 
     const handleDocumentInputChange = (e) => {
         const { name, value } = e.target;
@@ -618,7 +517,6 @@ const HistorialPaciente = () => {
             handleCloseUploadModal();
             
         } catch (error) {
-            console.error('Error al subir documento:', error);
             
             Swal.fire({
                 title: 'Error',
@@ -806,36 +704,31 @@ const HistorialPaciente = () => {
                                                                 )}
                                                             </div>
                                                             <div className={styles.documentActions}>
-                                                                <button 
-                                                                    className={styles.actionButton}
-                                                                    title="Ver documento"
-                                                                    onClick={() => handleViewDocument(documento)}
-                                                                >
-                                                                    <Eye size={18} color="#0891B2" />
-                                                                    <span>Ver</span>
-                                                                </button>
-                                                                
-                                                                {/* Mostrar botón de descarga solo para formatos que no sean PDF */}
+                                                                {/* Botón Ver solo para documentos que NO son PDF */}
                                                                 {!isPdfDocument(documento) && (
                                                                     <button 
                                                                         className={styles.actionButton}
-                                                                        title="Descargar documento"
-                                                                        onClick={() => handleDownloadDocument(documento)}
+                                                                        title="Ver documento"
+                                                                        onClick={() => handleViewDocument(documento)}
                                                                     >
-                                                                        <Download size={18} color="#7C3AED" />
-                                                                        <span>Descargar</span>
+                                                                        <Eye size={18} color="#0891B2" />
+                                                                        <span>Ver</span>
                                                                     </button>
                                                                 )}
                                                                 
+                                                                {/* Botón de descarga/ver para todos los documentos */}
                                                                 <button 
                                                                     className={styles.actionButton}
-                                                                    title="Editar documento"
-                                                                    onClick={() => handleEditDocument(documento)}
+                                                                    title={isPdfDocument(documento) ? "Ver documento" : "Descargar documento"}
+                                                                    onClick={() => handleDownloadDocument(documento)}
                                                                 >
-                                                                    <Edit2 size={18} color="#0891B2" />
-                                                                    <span>Editar</span>
+                                                                    {isPdfDocument(documento) ? 
+                                                                        <Eye size={18} color="#7C3AED" /> : 
+                                                                        <Download size={18} color="#7C3AED" />}
+                                                                    <span>{isPdfDocument(documento) ? "Ver" : "Descargar"}</span>
                                                                 </button>
                                                                 
+                                                                                                                                
                                                                 <button 
                                                                     className={styles.actionButton}
                                                                     title="Eliminar documento"
@@ -897,19 +790,20 @@ const HistorialPaciente = () => {
                                     let fileIcon = <FileText size={64} color="#219EBC" />;
                                     let fileTypeText = 'documento';
                                     
-                                    // Para PDFs, usar iframe que muestra directamente el documento
+                                    // Para PDFs, mostrar mensaje para descargar
                                     if (isPdf) {
                                         return (
-                                            <div className={styles.pdfViewer}>
-                                                <iframe
-                                                    src={previewDocument.signed_url}
-                                                    title={previewDocument.titulo || "Vista previa de PDF"}
-                                                    className={styles.pdfIframe}
-                                                    width="100%"
-                                                    height="600px"
-                                                    frameBorder="0"
-                                                    allowFullScreen
-                                                />
+                                            <div className={styles.documentPreview}>
+                                                <div className={styles.previewPlaceholder}>
+                                                    <FileText size={64} color="#E11D48" />
+                                                    <p>Documento PDF: <strong>{previewDocument.titulo}</strong></p>
+                                                    <p className={styles.previewNote}>
+                                                        No se puede mostrar una vista previa para este documento PDF.
+                                                    </p>
+                                                    <p className={styles.previewTip}>
+                                                        Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.
+                                                    </p>
+                                                </div>
                                             </div>
                                         );
                                     }
@@ -931,8 +825,116 @@ const HistorialPaciente = () => {
                                               (previewDocument.tituloOriginal.toLowerCase().endsWith('.xls') || 
                                                previewDocument.tituloOriginal.toLowerCase().endsWith('.xlsx')))) {
                                         fileIcon = <FileText size={64} color="#059669" />;
-                                        fileTypeText = 'hoja de cálculo';
+                                        fileTypeText = 'hoja de Excel';
                                     }
+                                    
+                                    // Para imágenes
+                                    else if (previewDocument.signed_url.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i) ||
+                                             (previewDocument.tituloOriginal && 
+                                              previewDocument.tituloOriginal.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i))) {
+                                        return (
+                                            <div className={styles.documentPreview}>
+                                                <img 
+                                                    src={previewDocument.signed_url} 
+                                                    alt={previewDocument.titulo || 'Vista previa'} 
+                                                    className={styles.previewImage}
+                                                />
+                                            </div>
+                                        );
+                                    }
+                                    
+                                    // Para otros formatos, mostrar placeholder
+                                    return (
+                                        <div className={styles.documentPreview}>
+                                            <div className={styles.previewPlaceholder}>
+                                                {fileIcon}
+                                                <p>Vista previa del {fileTypeText}: <strong>{previewDocument.titulo}</strong></p>
+                                                <p className={styles.previewNote}>
+                                                    No se puede mostrar una vista previa para este tipo de archivo.
+                                                </p>
+                                                <p className={styles.previewTip}>
+                                                    Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })()
+                            ) : (
+                                <div className={styles.documentPreview}>
+                                    <div className={styles.previewPlaceholder}>
+                                        <FileText size={64} color="#219EBC" />
+                                        <p>Vista previa del documento: {previewDocument.titulo}</p>
+                                        <p className={styles.previewNote}>
+                                            (No se puede mostrar la vista previa del documento)
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className={styles.previewActions}>
+                            <button 
+                                className={styles.closePreviewButton}
+                                onClick={handleClosePreview}
+                            >
+                                Cerrar
+                            </button>
+                            
+                            {/* Botón de descarga para todos los documentos */}
+                            <button
+                                className={styles.downloadPreviewButton}
+                                onClick={() => {
+                                    handleDownloadDocument(previewDocument);
+                                    handleClosePreview();
+                                }}
+                            >
+                                <Download size={16} color="#7C3AED" />
+                                Descargar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        {/* Modal de Previsualización */}
+        {showPreview && previewDocument && (
+            <div className={styles.previewOverlay}>
+                <div className={styles.previewContainer}>
+                    <div className={styles.previewHeader}>
+                        <h4>{previewDocument.titulo}</h4>
+                        <button onClick={handleClosePreview} className={styles.closeButton}>×</button>
+                    </div>
+                    <div className={styles.previewContent}>
+                        {previewDocument.signed_url ? (
+                            // Determinar el tipo de archivo para mostrar la vista previa adecuada
+                            (() => {
+                                // Verificar si la URL o el título contiene indicación del tipo de archivo
+                                const isPdf = isPdfDocument(previewDocument);
+                                let fileType = 'desconocido';
+                                let fileIcon = <FileText size={64} color="#219EBC" />;
+                                let fileTypeText = 'documento';
+                                
+                                // Para PDFs, mostrar mensaje para descargar
+                                if (isPdf) {
+                                    // Para PDFs, usar el icono correcto
+                                    fileType = 'pdf';
+                                    fileIcon = <FileText size={64} color="#E11D48" />;
+                                    fileTypeText = 'PDF';
+                                    
+                                    return (
+                                        <div className={styles.documentPreview}>
+                                            <div className={styles.previewPlaceholder}>
+                                                <FileText size={64} color="#E11D48" />
+                                                <p>Documento PDF: <strong>{previewDocument.titulo}</strong></p>
+                                                <p className={styles.previewNote}>
+                                                    No se puede mostrar una vista previa para este documento PDF.
+                                                </p>
+                                                <p className={styles.previewTip}>
+                                                    Utiliza el botón "Descargar" para guardar y abrir el archivo en tu dispositivo.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                }
                                     
                                     // Para imágenes
                                     else if (previewDocument.signed_url.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/i) ||
@@ -1003,108 +1005,7 @@ const HistorialPaciente = () => {
                 </div>
             )}
 
-            {/* Modal para editar documento */}
-            {showEditModal && editingDocument && (
-                <div className={styles.uploadModal}>
-                    <div className={styles.uploadContainer}>
-                        <div className={styles.uploadHeader}>
-                            <h4>Editar documento</h4>
-                            <button onClick={handleCloseEditModal} className={styles.closeButton}>×</button>
-                        </div>
-                        <div className={styles.uploadContent}>
-                            <div className={styles.formField}>
-                                <label htmlFor="titulo">Nombre del documento *</label>
-                                <input
-                                    type="text"
-                                    id="titulo"
-                                    name="titulo"
-                                    value={editDocumentData.titulo}
-                                    onChange={handleEditDocumentInputChange}
-                                    placeholder="Nombre del documento"
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label htmlFor="document_type">Tipo de documento *</label>
-                                <select
-                                    id="document_type"
-                                    name="document_type"
-                                    value={editDocumentData.document_type}
-                                    onChange={handleEditDocumentInputChange}
-                                    required
-                                    className={styles.selectField}
-                                >
-                                    {documentTypes.map(type => (
-                                        <option key={type.value} value={type.value}>
-                                            {type.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label htmlFor="status_id">Estado del documento *</label>
-                                <select
-                                    id="status_id"
-                                    name="status_id"
-                                    value={editDocumentData.status_id}
-                                    onChange={handleEditDocumentInputChange}
-                                    required
-                                    className={styles.selectField}
-                                >
-                                    {documentStatuses.map(status => (
-                                        <option key={status.value} value={status.value}>
-                                            {status.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className={styles.formField}>
-                                <label>Reemplazar documento (opcional)</label>
-                                <div 
-                                    className={styles.fileUploadArea}
-                                    onClick={handleEditUploadAreaClick}
-                                >
-                                    <div className={styles.fileUploadIcon}>
-                                        <Upload size={30} color="#0891B2" />
-                                    </div>
-                                    <p className={styles.fileUploadText}>
-                                        Haz clic aquí para seleccionar un nuevo archivo o arrástralo y suéltalo
-                                    </p>
-                                    <input
-                                        type="file"
-                                        ref={editFileInputRef}
-                                        className={styles.fileInput}
-                                        onChange={handleEditFileSelect}
-                                        accept=".pdf,.doc,.docx"
-                                    />
-                                </div>
-                                {editSelectedFileName && (
-                                    <p className={styles.selectedFileName}>{editSelectedFileName}</p>
-                                )}
-                            </div>
-                        </div>
-                        <div className={styles.uploadActions}>
-                            <button 
-                                className={styles.cancelButton}
-                                onClick={handleCloseEditModal}
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                className={styles.uploadButton}
-                                onClick={handleUpdateDocument}
-                                disabled={!editDocumentData.titulo}
-                            >
-                                <Edit2 size={16} color="#FFFFFF" />
-                                Guardar cambios
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Se ha eliminado el modal de edición de documentos */}
             
             {/* Modal para subir documento */}
             {showUploadModal && (

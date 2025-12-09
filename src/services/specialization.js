@@ -12,7 +12,6 @@ export const getSpecializations = async () => {
     const response = await api.get('/specialization/index');
     
     if (!response || !response.data) {
-      console.warn('La respuesta no contiene datos');
       return { data: [] };
     }
     
@@ -26,11 +25,9 @@ export const getSpecializations = async () => {
       specializations = response.data.data;
     } 
     else {
-      console.warn('Estructura de respuesta no reconocida, intentando convertir:', response.data);
       specializations = response.data ? [response.data] : [];
     }
     
-    // Asegurarse de que cada especialización tenga un id
     const processedSpecializations = specializations.map((spec, index) => {
       // Si la especialización ya tiene un id, lo usamos, de lo contrario asignamos un índice
       return {
@@ -41,7 +38,6 @@ export const getSpecializations = async () => {
     
     return { data: processedSpecializations };
   } catch (error) {
-    console.error('Error al obtener especializaciones:', error);
     throw new Error(error.message);
   }
 };
@@ -56,7 +52,6 @@ export const createSpecialization = async (specializationData) => {
     const response = await api.post('/specialization/create', specializationData);
     return response;
   } catch (error) {
-    console.error('Error al crear especialización:', error);
     throw new Error(error.message);
   }
 };
@@ -72,7 +67,6 @@ export const updateSpecialization = async (id, specializationData) => {
     const response = await api.put(`/specialization/update/${id}`, specializationData);
     return response;
   } catch (error) {
-    console.error('Error al actualizar especialización:', error);
     throw new Error(error.message);
   }
 };
@@ -87,7 +81,6 @@ export const deleteSpecialization = async (id) => {
     const response = await api.del(`/specialization/delete/${id}`);
     return response;
   } catch (error) {
-    console.error('Error al eliminar especialización:', error);
     throw new Error(error.message);
   }
 };

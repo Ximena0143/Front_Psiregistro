@@ -2,7 +2,7 @@
  * Servicio para gestionar las plantillas de test psicológicos
  */
 import api from './api';
-import { getToken } from './auth';
+import authService, { getToken } from './auth';
 
 /**
  * Obtiene todas las plantillas del usuario
@@ -33,7 +33,6 @@ export const getBlanksByUser = async (userId) => {
     
     return blanksData;
   } catch (error) {
-    console.error('Error fetching blanks:', error);
     throw new Error(error.message);
   }
 };
@@ -95,8 +94,7 @@ export const uploadBlank = async (data, file) => {
     
     return processedResponse;
   } catch (error) {
-    console.error('Error uploading blank:', error);
-    console.error('Error details:', error.message);
+    
     
     // Si hay información en error.response, mostrarla
     if (error.response) {
@@ -137,11 +135,41 @@ export const deleteBlank = async (id) => {
   }
 };
 
+/**
+ * Envía una plantilla a los correos electrónicos especificados
+ * @param {number} blankId - ID de la plantilla
+ * @param {Array<string>} emails - Lista de correos electrónicos
+ * @returns {Promise} - Respuesta del envío
+ */
+export const sendBlank = async (blankId, emails) => {
+  try {
+    console.log('Sending blank to emails:', emails);
+    
+    const requestData = {
+      blank_id: blankId,
+      emails: emails
+    };
+    
+    const response = await api.post('/blank/send-blank', requestData, {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+    
+    console.log('Send blank response:', response);
+    return response;
+  } catch (error) {
+    console.error('Error sending blank:', error);
+    throw error;
+  }
+};
+
 const blankService = {
   getBlanksByUser,
   uploadBlank,
-  downloadBlank,
-  deleteBlank
+  deleteBlank,
+  sendBlank
 };
 
 export default blankService;

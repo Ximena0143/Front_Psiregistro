@@ -368,3 +368,31 @@
     border-radius: 4px;
     border: 1px solid #E6EDF0;
 }
+
+/* Estilos para estados de carga y vacío */
+.loadingContainer,
+.emptyState {
+    width: 100%;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.loadingContainer p,
+.emptyState p {
+    color: #64748B;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.emptyState button {
+    margin-top: 15px;
+}

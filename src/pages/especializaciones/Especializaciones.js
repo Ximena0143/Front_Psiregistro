@@ -44,10 +44,8 @@ const Especializaciones = () => {
                 setEspecializaciones(response.data);
             } else {
                 setEspecializaciones([]);
-                console.warn('No se recibieron datos de especializaciones del servidor');
             }
         } catch (err) {
-            console.error('Error al cargar especializaciones:', err);
             setError('No se pudieron cargar las especializaciones. Por favor, intente de nuevo más tarde.');
             
             // Mostrar mensaje de error
@@ -121,9 +119,7 @@ const Especializaciones = () => {
             // Cerrar modal y actualizar lista
             handleCloseAddModal();
             fetchEspecializaciones();
-        } catch (error) {
-            console.error('Error al crear especialización:', error);
-            
+        } catch (error) {            
             Swal.fire({
                 title: 'Error',
                 text: 'No se pudo crear la especialización. Por favor, intente de nuevo.',
@@ -160,9 +156,7 @@ const Especializaciones = () => {
             // Cerrar modal y actualizar lista
             handleCloseEditModal();
             fetchEspecializaciones();
-        } catch (error) {
-            console.error('Error al actualizar especialización:', error);
-            
+        } catch (error) {            
             Swal.fire({
                 title: 'Error',
                 text: 'No se pudo actualizar la especialización. Por favor, intente de nuevo.',
@@ -200,7 +194,6 @@ const Especializaciones = () => {
                     // Actualizar la lista de especializaciones
                     fetchEspecializaciones();
                 } catch (error) {
-                    console.error('Error al eliminar especialización:', error);
                     
                     let errorMessage = 'No se pudo eliminar la especialización.';
                     if (error.response && error.response.data && error.response.data.message) {
