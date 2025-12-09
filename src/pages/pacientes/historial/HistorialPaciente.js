@@ -909,14 +909,12 @@ const HistorialPaciente = () => {
                             (() => {
                                 // Verificar si la URL o el título contiene indicación del tipo de archivo
                                 const isPdf = isPdfDocument(previewDocument);
-                                let fileType = 'desconocido';
                                 let fileIcon = <FileText size={64} color="#219EBC" />;
                                 let fileTypeText = 'documento';
                                 
                                 // Para PDFs, mostrar mensaje para descargar
                                 if (isPdf) {
                                     // Para PDFs, usar el icono correcto
-                                    fileType = 'pdf';
                                     fileIcon = <FileText size={64} color="#E11D48" />;
                                     fileTypeText = 'PDF';
                                     

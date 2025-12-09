@@ -185,7 +185,7 @@ const Publicaciones = () => {
                 let formattedTitle = post.tittle;
                 
                 // Eliminar la extensión del archivo (.jpg, .png, etc.)
-                formattedTitle = formattedTitle.replace(/\.[^\.]+$/, '');
+                formattedTitle = formattedTitle.replace(/\.[^.]+$/, '');
                 
                 // Reemplazar guiones por espacios
                 formattedTitle = formattedTitle.replace(/-/g, ' ');
