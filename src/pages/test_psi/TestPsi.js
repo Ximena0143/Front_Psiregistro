@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from './styles.module.css';
 import Header from '../../components/layout/Header/Header';
 import Sidebar from '../../components/layout/Sidebar/Sidebar';
-import { X, Upload, Eye, UserRound, Send, Trash2 } from 'lucide-react';
+import { X, Upload, UserRound, Send, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import blankService from '../../services/blankService';
 import authService from '../../services/auth';
@@ -51,11 +51,9 @@ const TestPsi = () => {
                             
                             setTests(formattedTests);
                         } else {
-                            console.error('blanksData no es un array:', blanksData);
                             setTests([]);
                         }
                     } catch (apiError) {
-                        console.error('Error en la llamada a la API:', apiError);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error de conexión',
@@ -64,8 +62,6 @@ const TestPsi = () => {
                         });
                     }
                 } else {
-                    console.warn('No se encontró el ID del usuario o datos de usuario');
-                    
                     Swal.fire({
                         icon: 'warning',
                         title: 'Sesión no encontrada',
@@ -74,7 +70,6 @@ const TestPsi = () => {
                     });
                 }
             } catch (error) {
-                console.error('Error general al cargar los tests:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -121,12 +116,6 @@ const TestPsi = () => {
             archivo: null
         });
         setSelectedFileName('');
-    };
-
-    // Funciones para manejar el modal de detalles del test
-    const handleOpenDetailsModal = (test) => {
-        setCurrentTest(test);
-        setShowDetailsModal(true);
     };
 
     const handleCloseDetailsModal = () => {
@@ -253,11 +242,9 @@ const TestPsi = () => {
                 // Cerrar el modal
                 handleCloseUploadModal();
             } else {
-                console.error('No se pudieron extraer datos de la respuesta:', response);
                 throw new Error('La respuesta del servidor no tiene el formato esperado');
             }
         } catch (error) {
-            console.error('Error al guardar la plantilla:', error);
             let errorMessage = 'No se pudo guardar la plantilla. Por favor, intenta de nuevo más tarde.';
             
             // Intentar obtener un mensaje de error más específico si está disponible
@@ -307,7 +294,6 @@ const TestPsi = () => {
                         showConfirmButton: false
                     });
                 } catch (error) {
-                    console.error('Error al eliminar la plantilla:', error);
                     
                     let errorMessage = 'No se pudo eliminar la plantilla. Por favor, intenta de nuevo más tarde.';
                     
@@ -341,7 +327,6 @@ const TestPsi = () => {
             
             // Llamar al servicio para enviar el test
             const response = await blankService.sendBlank(currentTest.id, emails);
-            console.log('Send blank response:', response);
             
             // Mostrar alerta de éxito
             Swal.fire({
@@ -356,7 +341,6 @@ const TestPsi = () => {
             // Cerrar el modal
             handleCloseAssignModal();
         } catch (error) {
-            console.error('Error al enviar el test:', error);
             
             let errorMessage = 'No se pudo enviar la plantilla. Por favor, intenta de nuevo más tarde.';
             
@@ -376,42 +360,6 @@ const TestPsi = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-
-
-    // Función para ver el documento directamente
-    const handleViewDocument = (documentUrl) => {
-        if (!documentUrl) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'URL no disponible',
-                text: 'No se puede acceder a este documento. La URL no está disponible.',
-                confirmButtonColor: '#FB8500'
-            });
-            return;
-        }
-        
-        // Notificar al usuario que se está abriendo el documento
-        const toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer);
-                toast.addEventListener('mouseleave', Swal.resumeTimer);
-            }
-        });
-        
-        toast.fire({
-            icon: 'info',
-            title: 'Abriendo documento...'
-        });
-        
-        // Abrir el documento en una nueva pestaña
-        window.open(documentUrl, '_blank');
     };
 
     return (

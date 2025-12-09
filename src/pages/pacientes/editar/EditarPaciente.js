@@ -86,8 +86,7 @@ const EditarPaciente = () => {
                     });
                 }
             } catch (error) {
-                console.error('Error al cargar datos del paciente:', error);
-                
+
                 Swal.fire({
                     title: 'Error',
                     text: 'No se pudieron cargar los datos del paciente',

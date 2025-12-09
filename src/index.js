@@ -25,7 +25,6 @@ import reportWebVitals from './reportWebVitals';
       // Verificar si estamos en una ruta que necesita corrección
       for (const route of routesToFix) {
         if (path.startsWith(route)) {
-          console.log(`Redirigiendo desde ${window.location.pathname} a la URL en formato HashRouter: /#/${path}${search}`);
           window.location.replace(`/#/${path}${search}`);
           break;
         }

@@ -76,7 +76,7 @@ const Perfil = () => {
             
             // Obtener el usuario actual usando el endpoint /auth/me
             const meResponse = await api.post('/auth/me');
-            console.log('Respuesta de /auth/me:', meResponse); // Para depuración
+
             
             if (!meResponse || !meResponse.data) {
                 setLoading(false);
@@ -88,7 +88,7 @@ const Perfil = () => {
             
             // Usar los datos del usuario desde meResponse.data
             const basicUserData = meResponse.data;
-            console.log('Datos del usuario obtenidos:', basicUserData); // Para depuración
+
             
             // Utilizar la función reutilizable para actualizar los datos de usuario
             updateUserDataState(basicUserData);
@@ -96,7 +96,6 @@ const Perfil = () => {
             setLoading(false);
             return basicUserData; // Retorna los datos por si son necesarios
         } catch (error) {
-            console.error('Error al cargar datos del perfil:', error);
             Swal.fire({
                 title: 'Error',
                 text: 'No se pudo cargar la información del perfil',
@@ -111,22 +110,17 @@ const Perfil = () => {
     // Método para obtener la URL firmada de la foto de perfil directamente del backend
     const getProfilePhotoUrl = async () => {
         try {
-            console.log('Intentando obtener la URL firmada de la foto de perfil');
             const response = await api.get('/user/get-profile-photo');
-            console.log('Respuesta completa del endpoint get-profile-photo:', response);
             
             // Verificamos si tenemos la estructura esperada en la respuesta
             if (response && response.data && response.data.URL) {
-                console.log('URL firmada de la foto obtenida:', response.data.URL);
                 // Actualizar el estado con la URL firmada
                 setProfileImage(response.data.URL);
                 return response.data.URL;
             } else {
-                console.error('Respuesta inválida al obtener URL de foto');
                 return null;
             }
         } catch (error) {
-            console.error('Error al obtener URL de foto de perfil:', error);
             return null;
         }
     };
@@ -290,7 +284,6 @@ const Perfil = () => {
                         setIsEditing(false);
                     })
                     .catch((error) => {
-                        console.error('Error al recargar datos:', error);
                         setIsEditing(false);
                     });
             }
@@ -304,28 +297,11 @@ const Perfil = () => {
             // Usar el servicio para actualizar la foto de perfil
             // Crear un FormData para enviar el archivo
             const formData = new FormData();
-            
-            // Verificar y mostrar detalles del archivo
-            console.log('Archivo a subir:', file);
-            console.log('Nombre del archivo:', file.name);
-            console.log('Tipo del archivo:', file.type);
-            console.log('Tamaño del archivo:', file.size, 'bytes');
-            
-            // IMPORTANTE: asegurarse de que el nombre del campo sea exactamente 'profile_photo'
-            console.log('Agregando archivo al FormData:', file.name, file.type, file.size);
+    
             formData.append('profile_photo', file);
             
             // Simular PATCH con el parámetro _method
             formData.append('_method', 'PATCH');
-            
-            // Para depuración: verificar el contenido del FormData
-            console.log('Contenido del FormData:');
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ': ' + (pair[1] instanceof File ? `File: ${pair[1].name}` : pair[1]));
-            }
-            
-            // Logging del FormData (no muestra contenido pero confirma que existe)
-            console.log('FormData creado:', formData);
             
             // Configurar headers para envío de archivos
             const config = {
@@ -334,15 +310,8 @@ const Perfil = () => {
                     'Authorization': `Bearer ${localStorage.getItem('token')}` 
                 }
             };
-            console.log('Configuración de la solicitud:', config);
-            
             // Enviar la imagen al backend usando POST pero simulando PATCH
-            console.log('Enviando solicitud al endpoint: /user/update-profile-photo como POST con _method=PATCH');
-            // FormData ya contiene _method=PATCH, así que usamos POST que maneja mejor la subida de archivos
             const response = await api.post('/user/update-profile-photo', formData, config);
-            console.log('Content-Type de la solicitud:', config.headers['Content-Type']);
-            console.log('Respuesta completa del servidor:', response);
-            console.log('Datos de respuesta:', response.data);
             
             if (response && !response.error) {
                 Swal.fire({
@@ -351,30 +320,24 @@ const Perfil = () => {
                     icon: 'success',
                     confirmButtonColor: '#FB8500'
                 });
-                
-                console.log('Procesando respuesta del servidor:', response.data);
-                
+                                
                 // Obtener la ruta de la foto de la respuesta del servidor
                 let photoPath = null;
                 
                 // Verificar primero en response.data.path (estructura devuelta por el backend actual)
                 if (response.data && response.data.path) {
                     photoPath = response.data.path;
-                    console.log('Encontrada ruta de foto en response.data.path:', photoPath);
                 }
                 // Verificar estructura alternativa por compatibilidad
                 else if (response.data && response.data.user && response.data.user.profile_photo_path) {
                     photoPath = response.data.user.profile_photo_path;
-                    console.log('Encontrada ruta de foto en response.data.user.profile_photo_path:', photoPath);
                 }
                 
                 if (photoPath) {
                     // IMPORTANTE: Guardar la ruta en localStorage para persistencia
                     localStorage.setItem('user_photo_path', photoPath);
-                    console.log('Ruta de foto guardada en localStorage:', photoPath);
                     
                     // Después de subir la imagen, obtener la URL firmada directamente del backend
-                    console.log('Obteniendo URL firmada de la nueva foto subida');
                     try {
                         // Obtener la URL firmada del backend
                         await getProfilePhotoUrl();
@@ -384,7 +347,6 @@ const Perfil = () => {
                         // Como respaldo, construir una URL directa (puede no funcionar si el bucket es privado)
                         const s3BaseUrl = 'https://psiregistro.s3.us-west-1.amazonaws.com/';
                         const fullImageUrl = s3BaseUrl + photoPath;
-                        console.log('URL de respaldo para la imagen:', fullImageUrl);
                         setProfileImage(fullImageUrl);
                     }
                 }
@@ -393,7 +355,6 @@ const Perfil = () => {
                 await fetchUserData();
             }
         } catch (error) {
-            console.error('Error al actualizar la foto de perfil:', error);
             Swal.fire({
                 title: 'Error',
                 text: 'No se pudo actualizar la foto de perfil',

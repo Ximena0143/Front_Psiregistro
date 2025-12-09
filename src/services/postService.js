@@ -67,14 +67,6 @@ export const createPost = async (data, files) => {
     // Añadir el tipo de post determinado
     formData.append('post_type', postType);
     
-    // Agregar logs para depuración
-    console.log('Enviando datos a la API:', {
-      titulo: data.titulo,
-      descripcion: data.descripcion,
-      post_type: postType,
-      archivos: files ? files.length : 0
-    });
-    
     const response = await api.post('/post/create', formData);
     
     if (response && !response.error) {

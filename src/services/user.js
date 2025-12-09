@@ -14,7 +14,6 @@ export const getUsers = async (perPage = 100, page = 1) => {
     const response = await api.get(`/user/index?per_page=${perPage}&page=${page}`);
     
     if (!response || !response.data) {
-      console.warn('La respuesta no contiene datos');
       return { data: [] };
     }
     
@@ -26,13 +25,10 @@ export const getUsers = async (perPage = 100, page = 1) => {
       return response.data;
     } 
     else {
-      console.warn('Estructura de respuesta no reconocida, intentando convertir:', response.data);
-      // Intentar convertir un objeto a un array si es necesario
       const dataArray = response.data ? [response.data] : [];
       return { data: dataArray };
     }
   } catch (error) {
-    console.error('Error al obtener usuarios:', error);
     throw new Error(error.message);
   }
 };
@@ -47,7 +43,6 @@ export const getUserById = async (id) => {
     const response = await api.get(`/user/${id}`);
     
     if (!response || !response.data) {
-      console.warn('La respuesta no contiene datos del usuario');
       return null;
     }
     
@@ -60,7 +55,6 @@ export const getUserById = async (id) => {
       return response.data;
     }
   } catch (error) {
-    console.error(`Error al obtener usuario con ID ${id}:`, error);
     throw new Error(error.message);
   }
 };
@@ -76,7 +70,6 @@ export const getDeletedUsers = async (perPage = 10, page = 1) => {
     const response = await api.get(`/user/deleted-index?per_page=${perPage}&page=${page}`);
     return response;
   } catch (error) {
-    console.error('Error al obtener usuarios eliminados:', error);
     throw new Error(error.message);
   }
 };
@@ -107,7 +100,6 @@ export const registerUser = async (userData) => {
     const response = await api.post('/user/register', dataToSend);
     return response;
   } catch (error) {
-    console.error('Error al registrar usuario:', error);
     throw new Error(error.message);
   }
 };
@@ -123,8 +115,6 @@ export const updateUser = async (id, userData) => {
     const response = await api.put(`/user/update/${id}`, userData);
     return response;
   } catch (error) {
-    // Log detallado del error
-    console.error('Error al actualizar usuario:', error);
     
     // Mejorar el mensaje de error para que sea más descriptivo
     let errorMessage = error.message || 'Error desconocido';
@@ -148,7 +138,6 @@ export const deleteUser = async (id) => {
     const response = await api.del(`/user/delete/${id}`);
     return response;
   } catch (error) {
-    console.error('Error al eliminar usuario:', error);
     throw new Error(error.message);
   }
 };
@@ -163,7 +152,6 @@ export const restoreUser = async (id) => {
     const response = await api.patch(`/user/restore/${id}`);
     return response;
   } catch (error) {
-    console.error('Error al restaurar usuario:', error);
     throw new Error(error.message);
   }
 };
@@ -178,7 +166,6 @@ export const forceDeleteUser = async (id) => {
     const response = await api.del(`/user/force-delete/${id}`);
     return response;
   } catch (error) {
-    console.error('Error al eliminar permanentemente usuario:', error);
     throw new Error(error.message);
   }
 };
@@ -199,7 +186,6 @@ export const updateProfilePhoto = async (photoFile) => {
     const response = await api.post('/update-profile-photo', formData);
     return response;
   } catch (error) {
-    console.error('Error al actualizar la foto de perfil:', error);
     throw error;
   }
 };

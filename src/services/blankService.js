@@ -33,7 +33,6 @@ export const getBlanksByUser = async (userId) => {
     
     return blanksData;
   } catch (error) {
-    console.error('Error fetching blanks:', error);
     throw new Error(error.message);
   }
 };
@@ -95,8 +94,7 @@ export const uploadBlank = async (data, file) => {
     
     return processedResponse;
   } catch (error) {
-    console.error('Error uploading blank:', error);
-    console.error('Error details:', error.message);
+    
     
     // Si hay información en error.response, mostrarla
     if (error.response) {

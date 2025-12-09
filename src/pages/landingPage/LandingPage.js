@@ -85,14 +85,9 @@ const LandingPage = () => {
     useEffect(() => {
         const fetchPsychologists = async () => {
             try {
-                console.log('Obteniendo datos de psicólogos para la landing page...');
-                const data = await landingService.getPsychologists();
-                console.log('Datos de psicólogos obtenidos:', data);
-                
+                const data = await landingService.getPsychologists();                
                 if (data && data.length > 0) {
                     setPsicologos(data);
-                } else {
-                    console.log('No se encontraron datos de psicólogos');
                 }
             } catch (error) {
                 console.error('Error al cargar los psicólogos:', error);
@@ -107,14 +102,9 @@ const LandingPage = () => {
         const fetchPublicaciones = async () => {
             try {
                 setLoadingPublicaciones(true);
-                console.log('Obteniendo publicaciones para la landing page...');
-                const data = await publicacionesLandingService.getPublicaciones();
-                console.log('Publicaciones obtenidas:', data);
-                
+                const data = await publicacionesLandingService.getPublicaciones();                
                 if (data && data.length > 0) {
                     setPublicaciones(data);
-                } else {
-                    console.log('No se encontraron publicaciones');
                 }
             } catch (error) {
                 console.error('Error al cargar las publicaciones:', error);
@@ -289,19 +279,16 @@ const LandingPage = () => {
                                     )}
                                 </>
                             ) : (
-                                // Fallback estático si no hay publicaciones
+                                // Mensaje cuando no hay publicaciones disponibles
                                 <>
-                                    <div className={styles.container_titulo_publi2}>
-                                        <h3 className={styles.titulo_publi2}>Fortalecimiento de la inteligencia emocional en el aula</h3>
-                                    </div>
-                                    <div className={styles.container_imagen_publi2}>
-                                        <img className={styles.image1_publi} src="/Images/Imagen1Publi.jpg" alt="Imagen ejemplo publicaciones" />
-                                    </div>
-                                    <div className={styles.container_descripcion_publi}>
-                                        <p className={styles.descripcion_publi}>En colaboración con la <strong>Institución Educativa San Gabriel</strong>,
-                                            realizamos una charla dirigida a los maestros de secundaria para brindarles herramientas efectivas
-                                            que les permitan manejar sus emociones y ayudar a sus estudiantes a desarrollar una inteligencia
-                                            emocional saludable.</p>
+                                    <div className={styles.no_publications_container}>
+                                        <div className={styles.no_publications_content}>
+                                            <h3 className={styles.no_publications_title}>No hay publicaciones disponibles</h3>
+                                            <p className={styles.no_publications_text}>
+                                                En este momento no hay eventos o publicaciones disponibles para mostrar. 
+                                                Te invitamos a visitarnos próximamente para conocer nuestras actividades y novedades.
+                                            </p>
+                                        </div>
                                     </div>
                                 </>
                             )}
@@ -383,30 +370,17 @@ const LandingPage = () => {
                                             </div>
                                         ))
                                 ) : (
-                                    // Mostrar versión estática como respaldo
+                                    // Mensaje cuando no hay psicólogos disponibles
                                     <>
-                                        <div className={styles.item1_psicologos}>
-                                            <p className={styles.nombre_psicologo}>Dra. Jimena García</p>
-                                            <p className={styles.especialidad_psicologos}>Psicóloga forense</p>
-                                            <img className={styles.imagen_psicologos} src="/Images/Imagen1PSI.jpg" alt="Imagen1 psicologos" />
-                                            <p className={styles.descripcion_psicologos}>Especialista en psicología forense con amplia experiencia en evaluaciones psicológicas.</p>
+                                        <div className={styles.no_psychologists_container}>
+                                            <div className={styles.no_psychologists_content}>
+                                                <h3 className={styles.no_psychologists_title}>No hay psicólogos disponibles</h3>
+                                                <p className={styles.no_psychologists_text}>
+                                                    En este momento no tenemos información de psicólogos para mostrar.
+                                                    Pronto actualizaremos nuestro equipo de especialistas.
+                                                </p>
+                                            </div>
                                         </div>
-                                        {visibleCount > 1 && (
-                                            <div className={styles.item1_psicologos}>
-                                                <p className={styles.nombre_psicologo}>Dr. César Estrada</p>
-                                                <p className={styles.especialidad_psicologos}>Psicólogo educación y del desarrollo</p>
-                                                <img className={styles.imagen_psicologos} src="/Images/Imagen2PSI.jpg" alt="Imagen2 psicologos" />
-                                                <p className={styles.descripcion_psicologos}>Especializado en psicología educativa y del desarrollo, enfocado en niños y adolescentes.</p>
-                                            </div>
-                                        )}
-                                        {visibleCount > 2 && (
-                                            <div className={styles.item1_psicologos}>
-                                                <p className={styles.nombre_psicologo}>Dra. Marisol Flores</p>
-                                                <p className={styles.especialidad_psicologos}>Psicóloga pareja y familiar</p>
-                                                <img className={styles.imagen_psicologos} src="/Images/Imagen3PSI.jpg" alt="Imagen3 psicologos" />
-                                                <p className={styles.descripcion_psicologos}>Experta en terapia de pareja y familiar, con enfoque en resolución de conflictos.</p>
-                                            </div>
-                                        )}
                                     </>
                                 )}
                             </div>

@@ -123,14 +123,12 @@ function RootRouteHandler() {
   
   // Si hay parámetros de consulta y uno de ellos es token, redirigir a reset-password
   if (location.search && location.search.includes('token=')) {
-    console.log('Detectado token en la raíz, redirigiendo a /reset-password' + location.search);
     return <Navigate to={`/reset-password${location.search}`} replace />;
   }
   
   // Verificar si hay doble slash en la URL
   const fullPath = window.location.pathname;
   if (fullPath.includes('//')) {
-    console.log('Detectada URL con doble slash:', fullPath);
     
     // Normalizar el pathname
     let normalizedPath = fullPath;
@@ -140,7 +138,6 @@ function RootRouteHandler() {
     
     // Si el path normalizado contiene reset-password, redirigir correctamente
     if (normalizedPath.includes('/reset-password')) {
-      console.log(`Corrigiendo ruta con doble slash: ${fullPath} -> /#${normalizedPath}`);
       return <Navigate to={`/#${normalizedPath}${location.search}`} replace />;
     }
   }

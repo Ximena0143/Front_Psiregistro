@@ -22,44 +22,30 @@ export default function ResetPassword() {
 
   // Extraer el token de los parámetros de la URL
   useEffect(() => {
-    console.log('Iniciando extracción de token...');
-    console.log('URL completa:', window.location.href);
-    console.log('Params:', params);
-    console.log('Location:', location);
-
     // Método 1: Intentar capturar desde parámetros de ruta (/:token)
     let tokenFromUrl = params.token;
-    console.log('Token desde parámetros de ruta:', tokenFromUrl);
 
     if (!tokenFromUrl) {
       // Método 2: Intentar desde location.search (BrowserRouter)
       const queryParams = new URLSearchParams(location.search);
-      tokenFromUrl = queryParams.get('token');
-      console.log('Token desde location.search:', tokenFromUrl);
-      
+      tokenFromUrl = queryParams.get('token');      
       // Método 3: Si no funciona, intentar desde location.hash (HashRouter)
       if (!tokenFromUrl && location.hash) {
-        console.log('Extrayendo desde location.hash:', location.hash);
         // Extraer la parte de la query string después del hash y la ruta
         const hashParts = location.hash.split('?');
-        console.log('Hash parts:', hashParts);
         
         if (hashParts.length > 1) {
           const hashQueryParams = new URLSearchParams(hashParts[1]);
           tokenFromUrl = hashQueryParams.get('token');
-          console.log('Token desde location.hash:', tokenFromUrl);
         } else {
           // Intentar otra forma: a veces el formato es /#/reset-password?token=xxx
           const pathAndQuery = location.hash.substring(1); // quitar el #
           const queryStartPos = pathAndQuery.indexOf('?');
           
           if (queryStartPos !== -1) {
-            const queryString = pathAndQuery.substring(queryStartPos + 1);
-            console.log('Query string alternativa:', queryString);
-            
+            const queryString = pathAndQuery.substring(queryStartPos + 1);            
             const altQueryParams = new URLSearchParams(queryString);
             tokenFromUrl = altQueryParams.get('token');
-            console.log('Token desde query alternativa:', tokenFromUrl);
           }
         }
       }
@@ -72,28 +58,20 @@ export default function ResetPassword() {
         if (tokenPos !== -1) {
           const tokenPart = fullUrl.substring(tokenPos + 6); // +6 para saltar 'token='
           const endPos = tokenPart.indexOf('&') !== -1 ? tokenPart.indexOf('&') : undefined;
-          tokenFromUrl = endPos ? tokenPart.substring(0, endPos) : tokenPart;
-          console.log('Token extraído directamente de URL:', tokenFromUrl);
+          tokenFromUrl = endPos ? tokenPart.substring(0, endPos) : tokenPart;          
         }
       }
     }
     
-    console.log('Location completa:', location);
-    
     if (tokenFromUrl) {
-      setToken(tokenFromUrl);
-      console.log('Token extraído de la URL:', tokenFromUrl);
+      setToken(tokenFromUrl);      
     } else {
       console.error('No se encontró un token en la URL');
-      console.error('URL completa actual:', window.location.href);
-      console.error('pathname:', window.location.pathname);
-      console.error('hash:', window.location.hash);
-      console.error('search:', window.location.search);
+
       
       // Verificar si la URL está en el formato incorrecto (sin # cuando debería tenerlo)
       // o tiene dobles slashes
-      if (window.location.pathname.includes('reset-password') && !window.location.hash) {
-        console.log('Detectada URL sin hash o con formato incorrecto. Intentando redireccionar...');
+      if (window.location.pathname.includes('reset-password') && !window.location.hash) {        
         
         // Normalizar el pathname eliminando posibles dobles slashes
         let pathname = window.location.pathname;
@@ -103,11 +81,9 @@ export default function ResetPassword() {
         
         // Crear la URL correcta en formato HashRouter
         const correctPath = pathname.replace('/reset-password', 'reset-password');
-        const correctUrl = `/#/${correctPath}${window.location.search}`;
-        
-        console.log(`Redirigiendo de ${window.location.href} a ${window.location.origin}${correctUrl}`);
+        const correctUrl = `/#/${correctPath}${window.location.search}`;        
         window.location.replace(correctUrl);
-        return; // Evitar mostrar el error ya que estamos redireccionando
+        return; 
       }
       
       Swal.fire({
@@ -187,9 +163,7 @@ export default function ResetPassword() {
     if (!emailError && !passwordError && !confirmError && email && password && passwordConfirm && token) {
       try {
         setLoading(true);
-        console.log('Iniciando proceso de reseteo de contraseña');
-        
-        // Llamar al servicio de reseteo de contraseña
+
         await authService.resetPassword({ 
           email, 
           password, 

@@ -20,7 +20,6 @@ export const getManuals = async () => {
       throw new Error(response.message || 'Error al obtener los manuales');
     }
   } catch (error) {
-    console.error('Error al obtener los manuales:', error);
     throw error;
   }
 };

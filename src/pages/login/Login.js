@@ -89,7 +89,6 @@ export default function Login() {
           response = await authService.login({ email, password });
           loginSuccess = true;
         } catch (loginError) {
-          console.error("Error en la primera llamada de login:", loginError);
 
           // Verificamos si a pesar del error se guardó un token (puede pasar si el servidor
           // responde con un token pero luego hay un error en el procesamiento)

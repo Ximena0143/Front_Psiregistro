@@ -18,12 +18,7 @@ const Publicaciones = () => {
     });
     const [selectedFileName, setSelectedFileName] = useState('');
     const fileInputRef = useRef(null);
-    
-    const formatDate = () => {
-        const date = new Date();
-        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        return `${date.getDate()} ${months[date.getMonth()]}, ${date.getFullYear()}`;
-    };
+
     // Funciones para manejar nueva publicación
     const handleOpenNewModal = () => {
         setShowNewModal(true);
@@ -89,24 +84,7 @@ const Publicaciones = () => {
                     Swal.showLoading();
                 }
             });
-            
-            // Preparar datos para enviar al servicio
-            const postData = {
-                titulo: newPublicacion.titulo,
-                descripcion: newPublicacion.descripcion || ''
-            };
-            
-            // Convertir la imagen en un array como espera el backend
-            const files = [newPublicacion.imagen];
-            
-            console.log('Archivo a enviar:', {
-                nombre: newPublicacion.imagen.name,
-                tipo: newPublicacion.imagen.type,
-                tamaño: newPublicacion.imagen.size
-            });
-            
-            // Llamar al servicio para crear la publicación
-            const response = await postService.createPost(postData, files);
+
             
             // Recargar las publicaciones para mostrar la recién creada
             await loadPosts();
@@ -124,7 +102,7 @@ const Publicaciones = () => {
             // Cerrar el modal
             handleCloseNewModal();
         } catch (error) {
-            console.error('Error al guardar la publicación:', error);
+            
             
             // Mostrar mensaje de error
             Swal.fire({
@@ -179,7 +157,6 @@ const Publicaciones = () => {
                         showConfirmButton: false
                     });
                 } catch (error) {
-                    console.error('Error al eliminar la publicación:', error);
                     
                     // Mostrar mensaje de error
                     Swal.fire({

@@ -224,7 +224,6 @@ const HistorialPaciente = () => {
                 fetchPatientDocuments(patient.id);
                 
             } catch (err) {
-                console.error('Error al cargar datos del paciente:', err);
                 setError(err.message || 'Error al cargar datos del paciente');
                 
                 // Mostrar alerta de error
@@ -316,7 +315,6 @@ const HistorialPaciente = () => {
             
             setDocumentos(documentosFormateados);
         } catch (error) {
-            console.error('Error al cargar documentos del paciente:', error);
             Swal.fire({
                 title: 'Error',
                 text: 'No se pudieron cargar los documentos del paciente',
@@ -354,18 +352,15 @@ const HistorialPaciente = () => {
                 // Para PDF: abrir en nueva pestaña
                 link.target = '_blank';
                 // No establecer el atributo download para PDFs
-                console.log('Abriendo PDF en nueva pestaña:', documento.signed_url);
             } else {
                 // Para otros archivos: forzar descarga
                 link.download = documento.tituloOriginal || documento.titulo || 'documento';
-                console.log('Descargando documento:', documento.tituloOriginal || documento.titulo);
             }
             
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         } else {
-            console.error('Error en descarga - URL no disponible:', documento);
             Swal.fire({
                 title: 'Error',
                 text: 'No se puede descargar el documento. URL no disponible.',
@@ -414,7 +409,6 @@ const HistorialPaciente = () => {
                 );
             }
         } catch (error) {
-            console.error('Error al eliminar documento:', error);
             Swal.fire(
                 'Error',
                 'No se pudo eliminar el documento. Inténtalo de nuevo.',
@@ -523,7 +517,6 @@ const HistorialPaciente = () => {
             handleCloseUploadModal();
             
         } catch (error) {
-            console.error('Error al subir documento:', error);
             
             Swal.fire({
                 title: 'Error',

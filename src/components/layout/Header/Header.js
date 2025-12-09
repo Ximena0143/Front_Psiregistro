@@ -21,19 +21,15 @@ const Header = ({ variant = 'landing' }) => {
     // Función para obtener la URL firmada de la foto de perfil
     const getProfilePhotoUrl = async () => {
         try {
-            console.log('Header: Obteniendo URL firmada de la foto de perfil');
             const response = await api.get('/landing/user/get-profile-photo');
             
             if (response && response.data && response.data.URL) {
-                console.log('Header: URL firmada obtenida:', response.data.URL);
                 setProfilePhotoUrl(response.data.URL);
                 return response.data.URL;
             } else {
-                console.log('Header: No se pudo obtener la URL firmada');
                 return null;
             }
         } catch (error) {
-            console.error('Header: Error al obtener URL de foto:', error);
             return null;
         }
     };

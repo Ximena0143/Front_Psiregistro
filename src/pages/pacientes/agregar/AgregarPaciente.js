@@ -45,12 +45,10 @@ const AgregarPaciente = () => {
                         setErrorIdentificationTypes('No hay tipos de identificación disponibles');
                     }
                 } else {
-                    console.warn('La respuesta no es un array de tipos de identificación:', response);
                     setIdentificationTypes([]);
                     setErrorIdentificationTypes('Error al obtener los tipos de identificación');
                 }
             } catch (error) {
-                console.error('Error al cargar tipos de identificación:', error);
                 setErrorIdentificationTypes('Error al cargar los tipos de identificación: ' + error.message);
                 setIdentificationTypes([]);
                 

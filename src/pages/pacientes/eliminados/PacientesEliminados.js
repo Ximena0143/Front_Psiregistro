@@ -52,7 +52,6 @@ const PacientesEliminados = () => {
                 setPatients([]);
             }
         } catch (err) {
-            console.error('Error al cargar pacientes eliminados:', err);
             setError('No se pudieron cargar los pacientes eliminados. Por favor, intente de nuevo más tarde.');
         } finally {
             setLoading(false);
@@ -102,7 +101,6 @@ const PacientesEliminados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al restaurar:', error);
             let errorMessage = 'No se pudo restaurar el paciente';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;
@@ -143,7 +141,6 @@ const PacientesEliminados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error al eliminar permanentemente:', error);
             let errorMessage = 'No se pudo eliminar el paciente permanentemente';
             if (error.response && error.response.data && error.response.data.message) {
                 errorMessage = error.response.data.message;

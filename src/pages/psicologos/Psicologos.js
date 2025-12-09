@@ -168,7 +168,6 @@ const Psicologos = () => {
                     // Actualizar la lista de psicólogos desde el backend
                     fetchPsicologos();
                 } catch (error) {
-                    console.error('Error al eliminar psicólogo:', error);
                     
                     Swal.fire({
                         title: 'Error',

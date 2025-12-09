@@ -31,15 +31,28 @@ export default function ForgotPassword() {
     if (!emailError && email) {
       try {
         setLoading(true);
-        console.log('Iniciando proceso de recuperación de contraseña');
         
-        // Llamar al servicio de recuperación de contraseña
-        await authService.forgotPassword({ email });
+        try {
+          // Llamar al servicio de recuperación de contraseña
+          await authService.forgotPassword({ email });
+        } catch (error) {
+          // Solo registrar el error en la consola para depuración, pero no mostrarlo al usuario
+          console.error('Error al solicitar recuperación de contraseña:', {
+            mensaje: error.message,
+            estado: error.status,
+            url: error.url,
+            datos: error.data
+          });
+          
+          // No hacer nada con el error - continuamos con el flujo normal
+          // independientemente de si el correo existe o no en la base de datos
+        }
         
-        // Mostrar mensaje de éxito
+        // SIEMPRE mostrar mensaje de éxito, independientemente de si el correo existe o no
+        // Esto es una práctica de seguridad para evitar la enumeración de usuarios
         Swal.fire({
           title: '¡Éxito!',
-          text: `Se ha enviado un correo de recuperación de contraseña a ${email}`,
+          text: `Si el correo ${email} está registrado en nuestro sistema, recibirás un mensaje con instrucciones para restablecer tu contraseña.`,
           icon: 'success',
           confirmButtonColor: '#FB8500',
           customClass: {
@@ -60,49 +73,6 @@ export default function ForgotPassword() {
           navigate('/login');
         }, 3000);
         
-      } catch (error) {
-        console.error('Error al solicitar recuperación de contraseña:', {
-          mensaje: error.message,
-          estado: error.status,
-          url: error.url,
-          datos: error.data
-        });
-        
-        // Mostrar mensaje de error
-        let errorTitle = 'Error';
-        let errorMsg = error.message || 'Ha ocurrido un error al intentar procesar tu solicitud';
-        
-        // Personalizar mensaje según el código de error
-        if (error.status) {
-          switch (error.status) {
-            case 404:
-              errorTitle = 'Correo no encontrado';
-              errorMsg = 'No existe una cuenta asociada a este correo electrónico.';
-              break;
-            case 500:
-              errorTitle = 'Error del servidor';
-              errorMsg = 'Hay un problema en el servidor. Por favor, intenta nuevamente o contacta al administrador.';
-              break;
-            default:
-              // Mantener los mensajes por defecto
-          }
-        }
-        
-        Swal.fire({
-          title: errorTitle,
-          text: errorMsg,
-          icon: 'error',
-          confirmButtonColor: '#FB8500',
-          customClass: {
-            confirmButton: 'font-dm-sans',
-            title: 'font-dm-sans',
-            popup: 'font-dm-sans swal-modal-login',
-            container: 'swal-overlay-login'
-          },
-          backdrop: true,
-          heightAuto: false,
-          position: 'center'
-        });
       } finally {
         setLoading(false);
       }

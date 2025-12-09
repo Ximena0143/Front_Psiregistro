@@ -18,11 +18,9 @@ export const getPatientReminders = async (patientId) => {
     } else if (Array.isArray(response.data)) {
       return response.data;
     } else {
-      console.warn('Estructura de respuesta no reconocida:', response.data);
       return [];
     }
   } catch (error) {
-    console.error('Error al obtener recordatorios del paciente:', error);
     throw new Error(error.message);
   }
 };
@@ -42,7 +40,6 @@ export const getReminder = async (id) => {
       return response.data;
     }
   } catch (error) {
-    console.error('Error al obtener recordatorio:', error);
     throw new Error(error.message);
   }
 };
@@ -57,8 +54,6 @@ export const createReminder = async (reminderData) => {
     const response = await api.post('/reminder/create', reminderData);
     return response.data;
   } catch (error) {
-    console.error('Error al crear recordatorio:', error);
-    // Extraer mensaje de error para mostrar al usuario
     let errorMessage = 'Error al crear recordatorio';
     if (error.response && error.response.data) {
       errorMessage = error.response.data.message || errorMessage;
@@ -81,8 +76,6 @@ export const updateReminder = async (id, reminderData) => {
     const response = await api.put(`/reminder/update/${id}`, reminderData);
     return response.data;
   } catch (error) {
-    console.error('Error al actualizar recordatorio:', error);
-    // Extraer mensaje de error para mostrar al usuario
     let errorMessage = 'Error al actualizar recordatorio';
     if (error.response && error.response.data) {
       errorMessage = error.response.data.message || errorMessage;
@@ -104,7 +97,6 @@ export const deleteReminder = async (id) => {
     const response = await api.del(`/reminder/delete/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar recordatorio:', error);
     throw new Error(error.message);
   }
 };
