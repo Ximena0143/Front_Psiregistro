@@ -2,7 +2,7 @@
  * Servicio para gestionar las plantillas de test psicológicos
  */
 import api from './api';
-import authService, { getToken } from './auth';
+import { getToken } from './auth';
 
 /**
  * Obtiene todas las plantillas del usuario

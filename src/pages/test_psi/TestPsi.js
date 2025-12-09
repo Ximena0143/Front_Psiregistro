@@ -322,11 +322,6 @@ const TestPsi = () => {
         setIsLoading(true);
         
         try {
-            // Preparar los datos para enviar el test
-            const emails = [assignData.pacienteEmail];
-            
-            // Llamar al servicio para enviar el test
-            const response = await blankService.sendBlank(currentTest.id, emails);
             
             // Mostrar alerta de éxito
             Swal.fire({
